@@ -212,3 +212,59 @@
 [22-May-2011 18:03:40] 0:maxadmin:items_category_db.inc:14: Missing argument 10 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
 [22-May-2011 18:03:40] 0:maxadmin:items_category_db.inc:14: Missing argument 11 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
 [22-May-2011 18:03:40] 0:maxadmin:items_category_db.inc:14: Missing argument 12 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:12: Missing argument 2 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:12: Missing argument 3 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:13: Missing argument 4 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:13: Missing argument 5 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:13: Missing argument 6 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:13: Missing argument 7 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:14: Missing argument 8 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:14: Missing argument 9 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:14: Missing argument 10 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:14: Missing argument 11 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[18-Jun-2011 01:36:00] 0:maxadmin:items_category_db.inc:14: Missing argument 12 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:12: Missing argument 2 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:12: Missing argument 3 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:13: Missing argument 4 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:13: Missing argument 5 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:13: Missing argument 6 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:13: Missing argument 7 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:14: Missing argument 8 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:14: Missing argument 9 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:14: Missing argument 10 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:14: Missing argument 11 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[31-Jul-2011 12:53:11] 0:maxadmin:items_category_db.inc:14: Missing argument 12 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[01-Aug-2011 15:09:20] 0:maxadmin:simple_crud_class.inc:116: key() [<a href='function.key'>function.key</a>]: Passed variable is not an array or object
+[01-Aug-2011 15:09:34] 0:maxadmin:simple_crud_class.inc:116: key() [<a href='function.key'>function.key</a>]: Passed variable is not an array or object
+[01-Aug-2011 15:10:07] 0:maxadmin:simple_crud_class.inc:116: key() [<a href='function.key'>function.key</a>]: Passed variable is not an array or object
+[01-Aug-2011 16:27:58] 0:maxadmin:connect_db.inc:89: mysql_fetch_array(): supplied argument is not a valid MySQL result resource
+[01-Aug-2011 16:28:01] 0:maxadmin:connect_db.inc:89: mysql_fetch_array(): supplied argument is not a valid MySQL result resource
+[17-Aug-2011 12:32:59] 0:maxadmin:simple_crud_class.inc:116: key() [<a href='function.key'>function.key</a>]: Passed variable is not an array or object
+[17-Aug-2011 12:33:27] 0:maxadmin:simple_crud_class.inc:116: key() [<a href='function.key'>function.key</a>]: Passed variable is not an array or object
+[17-Aug-2011 12:34:02] 0:maxadmin:simple_crud_class.inc:116: key() [<a href='function.key'>function.key</a>]: Passed variable is not an array or object
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:12: Missing argument 2 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:12: Missing argument 3 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:13: Missing argument 4 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:13: Missing argument 5 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:13: Missing argument 6 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:13: Missing argument 7 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:14: Missing argument 8 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:14: Missing argument 9 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:14: Missing argument 10 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:14: Missing argument 11 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:48:33] 0:maxadmin:items_category_db.inc:14: Missing argument 12 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:40] 0:maxadmin:items_category_db.inc:12: Missing argument 2 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:40] 0:maxadmin:items_category_db.inc:12: Missing argument 3 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:40] 0:maxadmin:items_category_db.inc:13: Missing argument 4 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:40] 0:maxadmin:items_category_db.inc:13: Missing argument 5 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:41] 0:maxadmin:items_category_db.inc:13: Missing argument 6 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:41] 0:maxadmin:items_category_db.inc:13: Missing argument 7 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:41] 0:maxadmin:items_category_db.inc:14: Missing argument 8 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:41] 0:maxadmin:items_category_db.inc:14: Missing argument 9 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:41] 0:maxadmin:items_category_db.inc:14: Missing argument 10 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:41] 0:maxadmin:items_category_db.inc:14: Missing argument 11 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 13:52:41] 0:maxadmin:items_category_db.inc:14: Missing argument 12 for add_item_category(), called in /home/m/a/mae/public_html/fa/modules/import_items/import_items.php on line 206 and defined
+[17-Aug-2011 17:46:42] 0:maxadmin:sales_credit_db.inc:21: Only variables should be passed by reference
+[17-Aug-2011 18:04:17] 0:maxadmin:sales_credit_db.inc:21: Only variables should be passed by reference
+[17-Aug-2011 22:24:44] 0:maxadmin:simple_crud_class.inc:116: key() [<a href='function.key'>function.key</a>]: Passed variable is not an array or object
+[17-Aug-2011 22:25:42] 0:maxadmin:simple_crud_class.inc:116: key() [<a href='function.key'>function.key</a>]: Passed variable is not an array or object

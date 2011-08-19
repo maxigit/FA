@@ -6,7 +6,7 @@
 	FA extension system documentation.
 */
 
-$next_extension_id = 11; // unique id for next installed extension
+$next_extension_id = 12; // unique id for next installed extension
 
 $installed_extensions = array (
   0 => 
@@ -90,6 +90,15 @@ $installed_extensions = array (
     'type' => 'extension',
     'active' => true,
     'path' => 'modules/repgen',
+  ),
+  11 => 
+  array (
+    'name' => 'zen_import',
+    'package' => 'zen_import',
+    'version' => '2.3.2-3',
+    'type' => 'extension',
+    'active' => true,
+    'path' => 'modules/zen_import',
   ),
 );
 ?>
