@@ -106,8 +106,11 @@ function is_ord($ar)
 ## Get a database connection
 
 //while (is_array($HTTP_POST_VARS) && list($key, $val) = each($HTTP_POST_VARS))
-while (is_array($_POST) && list($key, $val) = each($_POST))
+//while (is_array($_POST) && list($key, $val) = each($_POST))
+if (is_array($_POST))
 {
+  foreach($_POST as $key => $val)
+  {
   	switch ($key)
   	{
 
@@ -346,6 +349,7 @@ while (is_array($_POST) && list($key, $val) = each($_POST))
   		default:
           	break;
  	}
+  }
 }
 page("Report Generator REPGEN");
 
