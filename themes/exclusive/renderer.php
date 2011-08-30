@@ -195,7 +195,11 @@ include_once('xpMenu.class.php');
 			elseif ($selected_app->id == "AP")
 				display_supplier_topten();
 			elseif ($selected_app->id == "stock")
+      {
+				display_stock_uc_topten();
+				display_color_topten();
 				display_stock_topten();
+      }
 			elseif ($selected_app->id == "manuf")
 				display_stock_topten(true);
 			elseif ($selected_app->id == "proj")
@@ -413,14 +417,14 @@ include_once('xpMenu.class.php');
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
-		$sql = "SELECT SUM((trans.unit_price * trans.quantity) * d.rate) AS total, s.stock_id, s.description, 
+		$sql = "SELECT SUM((trans.unit_price * trans.quantity) * d.rate) AS total, s.stock_id as stock, s.description, 
 			SUM(trans.quantity) AS qty FROM
 			".TB_PREF."debtor_trans_details AS trans, ".TB_PREF."stock_master AS s, ".TB_PREF."debtor_trans AS d 
 			WHERE trans.stock_id=s.stock_id AND trans.debtor_trans_type=d.type AND trans.debtor_trans_no=d.trans_no
 			AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") ";
 		if ($manuf)
 			$sql .= "AND s.mb_flag='M' ";
-		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by s.stock_id ORDER BY total DESC, s.stock_id 
+		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock ORDER BY total DESC, stock
 			LIMIT 10";
 		$result = db_query($sql);
 		if ($manuf)
@@ -438,7 +442,7 @@ include_once('xpMenu.class.php');
 		while ($myrow = db_fetch($result))
 		{
 	    	alt_table_row_color($k);
-	    	$name = $myrow["description"];
+	    	$name = $myrow["stock"];
     		label_cell($name);
 		    amount_cell($myrow['total']);
 		    qty_cell($myrow['qty']);
@@ -466,6 +470,130 @@ include_once('xpMenu.class.php');
 		end_table(1);
 	}
 	
+	function display_stock_uc_topten($manuf=false)
+	{
+		global $path_to_root;
+		
+		$pg = new graph();
+
+		$begin = begin_fiscalyear();
+		$today = Today();
+		$begin1 = date2sql($begin);
+		$today1 = date2sql($today);
+		$sql = "SELECT SUM((trans.unit_price * trans.quantity) * d.rate) AS total, LEFT(s.stock_id,8) as stock, s.description, 
+			SUM(trans.quantity) AS qty FROM
+			".TB_PREF."debtor_trans_details AS trans, ".TB_PREF."stock_master AS s, ".TB_PREF."debtor_trans AS d 
+			WHERE trans.stock_id=s.stock_id AND trans.debtor_trans_type=d.type AND trans.debtor_trans_no=d.trans_no
+			AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") ";
+		if ($manuf)
+			$sql .= "AND s.mb_flag='M' ";
+		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock ORDER BY total DESC, stock
+			LIMIT 10";
+		$result = db_query($sql);
+		if ($manuf)
+			$title = _("Top 10 Manufactured Items in fiscal year");
+		else	
+			$title = _("Top 10 Sold Items in fiscal year");
+		br(2);
+		display_heading($title);
+		br();
+		$th = array(_("Item"), _("Amount"), _("Quantity"));
+		start_table(TABLESTYLE, "width=30%");
+		table_header($th);
+		$k = 0; //row colour counter
+		$i = 0;
+		while ($myrow = db_fetch($result))
+		{
+	    	alt_table_row_color($k);
+	    	$name = $myrow["stock"];
+    		label_cell($name);
+		    amount_cell($myrow['total']);
+		    qty_cell($myrow['qty']);
+		    $pg->x[$i] = $name; 
+		    $pg->y[$i] = $myrow['total'];
+		    $i++;
+			end_row();
+		}
+		end_table(2);
+		$pg->title     = $title;
+		$pg->axis_x    = _("Item");
+		$pg->axis_y    = _("Amount");
+		$pg->graphic_1 = $today;
+		$pg->type      = 2;
+		$pg->skin      = 1;
+		$pg->built_in  = false;
+		$filename = company_path(). "/pdf_files/". uniqid("").".png";
+		$pg->display($filename, true);
+		start_table(TABLESTYLE);
+		start_row();
+		echo "<td>";
+		echo "<img src='$filename' border='0' alt='$title'>";
+		echo "</td>";
+		end_row();
+		end_table(1);
+	}
+	function display_color_topten($manuf=false)
+	{
+		global $path_to_root;
+		
+		$pg = new graph();
+
+		$begin = begin_fiscalyear();
+		$today = Today();
+		$begin1 = date2sql($begin);
+		$today1 = date2sql($today);
+		$sql = "SELECT SUM((trans.unit_price * trans.quantity) * d.rate) AS total, SUBSTRING(s.stock_id,10,4) as stock, s.description, 
+			SUM(trans.quantity) AS qty FROM
+			".TB_PREF."debtor_trans_details AS trans, ".TB_PREF."stock_master AS s, ".TB_PREF."debtor_trans AS d 
+			WHERE trans.stock_id=s.stock_id AND trans.debtor_trans_type=d.type AND trans.debtor_trans_no=d.trans_no
+			AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") ";
+		if ($manuf)
+			$sql .= "AND s.mb_flag='M' ";
+		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock ORDER BY total DESC, stock
+			LIMIT 10";
+		$result = db_query($sql);
+		if ($manuf)
+			$title = _("Top 10 Manufactured Colors in fiscal year");
+		else	
+			$title = _("Top 10 Sold Colors in fiscal year");
+		br(2);
+		display_heading($title);
+		br();
+		$th = array(_("Item"), _("Amount"), _("Quantity"));
+		start_table(TABLESTYLE, "width=30%");
+		table_header($th);
+		$k = 0; //row colour counter
+		$i = 0;
+		while ($myrow = db_fetch($result))
+		{
+	    	alt_table_row_color($k);
+	    	$name = $myrow["stock"];
+    		label_cell($name);
+		    amount_cell($myrow['total']);
+		    qty_cell($myrow['qty']);
+		    $pg->x[$i] = $name; 
+		    $pg->y[$i] = $myrow['total'];
+		    $i++;
+			end_row();
+		}
+		end_table(2);
+		$pg->title     = $title;
+		$pg->axis_x    = _("Item");
+		$pg->axis_y    = _("Amount");
+		$pg->graphic_1 = $today;
+		$pg->type      = 2;
+		$pg->skin      = 1;
+		$pg->built_in  = false;
+		$filename = company_path(). "/pdf_files/". uniqid("").".png";
+		$pg->display($filename, true);
+		start_table(TABLESTYLE);
+		start_row();
+		echo "<td>";
+		echo "<img src='$filename' border='0' alt='$title'>";
+		echo "</td>";
+		end_row();
+		end_table(1);
+	}
 	function display_dimension_topten()
 	{
 		global $path_to_root;
