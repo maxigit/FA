@@ -191,7 +191,10 @@ include_once('xpMenu.class.php');
 			}
 
 			if ($selected_app->id == "orders")
+      {
 				display_customer_topten();
+       display_to_sell_topten();
+      }
 			elseif ($selected_app->id == "AP")
 				display_supplier_topten();
 			elseif ($selected_app->id == "stock")
@@ -532,6 +535,7 @@ include_once('xpMenu.class.php');
 		end_row();
 		end_table(1);
 	}
+
 	function display_color_topten($manuf=false)
 	{
 		global $path_to_root;
@@ -586,6 +590,60 @@ include_once('xpMenu.class.php');
 		$pg->built_in  = false;
 		$filename = company_path(). "/pdf_files/". uniqid("").".png";
 		$pg->display($filename, true);
+		start_table(TABLESTYLE);
+		start_row();
+		echo "<td>";
+		echo "<img src='$filename' border='0' alt='$title'>";
+		echo "</td>";
+		end_row();
+		end_table(1);
+  }
+  function display_to_sell_topten()
+	{
+		global $path_to_root;
+		
+		$pg = new graph();
+
+		$begin = begin_fiscalyear();
+		$today = Today();
+		$begin1 = date2sql($begin);
+		$today1 = date2sql($today);
+    $sql = "SELECT SUM(qty) AS qty, SUM(qty*standard_cost) cost, stock_id
+      FROM ".TB_PREF."stock_moves WHERE visible = 1 
+      GROUP by stock_id
+      ORDER by cost DESC LIMIT 20";
+		$result = db_query($sql);
+    $title = "Items on stock to sale";
+		br(2);
+		display_heading($title);
+		br();
+		$th = array(_("Item"), _("Amount"), _("Quantity"));
+		start_table(TABLESTYLE, "width=30%");
+		table_header($th);
+		$k = 0; //row colour counter
+		$i = 0;
+		while ($myrow = db_fetch($result))
+		{
+	    	alt_table_row_color($k);
+	    	$name = $myrow["stock_id"];
+    		label_cell($name);
+		    amount_cell($myrow['cost']);
+		    qty_cell($myrow['qty']);
+		    $pg->x[$i] = $name; 
+		    $pg->y[$i] = $myrow['cost'];
+		    $i++;
+			end_row();
+		}
+		end_table(2);
+		$pg->title     = $title;
+		$pg->axis_x    = _("Item");
+		$pg->axis_y    = _("Amount");
+		$pg->graphic_1 = $today;
+		$pg->type      = 2;
+		$pg->skin      = 1;
+		$pg->built_in  = false;
+		$filename = company_path(). "/pdf_files/". uniqid("").".png";
+		//$pg->display($filename, true);
 		start_table(TABLESTYLE);
 		start_row();
 		echo "<td>";
