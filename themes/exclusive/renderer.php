@@ -206,7 +206,11 @@ include_once('xpMenu.class.php');
 			elseif ($selected_app->id == "manuf")
 				display_stock_topten(true);
 			elseif ($selected_app->id == "proj")
+      {
 				display_dimension_topten();
+				display_dimension_topten(2);
+
+      }
 			elseif ($selected_app->id == "GL")
 				display_gl_info();
 			else	
@@ -652,7 +656,7 @@ include_once('xpMenu.class.php');
 		end_row();
 		end_table(1);
 	}
-	function display_dimension_topten()
+	function display_dimension_topten($dim_type=1)
 	{
 		global $path_to_root;
 		
@@ -664,7 +668,7 @@ include_once('xpMenu.class.php');
 		$today1 = date2sql($today);
 		$sql = "SELECT SUM(-t.amount) AS total, d.reference, d.name FROM
 			".TB_PREF."gl_trans AS t,".TB_PREF."dimensions AS d WHERE
-			(t.dimension_id = d.id OR t.dimension2_id = d.id) AND
+			t.dimension".($dim_type==1 ? "" : "2")."_id = d.id AND
 			t.tran_date >= '$begin1' AND t.tran_date <= '$today1' GROUP BY d.id ORDER BY total DESC LIMIT 10";
 		$result = db_query($sql, "Transactions could not be calculated");
 		$title = _("Top 10 Dimensions in fiscal year");
