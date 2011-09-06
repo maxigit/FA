@@ -44,12 +44,6 @@ function add_sales_order(&$order)
 
 	$order->trans_no = array($order_no=>0);
 
-	if ($order->is_sync) {
-		//Added by tclim - Implement Sync Module Tracking		
-		$currentDate = date('Y-m-d H:i:s');
-		add_sync(get_transtypes($order->trans_type), $order_no . "|" . $order->trans_type, SYNC_UPDATE, $currentDate, $currentDate, 'insert sales order for customer record [' . $order->customer_id . ']');
-	}
-		
 	if ($loc_notification == 1)
 	{
 		include_once($path_to_root . "/inventory/includes/inventory_db.inc");
@@ -143,11 +137,6 @@ function delete_sales_order($order_no, $trans_type)
 	delete_reference($trans_type, $order_no);
 
 	add_audit_trail($trans_type, $order_no, Today(), _("Deleted."));
-	
-	//Added by tclim - Implement Sync Module Tracking		
-	$currentDate = date('Y-m-d H:i:s');
-	add_sync(get_transtypes($trans_type), $order_no . "|" . $order->trans_type, 'DELETE', $currentDate, $currentDate, 'deleted sales order record');
-	
 	commit_transaction();
 }
 
@@ -198,14 +187,6 @@ function update_sales_order($order)
 	 WHERE order_no=" . db_escape($order_no) ."
 	 AND trans_type=".$order->trans_type." AND version=".$version;
 	db_query($sql, "order Cannot be Updated, this can be concurrent edition conflict");
-
-
-	if ($order->is_sync) {
-		//Added by tclim - Implement Sync Module Tracking		
-		$currentDate = date('Y-m-d H:i:s');
-		add_sync(get_transtypes($order->trans_type), $order_no . "|" . $order->trans_type, SYNC_UPDATE, $currentDate, $currentDate, 'updated sales order for customer record [' . $order->customer_id . ']');
-	}
-	
 
 	$sql = "DELETE FROM ".TB_PREF."sales_order_details WHERE order_no =" . db_escape($order_no) . " AND trans_type=".$order->trans_type;
 
@@ -304,7 +285,8 @@ function get_sales_order_header($order_no, $trans_type)
 	  ."stype.tax_included, "
 	  ."ship.shipper_name, "
 	  ."tax_group.name AS tax_group_name , "
-	  ."tax_group.id AS tax_group_id "
+	  ."tax_group.id AS tax_group_id, "
+	  ."cust.tax_id "
 	."FROM ".TB_PREF."sales_orders sorder, "
 	  .TB_PREF."debtors_master cust,"
 	  .TB_PREF."sales_types stype, "
@@ -345,7 +327,7 @@ function get_sales_order_details($order_no, $trans_type) {
 		.TB_PREF."sales_order_details.quantity,
 		  discount_percent,
 		  qty_sent as qty_done, "
-		.TB_PREF."stock_master.units, " .TB_PREF."stock_master.mb_flag, " .TB_PREF."stock_master.long_description,
+		.TB_PREF."stock_master.units,
 		".TB_PREF."stock_master.material_cost + "
 			.TB_PREF."stock_master.labour_cost + "
 			.TB_PREF."stock_master.overhead_cost AS standard_cost
