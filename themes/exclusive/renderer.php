@@ -211,8 +211,11 @@ include_once('xpMenu.class.php');
 				display_dimension_topten(2);
 
       }
-			elseif ($selected_app->id == "GL")
+      elseif ($selected_app->id == "GL")
+      {
+        display_bank_info();
 				display_gl_info();
+      }
 			else	
 			{
 				$title = "Display System Diagnostics";
@@ -760,6 +763,71 @@ include_once('xpMenu.class.php');
 		$pg->axis_y    = _("Amount");
 		$pg->graphic_1 = $today;
 		$pg->type      = 5;
+		$pg->skin      = 1;
+		$pg->built_in  = false;
+		$filename = company_path(). "/pdf_files/". uniqid("").".png";
+		$pg->display($filename, true);
+		start_table(TABLESTYLE);
+		start_row();
+		echo "<td>";
+		echo "<img src='$filename' border='0' alt='$title'>";
+		echo "</td>";
+		end_row();
+		end_table(1);
+	}	
+	function display_bank_info()
+	{
+		global $path_to_root;
+		$today = Today();
+		$today_sql = date2sql($today);
+
+    # find list of bank and current balance
+		$pg = new graph();
+    $sql = "SELECT ".TB_PREF."bank_accounts.id bank_id, bank_account_name, bank_curr_code, account_code
+      FROM ".TB_PREF."bank_accounts WHERE inactive = 0
+      AND account_code < 2000 
+     AND account_type <> 3";
+		$result = db_query($sql, "Bank accounts couldn't be found");
+		$title = _("Bank Balance");
+		br(2);
+		display_heading($title);
+		br();
+		start_table(TABLESTYLE2, "width=30%");
+		
+		$i = 0;
+		$total = 0;
+		while ($myrow = db_fetch($result))
+		{
+      $bank_account_name = $myrow['bank_account_name'];
+      $bank_account = $myrow['bank_id'];
+      $currency = $myrow['bank_curr_code'];
+      $raw_balance = get_balance_before_for_bank_account($bank_account, "2012-01-01");
+      $balance = $raw_balance*retrieve_exrate($currency,$today_sql);
+
+      $pg->x[$i] = $bank_account_name;
+      $pg->y[$i] = $balance;
+      $total += $balance;
+      $pg->z[$i] = $total;
+      $i++;
+
+
+			label_row($bank_account_name, number_format2($raw_balance, user_price_dec())."  ".$currency, 
+				"class='label' style='font-weight:bold;'", "style='font-weight:bold;' align=right");
+		}
+		$calculated = _("Total Balance");
+		label_row("&nbsp;", "");
+		label_row($calculated, number_format2($total, user_price_dec()), 
+			"class='label' style='font-weight:bold;'", "style='font-weight:bold;' align=right");
+    	$pg->x[$i] = $calculated; 
+    	$pg->y[$i] = $total;
+		
+		end_table(2);
+		$pg->title     = $title;
+		$pg->axis_x    = _("Account");
+		$pg->axis_y    = _("Amount");
+		$pg->graphic_1 = "Balance";
+		$pg->graphic_2 = "Cumulated";
+		$pg->type      = 2;
 		$pg->skin      = 1;
 		$pg->built_in  = false;
 		$filename = company_path(). "/pdf_files/". uniqid("").".png";
