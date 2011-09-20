@@ -216,6 +216,7 @@ include_once('xpMenu.class.php');
       elseif ($selected_app->id == "GL")
       {
         $total = display_bank_info();
+        display_cash_flow($total);
         display_loan_info($total);
 				display_gl_info();
       }
@@ -779,17 +780,65 @@ include_once('xpMenu.class.php');
 		end_table(1);
 	}	
 
-  function customer_balance_sql($date_from, $date_to)
+  function get_customer_balance($date_from, $date_to)
   {
-    $sql = "SELECT 
+    $sql = "SELECT sum(if(type = ".ST_CUSTCREDIT."
+      OR type =".ST_CUSTPAYMENT.", -1, 1)*(
+        ov_amount+ov_gst+ov_freight+ov_freight_tax+ov_discount-alloc
+      )*rate)
       FROM ".TB_PREF."debtor_trans
-      WHERE  1";
+      WHERE  (type = ".ST_SALESINVOICE."
+        OR type = ".ST_CUSTCREDIT."
+        OR type =".ST_CUSTPAYMENT.") ";
     if  ($date_from)
-      $sql .= "AND date >".$date_from;
+      $sql .= " AND due_date >= '".$date_from."'";
     if ($date_to)
-      $sql .= "AND date <=".$date_to;
+      $sql .= " AND due_date < '".$date_to."'";
+
+    $result = db_query($sql, "could not find debtor transactions");
+    $row = db_fetch($result);
+    return $row[0];
 
   }
+  function get_supplier_balance($date_from, $date_to)
+  {
+    $sql = "SELECT sum(if(type = ".ST_SUPPCREDIT."
+      OR type =".ST_SUPPAYMENT.", -1, 1)*(
+        if(type = ".ST_SUPPAYMENT.",-ov_amount,ov_amount)+ov_gst+ov_discount-alloc
+      )*rate)
+      FROM ".TB_PREF."supp_trans
+      WHERE  (type = ".ST_SALESINVOICE."
+        OR type = ".ST_SUPPCREDIT."
+)";
+        //OR type =".ST_SUPPAYMENT.") ";
+    if  ($date_from)
+      $sql .= " AND due_date >= '".$date_from."'";
+    if ($date_to)
+      $sql .= " AND due_date < '".$date_to."'";
+
+    $result = db_query($sql, "could not find supplier transactions");
+    $row = db_fetch($result);
+    return $row[0];
+
+  }
+
+  function get_vat_balance($date_from, $date_to)
+  {
+    $sql = "SELECT sum(amount)  
+      FROM ".TB_PREF."gl_trans, ".TB_PREF."tax_types
+      WHERE account = sales_gl_code 
+      AND name = 'VAT'";
+    if  ($date_from)
+      $sql .= " AND tran_date >= '".$date_from."'";
+    if ($date_to)
+      $sql .= " AND tran_date < '".$date_to."'";
+
+    $result = db_query($sql, "could not find VAT transactions");
+    $row = db_fetch($result);
+    return $row[0];
+
+  }
+
 	function display_bank_info()
   {
     global $path_to_root;
@@ -858,7 +907,7 @@ include_once('xpMenu.class.php');
     return $total;
   }
 
-	function display_loan_info($total)
+  function display_loan_info($total)
   {
     global $path_to_root;
     $today = Today();
@@ -910,6 +959,78 @@ include_once('xpMenu.class.php');
     $pg->x[$i] = $calculated; 
     $pg->y[$i] = $total;
     $pg->z[$i] = $total-$total_loan;
+    end_table(2);
+    $pg->title     = $title;
+    $pg->axis_x    = _("Account");
+    $pg->axis_y    = _("Amount");
+    $pg->graphic_1 = "Balance";
+    $pg->graphic_2 = "Cumulated";
+    $pg->type      = 2;
+    $pg->skin      = 1;
+    $pg->built_in  = false;
+    $filename = company_path(). "/pdf_files/". uniqid("").".png";
+    $pg->display($filename, true);
+    start_table(TABLESTYLE);
+    start_row();
+    echo "<td>";
+    echo "<img src='$filename' border='0' alt='$title'>";
+    echo "</td>";
+    end_row();
+    end_table(1);
+  }	                
+
+	function display_cash_flow($total_bank)
+  {
+    global $path_to_root;
+		$begin = begin_fiscalyear();
+		$today = Today();
+		$begin1 = date2sql($begin);
+		$today1 = date2sql($today);
+    $fortnight1 = date2sql(add_days($today,14));
+    $month1 = date2sql(add_months($today,1));
+
+    $pg = new graph();
+    $i = 0;
+    $total =0;
+
+    $title = _("Cash Flow");
+    br(2);
+    display_heading($title);
+    br();
+    start_table(TABLESTYLE2, "width=30%");
+    $rows=array(array("Bank", $total_bank));
+    $rows[]=array("Overdue", get_customer_balance($begin1,$today1));
+    $rows[]=array("*  Supplier", -get_supplier_balance($begin1,$today1));
+    $rows[]=array("14 days", get_customer_balance($today1,$fortnight1));
+    $rows[]=array("*  Supplier", -get_supplier_balance($today1, $fortnight1));
+    $rows[]=array("VAT", get_vat_balance($begin1));
+    $rows[]=array("1 month", get_customer_balance($fortnight1,$month1));
+    $rows[]=array("* Supplier ", -get_supplier_balance($fortnight1,$month1));
+    while ($myrow = $rows[$i])
+    {
+      $name = $myrow[0];
+      $amount = $myrow[1];
+
+      $pg->x[$i] = $name;
+      $pg->y[$i] = $amount;
+      $total += $amount;
+      if ($i != 0) $pg->z[$i] = $total;
+      $i++;
+
+
+      label_row($name, number_format2($amount, user_price_dec()), 
+        "class='label' style='font-weight:bold;'", "style='font-weight:bold;' align=right");
+    }
+
+
+    #Total Balance
+    $calculated = _("Balance");
+    label_row("&nbsp;", "");
+    label_row("Total", number_format2($total, user_price_dec()), 
+    "class='label' style='font-weight:bold;'", "style='font-weight:bold;' align=right");
+    $pg->x[$i] = $calculated; 
+    $pg->y[$i] = $total;
+    //$pg->z[$i] = $total-$total_loan;
     end_table(2);
     $pg->title     = $title;
     $pg->axis_x    = _("Account");
