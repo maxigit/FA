@@ -217,7 +217,7 @@ include_once('xpMenu.class.php');
       {
         $total = display_bank_info();
         display_cash_flow($total);
-        display_loan_info($total);
+        display_loan_info($total,true);
 				display_gl_info();
       }
 			else	
@@ -895,19 +895,19 @@ include_once('xpMenu.class.php');
     $pg->skin      = 1;
     $pg->built_in  = false;
     $filename = company_path(). "/pdf_files/". uniqid("").".png";
-    $pg->display($filename, true);
-    start_table(TABLESTYLE);
-    start_row();
-    echo "<td>";
-    echo "<img src='$filename' border='0' alt='$title'>";
-    echo "</td>";
-    end_row();
-    end_table(1);
+    //$pg->display($filename, true);
+    //start_table(TABLESTYLE);
+    //start_row();
+    //echo "<td>";
+    //echo "<img src='$filename' border='0' alt='$title'>";
+    //echo "</td>";
+    //end_row();
+    //end_table(1);
 
     return $total;
   }
 
-  function display_loan_info($total)
+  function display_loan_info($total,$skip_graphic)
   {
     global $path_to_root;
     $today = Today();
@@ -960,6 +960,8 @@ include_once('xpMenu.class.php');
     $pg->y[$i] = $total;
     $pg->z[$i] = $total-$total_loan;
     end_table(2);
+if ($skip_grapic==True)
+{
     $pg->title     = $title;
     $pg->axis_x    = _("Account");
     $pg->axis_y    = _("Amount");
@@ -977,6 +979,7 @@ include_once('xpMenu.class.php');
     echo "</td>";
     end_row();
     end_table(1);
+}
   }	                
 
 	function display_cash_flow($total_bank)
@@ -994,10 +997,10 @@ include_once('xpMenu.class.php');
     $total =0;
 
     $title = _("Cash Flow");
-    br(2);
-    display_heading($title);
-    br();
-    start_table(TABLESTYLE2, "width=30%");
+    //br(2);
+    //display_heading($title);
+    //br();
+    //start_table(TABLESTYLE2, "width=30%");
     $rows=array(array("Bank", $total_bank));
     $rows[]=array("Overdue", get_customer_balance($begin1,$today1));
     $rows[]=array("*  Supplier", -get_supplier_balance($begin1,$today1));
@@ -1018,20 +1021,20 @@ include_once('xpMenu.class.php');
       $i++;
 
 
-      label_row($name, number_format2($amount, user_price_dec()), 
-        "class='label' style='font-weight:bold;'", "style='font-weight:bold;' align=right");
+      //label_row($name, number_format2($amount, user_price_dec()), 
+        //"class='label' style='font-weight:bold;'", "style='font-weight:bold;' align=right");
     }
 
 
     #Total Balance
     $calculated = _("Balance");
-    label_row("&nbsp;", "");
-    label_row("Total", number_format2($total, user_price_dec()), 
-    "class='label' style='font-weight:bold;'", "style='font-weight:bold;' align=right");
+    //label_row("&nbsp;", "");
+    //label_row("Total", number_format2($total, user_price_dec()), 
+    //"class='label' style='font-weight:bold;'", "style='font-weight:bold;' align=right");
     $pg->x[$i] = $calculated; 
     $pg->y[$i] = $total;
     //$pg->z[$i] = $total-$total_loan;
-    end_table(2);
+    //end_table(2);
     $pg->title     = $title;
     $pg->axis_x    = _("Account");
     $pg->axis_y    = _("Amount");
