@@ -802,19 +802,20 @@ include_once('xpMenu.class.php');
   }
   function get_supplier_balance($date_from, $date_to)
   {
-    $sql = "SELECT sum(if(type = ".ST_SUPPCREDIT."
+    $sql = "SELECT sum(greatest(0,amount)) FROM (SELECT sum(if(type = ".ST_SUPPCREDIT."
       OR type =".ST_SUPPAYMENT.", -1, 1)*(
         if(type = ".ST_SUPPAYMENT.",-ov_amount,ov_amount)+ov_gst+ov_discount-alloc
-      )*rate)
+      )*rate) AS amount
       FROM ".TB_PREF."supp_trans
-      WHERE  (type = ".ST_SALESINVOICE."
+      WHERE  (type = ".ST_SUPPINVOICE."
         OR type = ".ST_SUPPCREDIT."
-)";
-        //OR type =".ST_SUPPAYMENT.") ";
+        OR type =".ST_SUPPAYMENT.")";
     if  ($date_from)
       $sql .= " AND due_date >= '".$date_from."'";
     if ($date_to)
       $sql .= " AND due_date < '".$date_to."'";
+
+    $sql .= " GROUP BY supplier_id) AS supplier ";
 
     $result = db_query($sql, "could not find supplier transactions");
     $row = db_fetch($result);
