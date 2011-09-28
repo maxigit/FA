@@ -989,10 +989,15 @@ if ($skip_grapic==True)
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
-    $fortnight1 = date2sql(add_days($today,14));
-    $month1 = date2sql(add_months($today,1));
-    $bvat_day1 = date2sql(get_tax_date(true));
-    $evat_day1 = date2sql(get_tax_date(false));
+    $fortnight = add_days($today,14);
+    $fortnight1 = date2sql($fortnight);
+    $month = add_months($today,1);
+    $month1 = date2sql($month);
+    $bvat_day = get_tax_date(true);
+    $evat_day = get_tax_date(false);
+    $pvat_day = add_months($evat_day,1);
+    $bvat_day1 = date2sql($bvat_day);
+    $evat_day1 = date2sql($evat_day);
 
     $pg = new graph();
     $i = 0;
@@ -1004,14 +1009,24 @@ if ($skip_grapic==True)
     //br();
     //start_table(TABLESTYLE2, "width=30%");
     $rows=array(array("Bank", $total_bank));
+    echo $bvat_day1;
+      echo $evat_day1;
+    if (date_diff2($pvat_day,$today,"s") <=0 )
+      $rows[]=array("VAT", get_vat_balance($bvat_day1, $evat_day1));
     $rows[]=array("Overdue", get_customer_balance($begin1,$today1));
     $rows[]=array("*  Supplier", -get_supplier_balance($begin1,$today1));
+
+    if (date_diff2($pvat_day, $today, "s") > 0  && date_diff2($pvat_day ,$fortnight, "s") <= 0 )
+      $rows[]=array("VAT", get_vat_balance($bvat_day1, $evat_day1));
     $rows[]=array("14 days", get_customer_balance($today1,$fortnight1));
     $rows[]=array("*  Supplier", -get_supplier_balance($today1, $fortnight1));
-    $rows[]=array("VAT", get_vat_balance($bvat_day1, $evat_day1));
+
+    if (date_diff2($pvat_day, $fortnight, "s") > 0  && date_diff2($pvat_day,$month, "s") <= 0 )
+      $rows[]=array("VAT", get_vat_balance($bvat_day1, $evat_day1));
     $rows[]=array("1 month", get_customer_balance($fortnight1,$month1));
     $rows[]=array("* Supplier ", -get_supplier_balance($fortnight1,$month1));
-    $rows[]=array("VAT", get_vat_balance($evat_day1));
+
+    $rows[]=array("next VAT", get_vat_balance($evat_day1));
     while ($myrow = $rows[$i])
     {
       $name = $myrow[0];
@@ -1059,12 +1074,12 @@ if ($skip_grapic==True)
 
   function get_tax_date($start=true)
   {
-	$date = Today();
-	$row = get_company_prefs();
-	$edate = add_months($date, -$row['tax_last']);
-	$edate = end_month($edate);
-	$bdate = begin_month($edate);
-	$bdate = add_months($bdate, -$row['tax_prd'] + 1);
-  return ($start ? $bdate : $edate);
+    $date = Today();
+    $row = get_company_prefs();
+    $edate = add_months($date, -$row['tax_last']);
+    $edate = end_month($edate);
+    $bdate = begin_month($edate);
+    $bdate = add_months($bdate, -$row['tax_prd'] + 1);
+    return ($start ? $bdate : $edate);
   }
 ?>
