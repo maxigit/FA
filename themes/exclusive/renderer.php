@@ -1009,8 +1009,6 @@ if ($skip_grapic==True)
     //br();
     //start_table(TABLESTYLE2, "width=30%");
     $rows=array(array("Bank", $total_bank));
-    echo $bvat_day1;
-      echo $evat_day1;
     if (date_diff2($pvat_day,$today,"s") <=0 )
       $rows[]=array("VAT", get_vat_balance($bvat_day1, $evat_day1));
     $rows[]=array("Overdue", get_customer_balance($begin1,$today1));
@@ -1080,6 +1078,9 @@ if ($skip_grapic==True)
     $edate = end_month($edate);
     $bdate = begin_month($edate);
     $bdate = add_months($bdate, -$row['tax_prd'] + 1);
+    #firt tax term include beginnig of life
+    if (date1_greater_date2(__date(2011,06,02),$bdate))
+      $bdate=__date(2011,04,01);
     return ($start ? $bdate : $edate);
   }
 ?>
