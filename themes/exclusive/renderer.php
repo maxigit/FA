@@ -991,6 +991,8 @@ if ($skip_grapic==True)
 		$today1 = date2sql($today);
     $fortnight1 = date2sql(add_days($today,14));
     $month1 = date2sql(add_months($today,1));
+    $bvat_day1 = date2sql(get_tax_date(true));
+    $evat_day1 = date2sql(get_tax_date(false));
 
     $pg = new graph();
     $i = 0;
@@ -1006,9 +1008,10 @@ if ($skip_grapic==True)
     $rows[]=array("*  Supplier", -get_supplier_balance($begin1,$today1));
     $rows[]=array("14 days", get_customer_balance($today1,$fortnight1));
     $rows[]=array("*  Supplier", -get_supplier_balance($today1, $fortnight1));
-    $rows[]=array("VAT", get_vat_balance($begin1));
+    $rows[]=array("VAT", get_vat_balance($bvat_day1, $evat_day1));
     $rows[]=array("1 month", get_customer_balance($fortnight1,$month1));
     $rows[]=array("* Supplier ", -get_supplier_balance($fortnight1,$month1));
+    $rows[]=array("VAT", get_vat_balance($evat_day1));
     while ($myrow = $rows[$i])
     {
       $name = $myrow[0];
@@ -1054,4 +1057,14 @@ if ($skip_grapic==True)
     end_table(1);
   }	
 
+  function get_tax_date($start=true)
+  {
+	$date = Today();
+	$row = get_company_prefs();
+	$edate = add_months($date, -$row['tax_last']);
+	$edate = end_month($edate);
+	$bdate = begin_month($edate);
+	$bdate = add_months($bdate, -$row['tax_prd'] + 1);
+  return ($start ? $bdate : $edate);
+  }
 ?>
