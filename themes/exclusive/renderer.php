@@ -194,8 +194,6 @@ include_once('xpMenu.class.php');
 
 			if ($selected_app->id == "orders")
       {
-        display_account_graph();
-        display_account_graph(true);
 				display_customer_topten();
        display_to_sell_topten();
       }
@@ -203,12 +201,17 @@ include_once('xpMenu.class.php');
 				display_supplier_topten();
 			elseif ($selected_app->id == "stock")
       {
+        display_account_graph();
+        display_account_graph(true);
 				display_stock_uc_topten();
 				display_color_topten();
 				display_stock_topten();
       }
 			elseif ($selected_app->id == "manuf")
+      {
 				display_stock_topten(true);
+
+      }
 			elseif ($selected_app->id == "proj")
       {
 				display_dimension_topten();
