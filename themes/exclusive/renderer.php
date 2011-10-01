@@ -201,7 +201,7 @@ include_once('xpMenu.class.php');
 				display_supplier_topten();
 			elseif ($selected_app->id == "stock")
       {
-        display_account_graph();
+        display_sales_graph();
         display_stock_graph();
 				display_stock_uc_topten();
 				display_color_topten();
@@ -1101,7 +1101,6 @@ if ($skip_grapic==True)
       AND tran_date < '".date2sql($date)."' 
       ";
 
-    echo $sql;
 		$result = db_query($sql);
     $row = db_fetch($result);
     return $row[0];
@@ -1125,7 +1124,72 @@ if ($skip_grapic==True)
       GROUP BY  date_g
       ORDER BY date_g
       ";
-    echo $sql;
+
+		$result = db_query($sql);
+    $pg = new graph();
+    $i = 0;
+    $total = get_initial_stock($begin);
+    $last_date = "";
+
+      $pg->x[$i] = "";
+      $pg->z[$i] = "";
+      $pg->z[$i] = $total;
+      $i++;
+
+		while ($myrow = db_fetch($result))
+    {
+      $date = $myrow['date'];
+      $cust = $myrow['neg'];
+      $supp = $myrow['pos'];
+
+      $total += $supp;
+      $total += $cust;
+      $pg->x[$i] = $date == $last_date ? "" : $date;
+      $last_date = $date;
+      $pg->y[$i] = -$cust;
+      $pg->z[$i] = $total;
+      $i++;
+    }
+    #last stock
+
+
+		$pg->title     = $title;
+		$pg->axis_x    = _("Time");
+		$pg->axis_y    = _("Sales");
+		$pg->graphic_1 = "Dispatched";
+		$pg->graphic_2 = "Stock Left";
+		$pg->type      = 1;
+		$pg->skin      = 1;
+		$pg->built_in  = false;
+		$filename = company_path(). "/pdf_files/". uniqid("").".png";
+		$pg->display($filename, true);
+		start_table(TABLESTYLE);
+		start_row();
+		echo "<td>";
+		echo "<img src='$filename' border='0' alt='$title'>";
+		echo "</td>";
+		end_row();
+		end_table(1);
+	 }
+
+ function display_sales_graph()
+	{
+    $title = "Sales/Week";
+    $end = Today();
+    $begin = add_months($end,-3);
+
+    $date_format = "DATE_FORMAT(tran_date, '%u')";
+
+    $sql = "SELECT ".$date_format." AS date_g,
+      DATE_FORMAT(MIN(tran_date),'%b/%d') AS date,
+      sum(if(account = 1001, least(amount,0), 0)) AS stock, sum(if(account=4000,least(amount,0), 0)) AS sales
+      FROM ".TB_PREF."gl_trans
+      WHERE (account = 1001 OR account = 4000)
+      AND tran_date >= '".date2sql($begin)."'
+      AND tran_date <= '".date2sql($end)."' 
+      GROUP BY  date_g
+      ORDER BY date_g
+      ";
 
 		$result = db_query($sql);
     $pg = new graph();
@@ -1136,28 +1200,22 @@ if ($skip_grapic==True)
 		while ($myrow = db_fetch($result))
     {
       $date = $myrow['date'];
-      $cust = $myrow['neg'];
-      $supp = $myrow['pos'];
+      $sales = $myrow['sales'];
+      $stock = -$myrow['stock'];
 
+      //if ($date != $last_date)       n
       $pg->x[$i] = $date == $last_date ? "" : $date;
       $last_date = $date;
-      $pg->y[$i] = $total;
-      $pg->z[$i] = -$cust;
-      $total += $supp;
-      $total += $cust;
+      $pg->y[$i] = $stock;
+      $pg->z[$i] = -$sales;
       $i++;
     }
-    #last stock
-
-      $pg->x[$i] = ".";
-      $pg->z[$i] = ".";
-      $pg->y[$i] = $total;
 
 		$pg->title     = $title;
 		$pg->axis_x    = _("Time");
 		$pg->axis_y    = _("Sales");
-		$pg->graphic_2 = "Sales";
-		$pg->graphic_1 = "Stock";
+		$pg->graphic_2 = "Invoiced";
+		$pg->graphic_1 = "Dispatched";
 		$pg->type      = 1;
 		$pg->skin      = 1;
 		$pg->built_in  = false;
