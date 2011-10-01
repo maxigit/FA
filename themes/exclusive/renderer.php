@@ -202,7 +202,7 @@ include_once('xpMenu.class.php');
 			elseif ($selected_app->id == "stock")
       {
         display_account_graph();
-        display_account_graph(true);
+        display_stock_graph();
 				display_stock_uc_topten();
 				display_color_topten();
 				display_stock_topten();
@@ -1101,10 +1101,77 @@ if ($skip_grapic==True)
       AND tran_date < '".date2sql($date)."' 
       ";
 
+    echo $sql;
 		$result = db_query($sql);
     $row = db_fetch($result);
     return $row[0];
 	 }
+
+ function display_stock_graph()
+	{
+    $end = Today();
+
+    $date_format = "DATE_FORMAT(tran_date, '%y-%m')";
+    $begin = add_years($end,-1);
+    $title = "Stock";
+
+    $sql = "SELECT ".$date_format." AS date_g,
+      DATE_FORMAT(MIN(tran_date),'%b %y') AS date,
+      sum(greatest(0,amount)) AS pos, sum(least(0,amount)) AS neg
+      FROM ".TB_PREF."gl_trans
+      WHERE account = 1001
+      AND tran_date >= '".date2sql($begin)."'
+      AND tran_date <= '".date2sql($end)."' 
+      GROUP BY  date_g
+      ORDER BY date_g
+      ";
+    echo $sql;
+
+		$result = db_query($sql);
+    $pg = new graph();
+    $i = 0;
+    $total = get_initial_stock($begin);
+    $last_date = "";
+
+		while ($myrow = db_fetch($result))
+    {
+      $date = $myrow['date'];
+      $cust = $myrow['neg'];
+      $supp = $myrow['pos'];
+
+      $pg->x[$i] = $date == $last_date ? "" : $date;
+      $last_date = $date;
+      $pg->y[$i] = $total;
+      $pg->z[$i] = -$cust;
+      $total += $supp;
+      $total += $cust;
+      $i++;
+    }
+    #last stock
+
+      $pg->x[$i] = ".";
+      $pg->z[$i] = ".";
+      $pg->y[$i] = $total;
+
+		$pg->title     = $title;
+		$pg->axis_x    = _("Time");
+		$pg->axis_y    = _("Sales");
+		$pg->graphic_2 = "Sales";
+		$pg->graphic_1 = "Stock";
+		$pg->type      = 1;
+		$pg->skin      = 1;
+		$pg->built_in  = false;
+		$filename = company_path(). "/pdf_files/". uniqid("").".png";
+		$pg->display($filename, true);
+		start_table(TABLESTYLE);
+		start_row();
+		echo "<td>";
+		echo "<img src='$filename' border='0' alt='$title'>";
+		echo "</td>";
+		end_row();
+		end_table(1);
+	 }
+
  function display_account_graph($month)
 	{
     $title = "Sales/Week";
