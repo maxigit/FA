@@ -185,16 +185,16 @@ function print_stock_check()
     }
     else
     {
-      if($count>50)
+      if($count>500)
       {
         display_error("Report exceeds allowed size,  order and demand desactivated");
         $bypass_orders=true;
       }
       $demandqty = $trans['QtyDemand'];
-      $demandqty += 1000* get_demand_qty($trans['stock_id'], $loc_code);
-      $demandqty += get_demand_asm_qty($trans['stock_id'], $loc_code);
+      //$demandqty += 1000* get_demand_qty($trans['stock_id'], $loc_code);
+      //$demandqty += get_demand_asm_qty($trans['stock_id'], $loc_code);
       $onorder = $trans['OnOrder'];
-      $onorder += 1000* get_on_porder_qty($trans['stock_id'], $loc_code);
+      //$onorder += 1000* get_on_porder_qty($trans['stock_id'], $loc_code);
     $flag = get_mb_flag($trans['stock_id']);
     if ($flag == 'M')
       $onorder += get_on_worder_qty($trans['stock_id'], $loc_code);
@@ -205,7 +205,7 @@ function print_stock_check()
       continue;
 
     $count+=1;
-    if($count > 200) {
+    if($count > 500) {
       display_error("Report exceeds allowed size, try filtering more items");
       break;
     }
