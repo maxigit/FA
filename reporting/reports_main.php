@@ -194,6 +194,7 @@ $reports->addReport(RC_INVENTORY, 303, _('Stock &Check Sheets'),
 			_('Show Shortage') => 'YES_NO',
 			_('Suppress Zeros') => 'YES_NO',
 			_('Comments') => 'TEXTBOX',
+			_('Item Like') => 'TEXT',
 			_('Destination') => 'DESTINATION'));
 $reports->addReport(RC_INVENTORY, 304, _('Inventory &Sales Report'),
 	array(	_('Start Date') => 'DATEBEGINM',
