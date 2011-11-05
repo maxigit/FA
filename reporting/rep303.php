@@ -38,16 +38,29 @@ function getTransactions($category, $location, $item_like)
 			".TB_PREF."stock_master.description, ".TB_PREF."stock_master.inactive,
 			IF(".TB_PREF."stock_moves.stock_id IS NULL, '', ".TB_PREF."stock_moves.loc_code) AS loc_code,
 			SUM(IF(".TB_PREF."stock_moves.stock_id IS NULL,0,".TB_PREF."stock_moves.qty)) AS QtyOnHand,
-      SUM(".TB_PREF."sales_order_details.quantity - ".TB_PREF."sales_order_details.qty_sent) As QtyDemand
+      QtyDemand
+      ,SUM(".TB_PREF."purch_order_details.quantity_ordered - ".TB_PREF."purch_order_details.quantity_received) As OnOrder
 		FROM (".TB_PREF."stock_master,
 			".TB_PREF."stock_category)
 		LEFT JOIN ".TB_PREF."stock_moves ON
 			(".TB_PREF."stock_master.stock_id=".TB_PREF."stock_moves.stock_id /*OR ".TB_PREF."stock_master.stock_id IS NULL*/)
-      LEFT JOIN (".TB_PREF."sales_order_details, ".TB_PREF."sales_orders) ON 
-      (".TB_PREF."stock_master.stock_id = ".TB_PREF."sales_order_details.stk_code
-      AND ".TB_PREF."sales_orders.order_no = ".TB_PREF."sales_order_details.order_no";
+    /* Sales order details = On Demand */
+      LEFT JOIN (SELECT stk_code, SUM(quantity - qty_sent) As QtyDemand
+      FROM ".TB_PREF."sales_order_details
+      INNER JOIN  ".TB_PREF."sales_orders ON ".TB_PREF."sales_orders.order_no = ".TB_PREF."sales_order_details.order_no
+      WHERE ".TB_PREF."sales_orders.trans_type=".ST_SALESORDER."
+      AND ".TB_PREF."sales_orders.trans_type=".TB_PREF."sales_order_details.trans_type ";
+      if ($location != "all")
+        $sql .= " AND ".TB_PREF."sales_orders.from_stk_loc =".db_escape($location);
+      $sql .= "GROUP BY stk_code
+    ) AS sales_order_details ON 
+      (".TB_PREF."stock_master.stock_id = sales_order_details.stk_code)
+    /* Purch Order detail : On Order */
+    LEFT JOIN (".TB_PREF."purch_order_details, ".TB_PREF."purch_orders) ON 
+      (".TB_PREF."stock_master.stock_id = ".TB_PREF."purch_order_details.item_code
+      AND ".TB_PREF."purch_orders.order_no = ".TB_PREF."purch_order_details.order_no";
 	if ($location != "all")
-		$sql .= " AND ".TB_PREF."sales_orders.from_stk_loc =".db_escape($location);
+		$sql .= " AND ".TB_PREF."purch_orders.from_stk_loc =".db_escape($location);
   $sql.=")
 		WHERE ".TB_PREF."stock_master.category_id=".TB_PREF."stock_category.category_id
 		AND (".TB_PREF."stock_master.mb_flag='B' OR ".TB_PREF."stock_master.mb_flag='M')";
@@ -168,6 +181,7 @@ function print_stock_check()
       $demandqty = -1;
       $demandqty = $trans['QtyDemand'];
       $onorder =  -1;
+      $onorder = $trans['OnOrder'];
     }
     else
     {
@@ -179,7 +193,8 @@ function print_stock_check()
       $demandqty = $trans['QtyDemand'];
       $demandqty += 1000* get_demand_qty($trans['stock_id'], $loc_code);
       $demandqty += get_demand_asm_qty($trans['stock_id'], $loc_code);
-      $onorder = get_on_porder_qty($trans['stock_id'], $loc_code);
+      $onorder = $trans['OnOrder'];
+      $onorder += 1000* get_on_porder_qty($trans['stock_id'], $loc_code);
     $flag = get_mb_flag($trans['stock_id']);
     if ($flag == 'M')
       $onorder += get_on_worder_qty($trans['stock_id'], $loc_code);
