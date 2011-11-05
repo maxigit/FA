@@ -35,6 +35,7 @@ function getTransactions($category, $location, $item_like)
 			".TB_PREF."stock_category.description AS cat_description,
 			".TB_PREF."stock_master.stock_id,
 			".TB_PREF."stock_master.units,
+			".TB_PREF."stock_master.mb_flag,
 			".TB_PREF."stock_master.description, ".TB_PREF."stock_master.inactive,
 			IF(".TB_PREF."stock_moves.stock_id IS NULL, '', ".TB_PREF."stock_moves.loc_code) AS loc_code,
 			SUM(IF(".TB_PREF."stock_moves.stock_id IS NULL,0,".TB_PREF."stock_moves.qty)) AS QtyOnHand,
@@ -191,13 +192,14 @@ function print_stock_check()
         $bypass_orders=true;
       }
       $demandqty = $trans['QtyDemand'];
-      //$demandqty += 1000* get_demand_qty($trans['stock_id'], $loc_code);
-      //$demandqty += get_demand_asm_qty($trans['stock_id'], $loc_code);
       $onorder = $trans['OnOrder'];
-      //$onorder += 1000* get_on_porder_qty($trans['stock_id'], $loc_code);
-    $flag = get_mb_flag($trans['stock_id']);
-    if ($flag == 'M')
-      $onorder += get_on_worder_qty($trans['stock_id'], $loc_code);
+      $flag = $trans['mb_flag'];
+      if ($flag == 'M')
+      {
+        $onorder += get_on_worder_qty($trans['stock_id'], $loc_code);
+        $demandqty += get_demand_asm_qty($trans['stock_id'], $loc_code);
+
+      }
     }
     if ($no_zeros && $trans['QtyOnHand'] == 0 && $demandqty == 0 && $onorder == 0)
       continue;
