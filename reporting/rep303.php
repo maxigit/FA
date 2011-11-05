@@ -37,11 +37,18 @@ function getTransactions($category, $location, $item_like)
 			".TB_PREF."stock_master.units,
 			".TB_PREF."stock_master.description, ".TB_PREF."stock_master.inactive,
 			IF(".TB_PREF."stock_moves.stock_id IS NULL, '', ".TB_PREF."stock_moves.loc_code) AS loc_code,
-			SUM(IF(".TB_PREF."stock_moves.stock_id IS NULL,0,".TB_PREF."stock_moves.qty)) AS QtyOnHand
+			SUM(IF(".TB_PREF."stock_moves.stock_id IS NULL,0,".TB_PREF."stock_moves.qty)) AS QtyOnHand,
+      SUM(".TB_PREF."sales_order_details.quantity - ".TB_PREF."sales_order_details.qty_sent) As QtyDemand
 		FROM (".TB_PREF."stock_master,
 			".TB_PREF."stock_category)
 		LEFT JOIN ".TB_PREF."stock_moves ON
 			(".TB_PREF."stock_master.stock_id=".TB_PREF."stock_moves.stock_id /*OR ".TB_PREF."stock_master.stock_id IS NULL*/)
+      LEFT JOIN (".TB_PREF."sales_order_details, ".TB_PREF."sales_orders) ON 
+      (".TB_PREF."stock_master.stock_id = ".TB_PREF."sales_order_details.stk_code
+      AND ".TB_PREF."sales_orders.order_no = ".TB_PREF."sales_order_details.order_no";
+	if ($location != "all")
+		$sql .= " AND ".TB_PREF."sales_orders.from_stk_loc =".db_escape($location);
+  $sql.=")
 		WHERE ".TB_PREF."stock_master.category_id=".TB_PREF."stock_category.category_id
 		AND (".TB_PREF."stock_master.mb_flag='B' OR ".TB_PREF."stock_master.mb_flag='M')";
 	if ($category != 0)
@@ -64,6 +71,7 @@ function getTransactions($category, $location, $item_like)
 		ORDER BY ".TB_PREF."stock_master.category_id,
 		".TB_PREF."stock_master.stock_id";
   
+  display_error($sql);
     return db_query($sql,"No transactions were returned");
 }
 
@@ -146,25 +154,46 @@ function print_stock_check()
 
 	$res = getTransactions($category, $location, $like);
 	$catt = '';
+  $count=0;
+  $bypass_orders = false;
 	while ($trans=db_fetch($res))
 	{
+
 		if ($location == 'all')
 			$loc_code = "";
 		else
 			$loc_code = $location;
-    $demandqty = get_demand_qty($trans['stock_id'], $loc_code);
-    //$demandqty += get_demand_asm_qty($trans['stock_id'], $loc_code);
-    $onorder = get_on_porder_qty($trans['stock_id'], $loc_code);
-    //$demandqty = 0;
-    //$onorder =  0;
-		$flag = get_mb_flag($trans['stock_id']);
-		if ($flag == 'M')
-			$onorder += get_on_worder_qty($trans['stock_id'], $loc_code);
-		if ($no_zeros && $trans['QtyOnHand'] == 0 && $demandqty == 0 && $onorder == 0)
-			continue;
-		if ($shortage && $trans['QtyOnHand'] - $demandqty >= 0)
-			continue;
+    if($bypass_orders)
+    {
+      $demandqty = -1;
+      $demandqty = $trans['QtyDemand'];
+      $onorder =  -1;
+    }
+    else
+    {
+      if($count>50)
+      {
+        display_error("Report exceeds allowed size,  order and demand desactivated");
+        $bypass_orders=true;
+      }
+      $demandqty = $trans['QtyDemand'];
+      $demandqty += 1000* get_demand_qty($trans['stock_id'], $loc_code);
+      $demandqty += get_demand_asm_qty($trans['stock_id'], $loc_code);
+      $onorder = get_on_porder_qty($trans['stock_id'], $loc_code);
+    $flag = get_mb_flag($trans['stock_id']);
+    if ($flag == 'M')
+      $onorder += get_on_worder_qty($trans['stock_id'], $loc_code);
+    }
+    if ($no_zeros && $trans['QtyOnHand'] == 0 && $demandqty == 0 && $onorder == 0)
+      continue;
+    if ($shortage && $trans['QtyOnHand'] - $demandqty >= 0)
+      continue;
 
+    $count+=1;
+    if($count > 200) {
+      display_error("Report exceeds allowed size, try filtering more items");
+      break;
+    }
     //continue;
 		if ($catt != $trans['cat_description'])
 		{
