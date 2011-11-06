@@ -828,7 +828,7 @@ include_once('xpMenu.class.php');
 
   }
 
-  function get_vat_balance($date_from, $date_to)
+  function get_vat_balance($date_from, $date_to=null)
   {
     $sql = "SELECT sum(amount)  
       FROM ".TB_PREF."gl_trans, ".TB_PREF."tax_types
@@ -1030,7 +1030,7 @@ if ($skip_grapic==True)
     $rows[]=array("1 month", get_customer_balance($fortnight1,$month1));
     $rows[]=array("* Supplier ", -get_supplier_balance($fortnight1,$month1));
 
-    if (date_diff2($pvat_day, $fmonth, "s") > 0)
+    if (date_diff2($pvat_day, $month1, "s") > 0)
       $rows[]=array("next VAT", get_vat_balance($bvat_day1)); #all vat
     else
       $rows[]=array("next VAT", get_vat_balance($evat_day1)); #VAT left
