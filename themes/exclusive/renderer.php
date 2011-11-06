@@ -1030,7 +1030,10 @@ if ($skip_grapic==True)
     $rows[]=array("1 month", get_customer_balance($fortnight1,$month1));
     $rows[]=array("* Supplier ", -get_supplier_balance($fortnight1,$month1));
 
-    $rows[]=array("next VAT", get_vat_balance($evat_day1));
+    if (date_diff2($pvat_day, $fmonth, "s") > 0)
+      $rows[]=array("next VAT", get_vat_balance($bvat_day1)); #all vat
+    else
+      $rows[]=array("next VAT", get_vat_balance($evat_day1)); #VAT left
     while ($myrow = $rows[$i])
     {
       $name = $myrow[0];
@@ -1085,8 +1088,8 @@ if ($skip_grapic==True)
     $bdate = begin_month($edate);
     $bdate = add_months($bdate, -$row['tax_prd'] + 1);
     #firt tax term include beginnig of life
-    if (date1_greater_date2(__date(2011,06,02),$bdate))
-      $bdate=__date(2011,04,01);
+    //if (date1_greater_date2(__date(2011,06,02),$bdate))
+      //$bdate=__date(2011,04,01);
     return ($start ? $bdate : $edate);
   }
 
