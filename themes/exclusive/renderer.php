@@ -1034,6 +1034,20 @@ if ($skip_grapic==True)
       $rows[]=array("next VAT", get_vat_balance($bvat_day1)); #all vat
     else
       $rows[]=array("next VAT", get_vat_balance($evat_day1)); #VAT left
+    #next months
+    $d=$month;
+    $d1=$month1;
+    for($j=2; $j <= 5 ; $j++)
+    {
+      $e=add_months($d,1);
+      $e1= date2sql($e);
+      $rows[]=array($j." month", get_customer_balance($d1,$e1));
+      $rows[]=array("* Supplier ", -get_supplier_balance($d1,$e1));
+      $d=$e;
+      $d1=$e1;
+
+    }
+
     while ($myrow = $rows[$i])
     {
       $name = $myrow[0];
@@ -1049,6 +1063,8 @@ if ($skip_grapic==True)
       //label_row($name, number_format2($amount, user_price_dec()), 
         //"class='label' style='font-weight:bold;'", "style='font-weight:bold;' align=right");
     }
+
+
 
 
     #Total Balance
