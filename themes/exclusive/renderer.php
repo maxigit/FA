@@ -302,7 +302,7 @@ include_once('xpMenu.class.php');
 				".TB_PREF."cust_branch as branch
 			WHERE debtor.debtor_no = trans.debtor_no AND trans.branch_code = branch.branch_code
 				AND trans.type = ".ST_SALESINVOICE." AND (trans.ov_amount + trans.ov_gst + trans.ov_freight 
-				+ trans.ov_freight_tax + trans.ov_discount - trans.alloc) > 0
+				+ trans.ov_freight_tax + trans.ov_discount - trans.alloc) > 1e-6
 				AND DATEDIFF('$today', trans.due_date) > 0 ORDER BY days DESC";
 		$result = db_query($sql);
 		$title = db_num_rows($result) . _(" overdue Sales Invoices");
