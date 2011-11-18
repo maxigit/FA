@@ -29,7 +29,7 @@ include_once($path_to_root . "/includes/db/manufacturing_db.inc");
 
 print_stock_check();
 
-function getTransactions($category, $location)
+function getTransactions($category, $location, $item_like)
 {
 	$sql = "SELECT ".TB_PREF."stock_master.category_id,
 			".TB_PREF."stock_category.description AS cat_description,
@@ -69,13 +69,22 @@ function getTransactions($category, $location)
 		$sql .= " AND ".TB_PREF."stock_master.category_id = ".db_escape($category);
 	if ($location != 'all')
 		$sql .= " AND IF(".TB_PREF."stock_moves.stock_id IS NULL, '1=1',".TB_PREF."stock_moves.loc_code = ".db_escape($location).")";
+  if($item_like)
+  {
+    $regexp = null;
+
+    if(sscanf($item_like, "/%s", &$regexp)==1)
+      $sql .= " AND ".TB_PREF."stock_master.stock_id RLIKE ".db_escape($regexp);
+    else
+      $sql .= " AND ".TB_PREF."stock_master.stock_id LIKE ".db_escape($item_like);
+  }
 	$sql .= " GROUP BY ".TB_PREF."stock_master.category_id,
 		".TB_PREF."stock_category.description,
 		".TB_PREF."stock_master.stock_id,
 		".TB_PREF."stock_master.description
 		ORDER BY ".TB_PREF."stock_master.category_id,
 		".TB_PREF."stock_master.stock_id";
-
+  
     return db_query($sql,"No transactions were returned");
 }
 
@@ -92,7 +101,8 @@ function print_stock_check()
     	$shortage = $_POST['PARAM_4'];
     	$no_zeros = $_POST['PARAM_5'];
     	$comments = $_POST['PARAM_6'];
-		$destination = $_POST['PARAM_7'];
+    	$like = $_POST['PARAM_7']; 
+      $destination = $_POST['PARAM_8'];
 
 	if ($destination)
 		include_once($path_to_root . "/reporting/includes/excel_report.inc");
@@ -155,7 +165,7 @@ function print_stock_check()
     $rep->Info($params, $cols, $headers, $aligns);
     $rep->NewPage();
 
-	$res = getTransactions($category, $location);
+	$res = getTransactions($category, $location, $like);
 	$catt = '';
 	while ($trans=db_fetch($res))
 	{
