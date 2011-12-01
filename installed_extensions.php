@@ -6,7 +6,7 @@
 	FA extension system documentation.
 */
 
-$next_extension_id = 12; // unique id for next installed extension
+$next_extension_id = 13; // unique id for next installed extension
 
 $installed_extensions = array (
   0 => 
@@ -99,6 +99,15 @@ $installed_extensions = array (
     'type' => 'extension',
     'active' => true,
     'path' => 'modules/zen_import',
+  ),
+  12 => 
+  array (
+    'name' => 'Annual expense breakdown report',
+    'package' => 'rep_annual_expense_breakdown',
+    'version' => '2.3.0-1',
+    'type' => 'extension',
+    'active' => true,
+    'path' => 'modules/rep_annual_expense_breakdown',
   ),
 );
 ?>
