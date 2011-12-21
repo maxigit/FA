@@ -396,7 +396,7 @@ include_once('xpMenu.class.php');
 			FROM ".TB_PREF."supp_trans as trans, ".TB_PREF."suppliers as s 
 			WHERE s.supplier_id = trans.supplier_id
 				AND trans.type = ".ST_SUPPINVOICE." AND (trans.ov_amount + trans.ov_gst + 
-					trans.ov_discount - trans.alloc) > 0
+					trans.ov_discount - trans.alloc) > 1e-6
 				AND DATEDIFF('$today', trans.due_date) > 0 ORDER BY days DESC";
 		$result = db_query($sql);
 		$title = db_num_rows($result) . _(" overdue Purchase Invoices");
