@@ -87,7 +87,7 @@ if (isset($_GET['NewDelivery']) && is_numeric($_GET['NewDelivery'])) {
 	create_cart(ST_SALESQUOTE, $_GET['NewQuoteToSalesOrder']);
 }
 
-$textcart = isset($_GET['TextCart']) && $_GET['TextCart'];
+$textcart = isset($_GET['CartMode']) && $_GET['CartMode'];
 
 page($_SESSION['page_title'], false, false, "", $js);
 //-----------------------------------------------------------------------------
@@ -641,6 +641,12 @@ function create_cart($type, $trans_no)
 
 //--------------------------------------------------------------------------------
 
+function handle_textcart() {
+
+  echo "!!!!----".$_POST['textcart']."----!!!!";
+}
+//--------------------------------------------------------------------------------
+
 if (isset($_POST['CancelOrder']))
 	handle_cancel_order();
 
@@ -690,6 +696,13 @@ if ($_SESSION['Items']->trans_type == ST_SALESINVOICE) {
 	$porder = _("Place Order");
 	$corder = _("Commit Order Changes");
 }
+// Process textcart if needed
+// we need the cart to be already loaded so we can modify it before displaying it
+if (isset($_POST['ProcessTextCart'])) {
+  $textcart = false; // Don't display the textcart
+  handle_textcart();
+}
+
 start_form();
 
 hidden('cart_id');
