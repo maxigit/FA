@@ -13,7 +13,8 @@ function sales_cart_to_text($cart) {
   $text = "";
 
   foreach ($cart->line_items as $item) {
-    $text .= sprintf("$item->stock_id %2d %0.2f %0.1f%%%s\n"
+    $dec = get_unit_dec($item->stock_id);
+    $text .= sprintf("$item->stock_id %2.${dec}f %0.2f %0.1f%%%s\n"
       ,$item->quantity
       ,$item->price
       ,$item->discount_percent
