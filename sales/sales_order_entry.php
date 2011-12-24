@@ -642,8 +642,12 @@ function create_cart($type, $trans_no)
 //--------------------------------------------------------------------------------
 
 function handle_textcart() {
-
-  echo "!!!!----".$_POST['textcart']."----!!!!";
+  if (!isset($_POST['textcart'])) {
+    return;
+  }
+  $cart = $_SESSION['Items'];
+  $text = $_POST['textcart'];
+  process_textcart($cart, $text);
 }
 //--------------------------------------------------------------------------------
 

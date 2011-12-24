@@ -27,5 +27,11 @@ function sales_cart_to_text($cart) {
 
   return $text;
 }
+
+function process_textcart($cart, $textcart) {
+  foreach (explode('\n', $textcart) as $line) {
+    echo  "LIN: ".$line."<br/>";
+  }
+}
 ?>
 
