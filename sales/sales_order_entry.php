@@ -27,6 +27,7 @@ include_once($path_to_root . "/sales/includes/ui/sales_order_ui.inc");
 include_once($path_to_root . "/sales/includes/sales_db.inc");
 include_once($path_to_root . "/sales/includes/db/sales_types_db.inc");
 include_once($path_to_root . "/reporting/includes/reporting.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_ui.inc");
 
 set_page_security( @$_SESSION['Items']->trans_type,
 	array(	ST_SALESORDER=>'SA_SALESORDER',
@@ -85,6 +86,8 @@ if (isset($_GET['NewDelivery']) && is_numeric($_GET['NewDelivery'])) {
 	$_SESSION['page_title'] = _($help_context = "Sales Order Entry");
 	create_cart(ST_SALESQUOTE, $_GET['NewQuoteToSalesOrder']);
 }
+
+$textcart = isset($_GET['TextCart']) && $_GET['TextCart'];
 
 page($_SESSION['page_title'], false, false, "", $js);
 //-----------------------------------------------------------------------------
@@ -696,7 +699,12 @@ $customer_error = display_order_header($_SESSION['Items'],
 if ($customer_error == "") {
 	start_table(TABLESTYLE, "width=80%", 10);
 	echo "<tr><td>";
-	display_order_summary($orderitems, $_SESSION['Items'], true);
+  if($textcart) {
+    display_sales_textcart($orderitems, $_SESSION['Items']);
+  }
+  else {
+    display_order_summary($orderitems, $_SESSION['Items'], true);
+  }
 	echo "</td></tr>";
 	echo "<tr><td>";
 	display_delivery_details($_SESSION['Items']);
