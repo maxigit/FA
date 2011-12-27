@@ -87,7 +87,7 @@ function parse_sales_line($line) {
       };
       $price = $matches[1] . $matches[2];//  ack to get first match or the second one
     }
-    elseif (preg_match('/^(\d+(?:.\d+))%$/', $field, $matches)) {
+    elseif (preg_match('/^(\d+(?:.\d+)?)%$/', $field, $matches)) {
       if($discount) {
         display_error("discount already set for line '$line'");
         return;
@@ -108,7 +108,7 @@ function parse_sales_line($line) {
     ,"stock_code" => $stock_code
     ,"quantity" => $quantity
     ,"price" => $price
-    ,"discount" => $discount
+    ,"discount" => $discount/100.0
     ,"description" => $description
   );
 
@@ -142,7 +142,5 @@ function process_textcart($cart, $textcart) {
       add_to_order($cart, $stock_code, $quantity, $price, $discount, $description );
 
     }
-
-
   }
 }
