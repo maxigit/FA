@@ -51,11 +51,11 @@ function parse_sales_line($line) {
     return;
   }
   // extract SKU and descriptions
-  if (!preg_match('/^([+\-!])?([^\s,;]+)(?:([^|]*)(?:\|\s*(.*))?)?/', $line, $matches)) {
+  if (!preg_match('/^([+\-!])?\s*([^\s,;]+)(?:([^|]*)(?:\|\s*(.*))?)?/', $line, $matches)) {
     display_error("error parsing '$line'");
     return;
   }
-    $mode = $ModeMap[$matches[1]];
+    $mode = $mode_map[$matches[1]];
     $stock_code =  $matches[2];
     $fields_str = $matches[3];
     $description = $matches[4];
@@ -105,19 +105,44 @@ function parse_sales_line($line) {
 
   return array(
     "mode" => "insert"
-    ,"stock_code" => stock_code
-    ,"quantity" => quantity
-    ,"price" => price
-    ,"discount" => discount
-    ,"description" => description
+    ,"stock_code" => $stock_code
+    ,"quantity" => $quantity
+    ,"price" => $price
+    ,"discount" => $discount
+    ,"description" => $description
   );
 
 }
 
 function process_textcart($cart, $textcart) {
   foreach (explode("\n", $textcart) as $line) {
-    parse_sales_line($line);
+    $attributes = parse_sales_line($line);
+    if (!$attributes)
+      continue;
+
+    $stock_code = $attributes["stock_code"];
+    $quantity = $attributes["quantity"];
+    $price = $attributes["price"];
+    $discount = $attributes["discount"];
+    $description = $attributes["description"];
+
+
+  echo "Stock Code : $stock_code</br><ul>";
+  echo "<li>quantity : $quantity</li>"   ;
+  echo "<li>price : $price</li>";
+  echo "<li>discount : $discount</li>";
+  echo "<li>description : $description</li>";
+  echo "</ul>";
+    switch ($attributes['mode']) {
+    case UPDATE_MODE:
+      break;
+    case DELETE_MODE:
+      break;
+    default: // INSERT
+      add_to_order($cart, $stock_code, $quantity, $price, $discount, $description );
+
+    }
+
+
   }
 }
-?>
-
