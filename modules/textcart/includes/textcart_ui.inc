@@ -1,4 +1,4 @@
-<?php
+,,<?php
 function display_sales_textcart($title, $cart) {
 	div_start('textcart');	
     display_heading($title);
@@ -28,6 +28,14 @@ function sales_cart_to_text($cart) {
   return $text;
 }
 
+define ('INSERT_MODE', 0);
+define ('UPDATE_MODE', 1);
+define ('DELETE_MODE', 2);
+$mode_map = array (
+  '+' => INSERT_MODE
+  ,'!' => UPDATE_MODE
+  ,'-' => DELETE_MODE
+);
 function parse_sales_line($line) {
   echo "parsing : $line<br/>";
   $line = trim($line);
@@ -43,13 +51,14 @@ function parse_sales_line($line) {
     return;
   }
   // extract SKU and descriptions
-  if (!preg_match('/^([^\s,;]+)(?:([^|]*)(?:\|\s*(.*))?)?/', $line, $matches)) {
+  if (!preg_match('/^([+\-!])?([^\s,;]+)(?:([^|]*)(?:\|\s*(.*))?)?/', $line, $matches)) {
     display_error("error parsing '$line'");
     return;
   }
-    $stock_code =  $matches[1];
-    $fields_str = $matches[2];
-    $description = $matches[3];
+    $mode = $ModeMap[$matches[1]];
+    $stock_code =  $matches[2];
+    $fields_str = $matches[3];
+    $description = $matches[4];
 
   $fields = preg_split("/[\s,;]+/", $fields_str);
 
@@ -93,6 +102,15 @@ function parse_sales_line($line) {
   echo "<li>discount : $discount</li>";
   echo "<li>description : $description</li>";
   echo "</ul>";
+
+  return array(
+    "mode" => "insert"
+    ,"stock_code" => stock_code
+    ,"quantity" => quantity
+    ,"price" => price
+    ,"discount" => discount
+    ,"description" => description
+  );
 
 }
 
