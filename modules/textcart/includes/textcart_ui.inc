@@ -20,7 +20,7 @@ function sales_cart_to_text($cart) {
     $text .= sprintf("$item->stock_id %2.${dec}f %0.${user_price_dec}f %0.1f%%%s\r\n"
       ,$item->quantity
       ,$item->price
-      ,$item->discount_percent
+      ,$item->discount_percent*100
       ,$item->item_description ? " | $item->item_description" : ""
     );
   }
@@ -87,7 +87,7 @@ function parse_sales_line($line) {
     }
 
     }
-  echo "Stock Code : $stock_code</br><ul>;";
+  echo "Stock Code : $stock_code</br><ul>";
   echo "<li>quantity : $quantity</li>"   ;
   echo "<li>price : $price</li>";
   echo "<li>discount : $discount</li>";
