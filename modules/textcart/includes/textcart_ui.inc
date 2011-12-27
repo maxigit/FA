@@ -56,14 +56,14 @@ function parse_sales_line($line) {
     // TODO refactore using an array
   foreach ($fields as $field) {
     # quantity are integer or preceeded by a +
-    if (preg_match("/^(\d+)$/", $field, $matches)) {
+    if (preg_match('/^(\d+)$/', $field, $matches)) {
       if($quantity) {
         display_error("quantity already set for line '$line'");
         return;
       };
       $quantity = $matches[1];
     }
-    elseif (preg_match("/^\+(\d*\.\d+)$/", $field, $matches)) {
+    elseif (preg_match('/^\+(\d*\.\d+)$/', $field, $matches)) {
       if($quantity) {
         display_error("quantity already set for line '$line'");
         return;
@@ -71,14 +71,14 @@ function parse_sales_line($line) {
       $quantity = $matches[1];
     }
     # price are float or integer preceeded by a $
-    elseif (preg_match("/^\$(\d+\(?:\.\d+)?)|(\d+)$/", $field, $matches)) {
+    elseif (preg_match('/^(?:(\d+\.\d+)|\$(\d+(?:\.\d+)?))$/', $field, $matches)) {
       if($price) {
         display_error("price already set for line '$line'");
         return;
       };
-      $price = $matches[1] || $matches[2];
+      $price = $matches[1] . $matches[2];//  ack to get first match or the second one
     }
-    elseif (preg_match("/^(\d+\(.\d+))%$/", $field, $matches)) {
+    elseif (preg_match('/^(\d+(?:.\d+))%$/', $field, $matches)) {
       if($discount) {
         display_error("discount already set for line '$line'");
         return;
