@@ -1,4 +1,4 @@
-,,<?php
+<?php
 function display_sales_textcart($title, $cart) {
 	div_start('textcart');	
     display_heading($title);
@@ -31,13 +31,15 @@ function sales_cart_to_text($cart) {
 define ('INSERT_MODE', 0);
 define ('UPDATE_MODE', 1);
 define ('DELETE_MODE', 2);
+function parse_sales_line($line) {
+  echo "parsing : $line<br/>";
+  // TODO create global variable
 $mode_map = array (
   '+' => INSERT_MODE
   ,'!' => UPDATE_MODE
   ,'-' => DELETE_MODE
+  ,'' => null
 );
-function parse_sales_line($line) {
-  echo "parsing : $line<br/>";
   $line = trim($line);
   $stock_code = "";
   $quantity = "";
@@ -126,7 +128,6 @@ function process_textcart($cart, $textcart) {
     $discount = $attributes["discount"];
     $description = $attributes["description"];
 
-
   echo "Stock Code : $stock_code</br><ul>";
   echo "<li>quantity : $quantity</li>"   ;
   echo "<li>price : $price</li>";
@@ -139,6 +140,8 @@ function process_textcart($cart, $textcart) {
     case DELETE_MODE:
       break;
     default: // INSERT
+      if (!$quantity) $quantity = 1;
+      if (!$price) $price = get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $order->price_factor);
       add_to_order($cart, $stock_code, $quantity, $price, $discount, $description );
 
     }
