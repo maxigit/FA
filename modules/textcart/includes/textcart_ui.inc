@@ -149,7 +149,7 @@ function process_textcart($cart, $textcart) {
       $line_no = find_line_number($cart, $stock_code, $quantity, $price, $discount, $description);
         echo "deleting $line_no";
       if (!isset($line_no)) { return; }
-      $cart->remove_from_cart($line_no, $qty);
+      $cart->remove_from_cart($line_no);
       break;
     default: // INSERT
       if (!$quantity) $quantity = 1;
