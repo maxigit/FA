@@ -6,7 +6,9 @@ function display_sales_textcart($title, $cart) {
     textarea_cells("", "textcart", sales_cart_to_text($cart), 80, 10, $title);
 		end_table();
     //submit_center("Name", "Value", true, "title", "ajaxsubmit");
-    submit_center("ProcessTextCart", "Process");
+    submit_center_first("ReplaceTextCart", "Replace");
+    submit("ModifyTextCart", "Modify");
+    submit_center_last("CancelTextCart", "Cancel");
 	div_end();
 }
 

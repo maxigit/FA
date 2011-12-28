@@ -641,12 +641,13 @@ function create_cart($type, $trans_no)
 
 //--------------------------------------------------------------------------------
 
-function handle_textcart() {
+function handle_textcart($clear_cart=false) {
   if (!isset($_POST['textcart'])) {
     return;
   }
   $cart = $_SESSION['Items'];
   $text = $_POST['textcart'];
+  if ($clear_cart) { $cart->clear_items(); }
   process_textcart($cart, $text);
 }
 //--------------------------------------------------------------------------------
@@ -702,11 +703,18 @@ if ($_SESSION['Items']->trans_type == ST_SALESINVOICE) {
 }
 // Process textcart if needed
 // we need the cart to be already loaded so we can modify it before displaying it
-if (isset($_POST['ProcessTextCart'])) {
+if (isset($_POST['ReplaceTextCart'])) {
   $textcart = false; // Don't display the textcart
-  handle_textcart();
+  handle_textcart(true);
+}
+if (isset($_POST['ModifyTextCart'])) {
+  $textcart = false; // Don't display the textcart
+  handle_textcart(false);
 }
 
+if (isset($_POST['CancelTextCart'])) {
+  $textcart = false; // Don't display the textcart
+}
 start_form();
 
 hidden('cart_id');
