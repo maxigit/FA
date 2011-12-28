@@ -87,8 +87,6 @@ if (isset($_GET['NewDelivery']) && is_numeric($_GET['NewDelivery'])) {
 	create_cart(ST_SALESQUOTE, $_GET['NewQuoteToSalesOrder']);
 }
 
-$textcart = isset($_GET['CartMode']) && $_GET['CartMode'];
-
 page($_SESSION['page_title'], false, false, "", $js);
 //-----------------------------------------------------------------------------
 
@@ -704,16 +702,17 @@ if ($_SESSION['Items']->trans_type == ST_SALESINVOICE) {
 // Process textcart if needed
 // we need the cart to be already loaded so we can modify it before displaying it
 if (isset($_POST['ReplaceTextCart'])) {
-  $textcart = false; // Don't display the textcart
+  $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
   handle_textcart(true);
 }
 if (isset($_POST['ModifyTextCart'])) {
-  $textcart = false; // Don't display the textcart
+  $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
+  $cart_mode = 'classic_cart'; // Don't display the textcart
   handle_textcart(false);
 }
 
 if (isset($_POST['CancelTextCart'])) {
-  $textcart = false; // Don't display the textcart
+  $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
 }
 start_form();
 
@@ -724,12 +723,21 @@ $customer_error = display_order_header($_SESSION['Items'],
 if ($customer_error == "") {
 	start_table(TABLESTYLE, "width=80%", 10);
 	echo "<tr><td>";
-  if($textcart) {
-    display_sales_textcart($orderitems, $_SESSION['Items']);
-  }
-  else {
+tabbed_content_start('tabs', array(
+		'classic_cart' => array(_('&Cart'), $selected_id!=-1),
+		'textcart' => array(_('&Text'), $selected_id!=-1),
+//		'orders' => array('S&ales orders', $selected_id!=-1) // not implemented
+	));
+  switch(get_post('_tabs_sel')) {
+  default:
+  case 'classic_cart':
     display_order_summary($orderitems, $_SESSION['Items'], true);
+    break;
+  case 'textcart':
+    display_sales_textcart($orderitems, $_SESSION['Items']);
+    break;
   }
+tabbed_content_end();
 	echo "</td></tr>";
 	echo "<tr><td>";
 	display_delivery_details($_SESSION['Items']);
