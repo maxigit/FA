@@ -31,15 +31,16 @@ function sales_cart_to_text($cart) {
 define ('INSERT_MODE', 0);
 define ('UPDATE_MODE', 1);
 define ('DELETE_MODE', 2);
-function parse_sales_line($line) {
-  echo "parsing : $line<br/>";
-  // TODO create global variable
 $mode_map = array (
   '+' => INSERT_MODE
-  ,'!' => UPDATE_MODE
+  ,'=' => UPDATE_MODE
   ,'-' => DELETE_MODE
   ,'' => null
 );
+function parse_sales_line($line) {
+  global $mode_map;
+  echo "parsing : $line<br/>";
+  // TODO create global variable
   $line = trim($line);
   $stock_code = "";
   $quantity = "";
@@ -53,7 +54,7 @@ $mode_map = array (
     return;
   }
   // extract SKU and descriptions
-  if (!preg_match('/^([+\-!])?\s*([^\s,;]+)(?:([^|]*)(?:\|\s*(.*))?)?/', $line, $matches)) {
+  if (!preg_match('/^([+\-=])?\s*([^\s,;]+)(?:([^|]*)(?:\|\s*(.*))?)?/', $line, $matches)) {
     display_error("error parsing '$line'");
     return;
   }
@@ -106,7 +107,7 @@ $mode_map = array (
   echo "</ul>";
 
   return array(
-    "mode" => "insert"
+    "mode" => $mode
     ,"stock_code" => $stock_code
     ,"quantity" => $quantity
     ,"price" => $price
@@ -123,12 +124,14 @@ function process_textcart($cart, $textcart) {
       continue;
 
     $stock_code = $attributes["stock_code"];
+    $mode = $attributes['mode'];
     $quantity = $attributes["quantity"];
     $price = $attributes["price"];
     $discount = $attributes["discount"];
     $description = $attributes["description"];
 
   echo "Stock Code : $stock_code</br><ul>";
+  echo "<li>mode : $mode</li>";
   echo "<li>quantity : $quantity</li>"   ;
   echo "<li>price : $price</li>";
   echo "<li>discount : $discount</li>";
@@ -136,14 +139,44 @@ function process_textcart($cart, $textcart) {
   echo "</ul>";
     switch ($attributes['mode']) {
     case UPDATE_MODE:
+      // we modifidy the first element, we can't use the attributes as criteria as 
+      // they are the new value
+      $line_no = find_line_number($cart, $stock_code);
+      if (!isset($line_no)) { return; }
+      $cart->update_cart_item($line_no, $quantity, $price, $discount, $description);
       break;
     case DELETE_MODE:
+      $line_no = find_line_number($cart, $stock_code, $quantity, $price, $discount, $description);
+        echo "deleting $line_no";
+      if (!isset($line_no)) { return; }
+      $cart->remove_from_cart($line_no, $qty);
       break;
     default: // INSERT
       if (!$quantity) $quantity = 1;
       if (!$price) $price = get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $order->price_factor);
       add_to_order($cart, $stock_code, $quantity, $price, $discount, $description );
-
     }
   }
+}
+
+// return if criteria is not set or value match it
+function match_criteria($value, $criteria) {
+ return ! ( isset($criteria) && $value == $criteria);
+}
+
+// Try to find the first line matching the criteria
+function find_line_number($cart, $stock_code, $quantity=null, $price=null, $discount=null,  $description=null) {
+  foreach ($cart->line_items as $line_no => $line) {
+    if ($line->stock_id == $stock_code 
+      //&& match_criteria($line->quantity, $quantity)
+      //&& match_criteria($line->price , $price)
+      //&& match_criteria($line->discount_percent , $discount)
+      //&& match_criteria($line->item_description, $description)
+    ) {
+        return $line_no;
+
+      }
+  }
+  display_error("Can't find line details with ".join(", ",array($stock_code, $quantity, $price, $discount, $description)));
+  return null;
 }
