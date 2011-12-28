@@ -139,7 +139,17 @@ function process_textcart($cart, $textcart) {
   echo "<li>discount : $discount</li>";
   echo "<li>description : $description</li>";
   echo "</ul>";
-    switch ($attributes['mode']) {
+
+  // Checking that product exists, to not answer dodgy one
+  $kit = get_item_kit($stock_code);
+  $number = db_num_rows($kit);
+  if ($number == 0) {
+    display_error("Product '$stock_code' doesn't exist");
+    display_error("Line '$line' skipped");
+  }
+  db_free_result($kit);
+
+    switch ($mode) {
     case UPDATE_MODE:
       // we modifidy the first element, we can't use the attributes as criteria as 
       // they are the new value
@@ -155,7 +165,7 @@ function process_textcart($cart, $textcart) {
       break;
     default: // INSERT
       if (!$quantity) $quantity = 1;
-      if (!$price) $price = get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $order->price_factor);
+      if (!$price) $price = get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $cart->price_factor);
       add_to_order($cart, $stock_code, $quantity, $price, $discount, $description );
     }
   }
