@@ -639,14 +639,14 @@ function create_cart($type, $trans_no)
 
 //--------------------------------------------------------------------------------
 
-function handle_textcart($clear_cart=false) {
+function handle_textcart($clear_cart=false, $default_mode=null) {
   if (!isset($_POST['textcart'])) {
     return;
   }
   $cart = $_SESSION['Items'];
   $text = $_POST['textcart'];
   if ($clear_cart) { $cart->clear_items(); }
-  process_textcart($cart, $text);
+  process_textcart($cart, $text, $default_mode);
 }
 //--------------------------------------------------------------------------------
 
@@ -703,12 +703,18 @@ if ($_SESSION['Items']->trans_type == ST_SALESINVOICE) {
 // we need the cart to be already loaded so we can modify it before displaying it
 if (isset($_POST['ReplaceTextCart'])) {
   $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
-  handle_textcart(true);
+  handle_textcart(true, INSERT_MODE );
 }
 if (isset($_POST['ModifyTextCart'])) {
   $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
   $cart_mode = 'classic_cart'; // Don't display the textcart
-  handle_textcart(false);
+  handle_textcart(false, INSERT_MODE);
+}
+
+if (isset($_POST['UpdateTextCart'])) {
+  $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
+  $cart_mode = 'classic_cart'; // Don't display the textcart
+  handle_textcart(false, UPDATE_MODE);
 }
 
 if (isset($_POST['CancelTextCart'])) {

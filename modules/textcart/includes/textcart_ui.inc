@@ -3,11 +3,12 @@ function display_sales_textcart($title, $cart) {
 	div_start('textcart');	
     display_heading($title);
 		start_table(TABLESTYLE, "width=100%");
-    textarea_cells("", "textcart", sales_cart_to_text($cart), 80, 10, $title);
+    textarea_cells("", "textcart", sales_cart_to_text($cart), 100, 10, $title);
 		end_table();
     //submit_center("Name", "Value", true, "title", "ajaxsubmit");
     submit_center_first("ReplaceTextCart", "Replace");
-    submit("ModifyTextCart", "Modify");
+    submit("ModifyTextCart", "Insert");
+    submit("UpdateTextCart", "Update");
     submit_center_last("CancelTextCart", "Cancel");
 	div_end();
 }
@@ -30,14 +31,14 @@ function sales_cart_to_text($cart) {
   return $text;
 }
 
-define ('INSERT_MODE', 0);
-define ('UPDATE_MODE', 1);
-define ('DELETE_MODE', 2);
+define ('INSERT_MODE', 1);
+define ('UPDATE_MODE', 2);
+define ('DELETE_MODE', 3);
 $mode_map = array (
   '+' => INSERT_MODE
   ,'=' => UPDATE_MODE
   ,'-' => DELETE_MODE
-  ,'' => null
+  ,'' => 0
 );
 function parse_sales_line($line) {
   global $mode_map;
@@ -119,7 +120,7 @@ function parse_sales_line($line) {
 
 }
 
-function process_textcart($cart, $textcart) {
+function process_textcart($cart, $textcart, $default_mode) {
   foreach (explode("\n", $textcart) as $line) {
     $attributes = parse_sales_line($line);
     if (!$attributes)
@@ -149,6 +150,7 @@ function process_textcart($cart, $textcart) {
   }
   db_free_result($kit);
 
+  if(!$mode) { $mode = $default_mode; }
     switch ($mode) {
     case UPDATE_MODE:
       // we modifidy the first element, we can't use the attributes as criteria as 
@@ -163,7 +165,7 @@ function process_textcart($cart, $textcart) {
       if (!isset($line_no)) { return; }
       $cart->remove_from_cart($line_no);
       break;
-    default: // INSERT
+    case INSERT_MODE:
       if (!$quantity) $quantity = 1;
       if (!$price) $price = get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $cart->price_factor);
       add_to_order($cart, $stock_code, $quantity, $price, $discount, $description );
