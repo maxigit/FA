@@ -140,7 +140,7 @@ function process_textcart($cart, $textcart) {
   echo "<li>description : $description</li>";
   echo "</ul>";
 
-  // Checking that product exists, to not answer dodgy one
+  // Checking that product exists, to not process dodgy one
   $kit = get_item_kit($stock_code);
   $number = db_num_rows($kit);
   if ($number == 0) {
