@@ -122,18 +122,53 @@ function parse_sales_line($line) {
 
 }
 
-function process_textcart($cart, $textcart, $default_mode) {
-  foreach (explode("\n", $textcart) as $line) {
-    $attributes = parse_sales_line($line);
-    if (!$attributes)
-      continue;
+define('NORMAL_LINE', 0);
+define('RAW_LINE', 1);
+define('TEMPLATE_LINE', 2);
+$line_mode_map = array (
+  '!' => RAW_LINE
+  ,':' => TEMPLATE_LINE
+  ,'' => NORMAL_LINE
+);
 
-    $stock_code = $attributes["stock_code"];
-    $mode = $attributes['mode'];
-    $quantity = $attributes["quantity"];
-    $price = $attributes["price"];
-    $discount = $attributes["discount"];
-    $description = $attributes["description"];
+function process_textcart($cart, $textcart, $default_mode) {
+  global $line_mode_map;
+  $template_line = null;
+  foreach (explode("\n", $textcart) as $line) {
+  # decide which type of line is
+  # ! raw line, no processing
+  # : template line
+    preg_match('/([!:]?)(.*)/', $line, $matches);
+    $line = $matches[2];
+    $line_mode = $line_mode_map[$matches[1]];
+
+    $attributes = parse_sales_line($line);
+
+    if ($line_mode == TEMPLATE_LINE) {
+      $template_line = $attributes ? $attributes : array();
+      continue;
+    }
+
+    if (!$attributes) continue;
+    if ($line_mode == NORMAL_LINE) {
+      $stock_code = expand_template($template_line['stock_template'], $attributes['stock_code']);
+      $mode = $attributes['mode'];
+      $quantity =  expand_template($template_line['quantity'], $attributes['quantity'], 1);
+      $price =  expand_template($template_line['price'], $attributes['price'], 
+        get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $cart->price_factor));
+      $discount = $attributes["discount"];
+      $discount =  expand_template($template_line['discount'], 0);
+      $description =  expand_template($template_line['description'], $attributes['description'], 1);
+    }
+    else {
+      $stock_code = $attributes["stock_code"];
+      $mode = $attributes['mode'];
+      $quantity = $attributes["quantity"];
+      $price = $attributes["price"];
+      $discount = $attributes["discount"];
+      $description = $attributes["description"];
+
+    }
 
   echo "Stock Code : $stock_code</br><ul>";
   echo "<li>mode : $mode</li>";
@@ -153,7 +188,7 @@ function process_textcart($cart, $textcart, $default_mode) {
   db_free_result($kit);
 
   if(!$mode) { $mode = $default_mode; }
-    switch ($mode) {
+  switch ($mode) {
     case UPDATE_MODE:
       // we modifidy the first element, we can't use the attributes as criteria as 
       // they are the new value
@@ -195,4 +230,42 @@ function find_line_number($cart, $stock_code, $quantity=null, $price=null, $disc
   }
   display_error("Can't find line details with ".join(", ",array($stock_code, $quantity, $price, $discount, $description)));
   return null;
+}
+
+/* This function replace @ by the default value
+  # by the value in the template
+  # by the template in the value
+  and evaluate what's between []
+ */
+function expand_template($template, $value, $default_value=null) {
+  $expand_done = false;
+
+  # replace # placeholder
+  if($value) {
+    if($template) {
+      if (strpos('#', $template) !== false)  {
+        $value = str_replace('#', $value, $template);
+      }
+      elseif(strpos('#', $value) !== false) {
+        $value = str_replace('#', $template, $value);
+      }
+    }
+  }
+  else
+  {
+    $value = $template;
+  }
+
+  if($value)  {
+  # now use default value if needed
+    $value = str_replace('@', $default_value, $value); 
+
+      #evaluate expression 
+      if(preg_match('^/\[(.*)\]$', $matches)) {
+        //display_error('math eval not supported at the moment')
+        $value = $matches[1];
+      }
+    return $value;
+  }
+
 }
