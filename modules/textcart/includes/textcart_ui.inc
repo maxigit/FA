@@ -158,7 +158,7 @@ function process_textcart($cart, $textcart, $default_mode) {
         get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $cart->price_factor));
       $discount = $attributes["discount"];
       $discount =  expand_template($template_line['discount'], 0);
-      $description =  expand_template($template_line['description'], $attributes['description'], 1);
+      $description =  expand_template($template_line['description'], $attributes['description'], get_kit_description($stock_code));
     }
     else {
       $stock_code = $attributes["stock_code"];
@@ -273,6 +273,14 @@ function expand_template($template, $value, $default_value=null) {
   }
   else {
   return $default_value;
+  }
+
+}
+function get_kit_description($item_code) {
+  $db_result = get_item_kit($item_code);
+  while($props = db_fetch($db_result)) {
+    return $props['description'];
+
   }
 
 }
