@@ -151,7 +151,7 @@ function process_textcart($cart, $textcart, $default_mode) {
 
     if (!$attributes) continue;
     if ($line_mode == NORMAL_LINE) {
-      $stock_code = expand_template($template_line['stock_template'], $attributes['stock_code']);
+      $stock_code = expand_template($template_line['stock_code'], $attributes['stock_code']);
       $mode = $attributes['mode'];
       $quantity =  expand_template($template_line['quantity'], $attributes['quantity'], 1);
       $price =  expand_template($template_line['price'], $attributes['price'], 
@@ -238,32 +238,37 @@ function find_line_number($cart, $stock_code, $quantity=null, $price=null, $disc
   and evaluate what's between []
  */
 function expand_template($template, $value, $default_value=null) {
-  $expand_done = false;
-
   # replace # placeholder
+  echo "expandind template=$template value=$value default_value=$default_value<br/>";
   if($value) {
     if($template) {
-      if (strpos('#', $template) !== false)  {
+      if (strpos($template, '#') !== false)  {
         $value = str_replace('#', $value, $template);
+  echo "   t template=$template value=$value default_value=$default_value<br/>";
       }
-      elseif(strpos('#', $value) !== false) {
+      elseif(strpos($value, '#') !== false) {
         $value = str_replace('#', $template, $value);
+  echo "   v template=$template value=$value default_value=$default_value<br/>";
       }
     }
   }
   else
   {
     $value = $template;
+  echo "    null template=$template value=$value default_value=$default_value<br/>";
   }
 
   if($value)  {
   # now use default value if needed
     $value = str_replace('@', $default_value, $value); 
+  echo "    default template=$template value=$value default_value=$default_value<br/>";
 
       #evaluate expression 
-      if(preg_match('^/\[(.*)\]$', $matches)) {
+    $matches=null;
+      if(preg_match('/^\[(.*)\]$/', $matches)) {
         //display_error('math eval not supported at the moment')
         $value = $matches[1];
+  echo "replaced template=$template value=$value default_value=$default_value<br/>";
       }
     return $value;
   }
