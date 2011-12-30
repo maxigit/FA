@@ -40,6 +40,8 @@ $mode_map = array (
   ,'-' => DELETE_MODE
   ,'' => 0
 );
+
+define ('PARAM_REG', '+|[@#]|\[[^]]*\]');
 function parse_sales_line($line) {
   global $mode_map;
   echo "parsing : $line<br/>";
@@ -71,14 +73,14 @@ function parse_sales_line($line) {
     // TODO refactore using an array
   foreach ($fields as $field) {
     # quantity are integer or preceeded by a +
-    if (preg_match('/^(\d+)$/', $field, $matches)) {
+    if (preg_match('/^(\d+'.PARAM_REG.')$/', $field, $matches)) {
       if($quantity) {
         display_error("quantity already set for line '$line'");
         return;
       };
       $quantity = $matches[1];
     }
-    elseif (preg_match('/^\+(\d*\.\d+)$/', $field, $matches)) {
+    elseif (preg_match('/^\+(\d*\.\d+'.PARAM_REG.')$/', $field, $matches)) {
       if($quantity) {
         display_error("quantity already set for line '$line'");
         return;
@@ -86,14 +88,14 @@ function parse_sales_line($line) {
       $quantity = $matches[1];
     }
     # price are float or integer preceeded by a $
-    elseif (preg_match('/^(?:(\d+\.\d+)|\$(\d+(?:\.\d+)?))$/', $field, $matches)) {
+    elseif (preg_match('/^(?:(\d+\.\d+)|\$(\d+(?:\.\d+)?'.PARAM_REG.'))$/', $field, $matches)) {
       if($price) {
         display_error("price already set for line '$line'");
         return;
       };
       $price = $matches[1] . $matches[2];//  ack to get first match or the second one
     }
-    elseif (preg_match('/^(\d+(?:.\d+)?)%$/', $field, $matches)) {
+    elseif (preg_match('/^(\d+(?:.\d+)?'.PARAM_REG.')%$/', $field, $matches)) {
       if($discount) {
         display_error("discount already set for line '$line'");
         return;
