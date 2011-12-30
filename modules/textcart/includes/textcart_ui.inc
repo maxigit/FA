@@ -252,8 +252,7 @@ function expand_template($template, $value, $default_value=null) {
       }
     }
   }
-  else
-  {
+  elseif (strpos($template, '#') === false)  {
     $value = $template;
   echo "    null template=$template value=$value default_value=$default_value<br/>";
   }
@@ -271,6 +270,9 @@ function expand_template($template, $value, $default_value=null) {
   echo "replaced template=$template value=$value default_value=$default_value<br/>";
       }
     return $value;
+  }
+  else {
+  return $default_value;
   }
 
 }
