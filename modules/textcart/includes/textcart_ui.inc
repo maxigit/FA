@@ -82,14 +82,14 @@ function parse_sales_line($line) {
     return;
   }
   // extract SKU and descriptions
-  if (!preg_match('/^([+\-=])?\s*([^\s,;]+)(?:([^|]*)(?:\|\s*"?(.*)"?)?)?/', $line, $matches)) {
+  if (!preg_match('/^([+\-=])?\s*([^\s,;]+)(?:([^|]*)(?:\|\s*.(.*)\s*)?)?/', htmlspecialchars_decode($line), $matches)) {
     display_error("error parsing '$line'");
     return;
   }
     $mode = $mode_map[$matches[1]];
     $stock_code =  $matches[2];
     $fields_str = $matches[3];
-    $description = $matches[4];
+    $description = trim($matches[4], '" ');
 
     # Hack to allow spaces between attribute qualifier
     $fields_str = preg_replace('/([+$])\s*/', '\1' , $fields_str);
