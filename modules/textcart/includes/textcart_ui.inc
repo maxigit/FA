@@ -42,11 +42,12 @@ function sales_cart_to_text($cart) {
 
   foreach ($cart->line_items as $item) {
     $dec = get_unit_dec($item->stock_id);
-    $text .= sprintf("$item->stock_id %2.${dec}f %0.${user_price_dec}f %0.1f%%%s\r\n"
+    // dodgy format excel compatible
+    $text .= sprintf("$item->stock_id\t+ %.${dec}f\t\$ %0.${user_price_dec}f\t%0.1f %%%s\r\n"
       ,$item->quantity
       ,$item->price
       ,$item->discount_percent*100
-      ,$item->item_description ? " | $item->item_description" : ""
+      ,$item->item_description ? "\t| \"$item->item_description\"" : ""
     );
   }
 
@@ -81,7 +82,7 @@ function parse_sales_line($line) {
     return;
   }
   // extract SKU and descriptions
-  if (!preg_match('/^([+\-=])?\s*([^\s,;]+)(?:([^|]*)(?:\|\s*(.*))?)?/', $line, $matches)) {
+  if (!preg_match('/^([+\-=])?\s*([^\s,;]+)(?:([^|]*)(?:\|\s*"?(.*)"?)?)?/', $line, $matches)) {
     display_error("error parsing '$line'");
     return;
   }
@@ -90,6 +91,9 @@ function parse_sales_line($line) {
     $fields_str = $matches[3];
     $description = $matches[4];
 
+    # Hack to allow spaces between attribute qualifier
+    $fields_str = preg_replace('/([+$])\s*/', '\1' , $fields_str);
+    $fields_str = preg_replace('/\s*(%)/', '\1' , $fields_str);
   $fields = preg_split("/[\s,;]+/", $fields_str);
 
     // TODO refactore using an array
@@ -102,7 +106,7 @@ function parse_sales_line($line) {
       };
       $quantity = $matches[1];
     }
-    elseif (preg_match('/^\+(\d*\.\d+'.PARAM_REG.')$/', $field, $matches)) {
+    elseif (preg_match('/^\+(\d*(?:\.\d+)?'.PARAM_REG.')$/', $field, $matches)) {
       if($quantity) {
         display_error("quantity already set for line '$line'");
         return;
