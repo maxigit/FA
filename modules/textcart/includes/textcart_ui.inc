@@ -204,7 +204,9 @@ function process_textcart($cart, $textcart, $default_mode) {
       break;
     case INSERT_MODE:
       if (!$quantity) $quantity = 1;
+      echo "price before $price";
       if (!$price) $price = get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $cart->price_factor);
+      echo "price after $price";
       add_to_order($cart, $stock_code, $quantity, $price, $discount, $description );
     }
   }
@@ -263,10 +265,11 @@ function expand_template($template, $value, $default_value=null) {
   echo "    default template=$template value=$value default_value=$default_value<br/>";
 
       #evaluate expression 
-    $matches=null;
-      if(preg_match('/^\[(.*)\]$/', $matches)) {
-        //display_error('math eval not supported at the moment')
-        $value = $matches[1];
+      if(preg_match('/^\[(.*)\]$/', $value, $matches)) {
+        // keep only arithmetical expression
+        $to_eval =  preg_replace('/[a-zA-Z]*/', "", $matches[1]);
+        echo "eval trimmed '$matches[1]' => '$to_eval' <br/>";
+        eval("\$value=$to_eval;");
   echo "replaced template=$template value=$value default_value=$default_value<br/>";
       }
     return $value;

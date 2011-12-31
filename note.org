@@ -73,3 +73,12 @@ $! mode
    stuff between parenthhesis are evaluted
 
    | ()
+*** to do
+add arithmetic
+csv mode 
+add everytwhere (po and stock transfer)
+clean
+    add comment --
+    add doc as comment
+    fix strtr
+
