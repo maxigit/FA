@@ -75,11 +75,11 @@ $! mode
    | ()
 *** done
 add arithmetic
+    add comment --
+    add doc as comment
 *** to do
     fix price bug
 csv mode 
 add everytwhere (po and stock transfer)
 clean
-    add comment --
-    add doc as comment
 

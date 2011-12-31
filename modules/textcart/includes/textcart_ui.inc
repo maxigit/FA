@@ -3,7 +3,7 @@ function display_sales_textcart($title, $cart) {
 	div_start('textcart');	
     display_heading($title);
 		start_table(TABLESTYLE, "width=100%");
-    textarea_cells("", "textcart", sales_cart_to_text($cart), 100, 10, $title);
+    textarea_cells("", "textcart", sales_cart_to_text($cart), 100, 25, $title);
 		end_table();
     //submit_center("Name", "Value", true, "title", "ajaxsubmit");
     submit_center_first("ReplaceTextCart", "Replace");
@@ -20,7 +20,7 @@ function sales_cart_to_text($cart) {
 -- stock_name optionals fields |  description 
 -- fields could be :
 --   integer or +number : quantity
---   float or $nubmer   : price
+--   float or \$nubmer   : price
 --   number%            :discount
 -- at the beginning of a line 
 -- : start a template line
@@ -30,9 +30,12 @@ function sales_cart_to_text($cart) {
 -- - suppress the line from the cart
 -- = update the line if exists
 -- place holder               :
--- @ : the default value of the corresponding fieled
+-- @ : the default value of the corresponding field
 -- # : the template or line value of the corresponding field
 -- [ ...  ] : arithmetical expression between [] would be evaluated
+
+
+
 
 "; // empty line are important
   $user_price_dec = user_price_dec();
@@ -178,7 +181,7 @@ function process_textcart($cart, $textcart, $default_mode) {
       $price =  expand_template($template_line['price'], $attributes['price'], 
         get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $cart->price_factor));
       $discount = $attributes["discount"];
-      $discount =  expand_template($template_line['discount'], 0);
+      $discount =  expand_template($template_line['discount'], $attributes['discount'], 0);
       $description =  expand_template($template_line['description'], $attributes['description'], get_kit_description($stock_code));
     }
     else {

@@ -645,7 +645,7 @@ function handle_textcart($clear_cart=false, $default_mode=null) {
   }
   $cart = $_SESSION['Items'];
   $text = $_POST['textcart'];
-  if ($clear_cart) { $cart->clear_items(); }
+  if ($clear_cart) { $cart->line_items = array(); } // clear_items doesn't work, can't update the price if we are using it
   process_textcart($cart, $text, $default_mode);
 }
 //--------------------------------------------------------------------------------
