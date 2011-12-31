@@ -15,7 +15,26 @@ function display_sales_textcart($title, $cart) {
 
 //TODO create a class
 function sales_cart_to_text($cart) {
-  $text = "";
+  $text = "-- This is a comment -- it will be skipped and not processed 
+-- structure of a line (every fields are optional apart from stock_name)
+-- stock_name optionals fields |  description 
+-- fields could be :
+--   integer or +number : quantity
+--   float or $nubmer   : price
+--   number%            :discount
+-- at the beginning of a line 
+-- : start a template line
+-- ! raw line (not preproceseed)
+-- before stock name
+-- + add an item
+-- - suppress the line from the cart
+-- = update the line if exists
+-- place holder               :
+-- @ : the default value of the corresponding fieled
+-- # : the template or line value of the corresponding field
+-- [ ...  ] : arithmetical expression between [] would be evaluated
+
+"; // empty line are important
   $user_price_dec = user_price_dec();
 
   foreach ($cart->line_items as $item) {

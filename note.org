@@ -76,6 +76,7 @@ $! mode
 *** done
 add arithmetic
 *** to do
+    fix price bug
 csv mode 
 add everytwhere (po and stock transfer)
 clean
