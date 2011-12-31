@@ -67,7 +67,7 @@ $mode_map = array (
 define ('PARAM_REG', '+|[@#]|\[[^]]*\]');
 function parse_sales_line($line) {
   global $mode_map;
-  echo "parsing : $line<br/>";
+  #echo "parsing : $line<br/>";
   // TODO create global variable
   $line = trim($line);
   $stock_code = "";
@@ -130,12 +130,12 @@ function parse_sales_line($line) {
     }
 
     }
-  echo "Stock Code : $stock_code</br><ul>";
-  echo "<li>quantity : $quantity</li>"   ;
-  echo "<li>price : $price</li>";
-  echo "<li>discount : $discount</li>";
-  echo "<li>description : $description</li>";
-  echo "</ul>";
+  #echo "Stock Code : $stock_code</br><ul>";
+  #echo "<li>quantity : $quantity</li>"   ;
+  #echo "<li>price : $price</li>";
+  #echo "<li>discount : $discount</li>";
+  #echo "<li>description : $description</li>";
+  #echo "</ul>";
 
   return array(
     "mode" => $mode
@@ -198,13 +198,13 @@ function process_textcart($cart, $textcart, $default_mode) {
 
     }
 
-  echo "Stock Code : $stock_code</br><ul>";
-  echo "<li>mode : $mode</li>";
-  echo "<li>quantity : $quantity</li>"   ;
-  echo "<li>price : $price</li>";
-  echo "<li>discount : $discount</li>";
-  echo "<li>description : $description</li>";
-  echo "</ul>";
+  #echo "Stock Code : $stock_code</br><ul>";
+  #echo "<li>mode : $mode</li>";
+  #echo "<li>quantity : $quantity</li>"   ;
+  #echo "<li>price : $price</li>";
+  #echo "<li>discount : $discount</li>";
+  #echo "<li>description : $description</li>";
+  #echo "</ul>";
 
   // Checking that product exists, to not process dodgy one
   $kit = get_item_kit($stock_code);
@@ -226,15 +226,15 @@ function process_textcart($cart, $textcart, $default_mode) {
       break;
     case DELETE_MODE:
       $line_no = find_line_number($cart, $stock_code, $quantity, $price, $discount, $description);
-        echo "deleting $line_no";
+        #echo "deleting $line_no";
       if (!isset($line_no)) { return; }
       $cart->remove_from_cart($line_no);
       break;
     case INSERT_MODE:
       if (!$quantity) $quantity = 1;
-      echo "price before $price";
+      #echo "price before $price";
       if (!$price) $price = get_kit_price($stock_code, $cart->customer_currency, $cart->sales_type, $cart->price_factor);
-      echo "price after $price";
+      #echo "price after $price";
       add_to_order($cart, $stock_code, $quantity, $price, $discount, $description );
     }
   }
@@ -269,36 +269,36 @@ function find_line_number($cart, $stock_code, $quantity=null, $price=null, $disc
  */
 function expand_template($template, $value, $default_value=null) {
   # replace # placeholder
-  echo "expandind template=$template value=$value default_value=$default_value<br/>";
+  #echo "expandind template=$template value=$value default_value=$default_value<br/>";
   if($value) {
     if($template) {
       if (strpos($template, '#') !== false)  {
         $value = str_replace('#', $value, $template);
-  echo "   t template=$template value=$value default_value=$default_value<br/>";
+  #echo "   t template=$template value=$value default_value=$default_value<br/>";
       }
       elseif(strpos($value, '#') !== false) {
         $value = str_replace('#', $template, $value);
-  echo "   v template=$template value=$value default_value=$default_value<br/>";
+  #echo "   v template=$template value=$value default_value=$default_value<br/>";
       }
     }
   }
   elseif (strpos($template, '#') === false)  {
     $value = $template;
-  echo "    null template=$template value=$value default_value=$default_value<br/>";
+  #echo "    null template=$template value=$value default_value=$default_value<br/>";
   }
 
   if($value)  {
   # now use default value if needed
     $value = str_replace('@', $default_value, $value); 
-  echo "    default template=$template value=$value default_value=$default_value<br/>";
+  #echo "    default template=$template value=$value default_value=$default_value<br/>";
 
       #evaluate expression 
       if(preg_match('/^\[(.*)\]$/', $value, $matches)) {
         // keep only arithmetical expression
         $to_eval =  preg_replace('/[a-zA-Z]*/', "", $matches[1]);
-        echo "eval trimmed '$matches[1]' => '$to_eval' <br/>";
+        #echo "eval trimmed '$matches[1]' => '$to_eval' <br/>";
         eval("\$value=$to_eval;");
-  echo "replaced template=$template value=$value default_value=$default_value<br/>";
+  #echo "replaced template=$template value=$value default_value=$default_value<br/>";
       }
     return $value;
   }
