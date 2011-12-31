@@ -135,9 +135,11 @@ function process_textcart($cart, $textcart, $default_mode) {
   global $line_mode_map;
   $template_line = null;
   foreach (explode("\n", $textcart) as $line) {
-  # decide which type of line is
-  # ! raw line, no processing
-  # : template line
+    # remove comments
+    $line = preg_replace('/--.*/', "", $line);
+    # decide which type of line is
+    # ! raw line, no processing
+    # : template line
     preg_match('/([!:]?)(.*)/', $line, $matches);
     $line = $matches[2];
     $line_mode = $line_mode_map[$matches[1]];
