@@ -64,7 +64,7 @@ function print_sales_orders()
 		if ($print_as_quote == 0)
 			$rep = new FrontReport(_("SALES ORDER"), "SalesOrderBulk", user_pagesize());
 		else
-			$rep = new FrontReport(_("QUOTE"), "QuoteBulk", user_pagesize());
+			$rep = new FrontReport(_("PRO-FORMA INVOICE\n This is not a VAT invoice"), "QuoteBulk", user_pagesize());
 		$rep->SetHeaderType('Header2');
 		$rep->currency = $cur;
 		$rep->Font();
@@ -85,7 +85,7 @@ function print_sales_orders()
 			$rep->Font();
 			if ($print_as_quote == 1)
 			{
-				$rep->title = _('QUOTE');
+				$rep->title = _('PROFORMA INVOICE');
 				$rep->filename = "Quote" . $i . ".pdf";
 			}
 			else
@@ -96,7 +96,7 @@ function print_sales_orders()
 			$rep->Info($params, $cols, null, $aligns);
 		}
 		else
-			$rep->title = ($print_as_quote==1 ? _("QUOTE") : _("SALES ORDER"));
+			$rep->title = ($print_as_quote==1 ? _("PROFORMA INVOICE") : _("SALES ORDER"));
 
 		$contacts = get_branch_contacts($branch['branch_code'], 'order', $branch['debtor_no']);
 		$rep->SetCommonData($myrow, $branch, $myrow, $baccount, ST_SALESORDER, $contacts);
