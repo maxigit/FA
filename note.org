@@ -55,6 +55,17 @@ $! mode
    :ML12-AF3-# ${@+0.3} | sina # boto
    BLK, black
    ! hello // don't process this line
+** use case
+*** copy from an email
+*** modify price
+**** using preprocesser
+**** using excel ?
+*** PO from order
+normal
+using excl to set min order quantity
+*** Item movent
+**** transfer corresponding to an order/po
+**** every from a location to another
 *** old
    or command start with : or !
    template line (starting with :)
@@ -82,4 +93,5 @@ add arithmetic
 csv mode 
 add everytwhere (po and stock transfer)
 clean
+
 

@@ -20,6 +20,8 @@ include_once($path_to_root . "/includes/data_checks.inc");
 
 include_once($path_to_root . "/inventory/includes/stock_transfers_ui.inc");
 include_once($path_to_root . "/inventory/includes/inventory_db.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_manager.inc");
+
 $js = "";
 if ($use_popup_windows)
 	$js .= get_js_open_window(800, 500);
@@ -219,7 +221,11 @@ if (isset($_GET['NewTransfer']) || !isset($_SESSION['transfer_items']))
 	handle_new_order();
 }
 
+
 //-----------------------------------------------------------------------------------------------
+$textcart_mgr = new ItemsTransTextCartManager();
+$textcart_mgr->handle_post_request();
+
 start_form();
 
 display_order_header($_SESSION['transfer_items']);
@@ -227,7 +233,10 @@ display_order_header($_SESSION['transfer_items']);
 start_table(TABLESTYLE, "width=70%", 10);
 start_row();
 echo "<td>";
-display_transfer_items(_("Items"), $_SESSION['transfer_items']);
+$textcart_mgr->tab_display(_("Items"), $_SESSION['transfer_items']
+  ,function ($title, $cart) {
+    display_transfer_items($title, $cart);
+  });
 transfer_options_controls();
 echo "</td>";
 end_row();

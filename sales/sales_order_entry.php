@@ -27,7 +27,7 @@ include_once($path_to_root . "/sales/includes/ui/sales_order_ui.inc");
 include_once($path_to_root . "/sales/includes/sales_db.inc");
 include_once($path_to_root . "/sales/includes/db/sales_types_db.inc");
 include_once($path_to_root . "/reporting/includes/reporting.inc");
-include_once($path_to_root . "/modules/textcart/includes/textcart_ui.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_manager.inc");
 
 set_page_security( @$_SESSION['Items']->trans_type,
 	array(	ST_SALESORDER=>'SA_SALESORDER',
@@ -699,27 +699,9 @@ if ($_SESSION['Items']->trans_type == ST_SALESINVOICE) {
 	$porder = _("Place Order");
 	$corder = _("Commit Order Changes");
 }
-// Process textcart if needed
-// we need the cart to be already loaded so we can modify it before displaying it
-if (isset($_POST['ReplaceTextCart'])) {
-  $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
-  handle_textcart(true, INSERT_MODE );
-}
-if (isset($_POST['ModifyTextCart'])) {
-  $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
-  $cart_mode = 'classic_cart'; // Don't display the textcart
-  handle_textcart(false, INSERT_MODE);
-}
+$textcart_mgr = new SalesTextCartManager();
+$textcart_mgr->handle_post_request();
 
-if (isset($_POST['UpdateTextCart'])) {
-  $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
-  $cart_mode = 'classic_cart'; // Don't display the textcart
-  handle_textcart(false, UPDATE_MODE);
-}
-
-if (isset($_POST['CancelTextCart'])) {
-  $_POST['_tabs_sel'] = 'classic_cart'; // Don't display the textcart
-}
 start_form();
 
 hidden('cart_id');
@@ -729,21 +711,12 @@ $customer_error = display_order_header($_SESSION['Items'],
 if ($customer_error == "") {
 	start_table(TABLESTYLE, "width=80%", 10);
 	echo "<tr><td>";
-tabbed_content_start('tabs', array(
-		'classic_cart' => array(_('&Cart'), $selected_id!=-1),
-		'textcart' => array(_('&Text'), $selected_id!=-1),
-//		'orders' => array('S&ales orders', $selected_id!=-1) // not implemented
-	));
-  switch(get_post('_tabs_sel')) {
-  default:
-  case 'classic_cart':
-    display_order_summary($orderitems, $_SESSION['Items'], true);
-    break;
-  case 'textcart':
-    display_sales_textcart($orderitems, $_SESSION['Items']);
-    break;
-  }
-tabbed_content_end();
+  $textcart_mgr->tab_display($orderitems
+    ,$_SESSION['Items']
+    ,function($title, $cart) {
+      display_order_summary($title, $cart, true);
+    }
+  );
 	echo "</td></tr>";
 	echo "<tr><td>";
 	display_delivery_details($_SESSION['Items']);
