@@ -92,7 +92,7 @@ function print_invoices()
 			}
 			else
 				$rep->title = _('INVOICE');
-			$contacts = get_branch_contacts($branch['branch_code'], 'invoice', $branch['debtor_no']);
+			$contacts = get_branch_contacts($branch['branch_code'], 'invoice', $branch['debtor_no'], false);
 			$baccount['payment_service'] = $pay_service;
 			$rep->SetCommonData($myrow, $branch, $sales_order, $baccount, ST_SALESINVOICE, $contacts);
 			$rep->NewPage();
@@ -129,12 +129,11 @@ function print_invoices()
 					$rep->NewPage();
 			}
 
-			$comments = get_comments(ST_SALESINVOICE, $i);
-			if ($comments && db_num_rows($comments))
+			$memo = get_comments_string(ST_SALESINVOICE, $i);
+			if ($memo != "")
 			{
 				$rep->NewLine();
-    			while ($comment=db_fetch($comments))
-    				$rep->TextColLines(0, 6, $comment['memo_'], -2);
+				$rep->TextColLines(1, 5, $memo, -2);
 			}
 
    			$DisplaySubTot = number_format2($SubTotal,$dec);
