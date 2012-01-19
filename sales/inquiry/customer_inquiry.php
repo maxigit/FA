@@ -1,12 +1,12 @@
 <?php
 /**********************************************************************
     Copyright (C) FrontAccounting, LLC.
-	Released under the terms of the GNU General Public License, GPL, 
-	as published by the Free Software Foundation, either version 3 
+	Released under the terms of the GNU General Public License, GPL,
+	as published by the Free Software Foundation, either version 3
 	of the License, or (at your option) any later version.
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
     See the License here <http://www.gnu.org/licenses/gpl-3.0.html>.
 ***********************************************************************/
 $page_security = 'SA_SALESTRANSVIEW';
@@ -69,7 +69,7 @@ function display_customer_summary($customer_record)
 	$past2 = 2 * $past1;
     if ($customer_record["dissallow_invoices"] != 0)
     {
-    	echo "<center><font color=red size=4><b>" . _("CUSTOMER ACCOUNT IS ON HOLD") . "</font></b></center>";
+	echo "<center><font color=red size=4><b>" . _("CUSTOMER ACCOUNT IS ON HOLD") . "</font></b></center>";
     }
 
 	$nowdue = "1-" . $past1 . " " . _('Days');
@@ -78,7 +78,7 @@ function display_customer_summary($customer_record)
 
     start_table(TABLESTYLE, "width=80%");
     $th = array(_("Currency"), _("Terms"), _("Current"), $nowdue,
-    	$pastdue1, $pastdue2, _("Total Balance"));
+	$pastdue1, $pastdue2, _("Total Balance"));
     table_header($th);
 
 	start_row();
@@ -177,36 +177,36 @@ function edit_link($row)
 			$str = "/sales/customer_invoice.php?ModifyInvoice=".$row['trans_no'];
 		break;
 	case ST_CUSTCREDIT:
-  		if (get_voided_entry(ST_CUSTCREDIT, $row["trans_no"]) === false && $row['Allocated'] == 0) // 2008-11-19 Joe Hunt
-		{	 
+		if (get_voided_entry(ST_CUSTCREDIT, $row["trans_no"]) === false && $row['Allocated'] == 0) // 2008-11-19 Joe Hunt
+		{
 			if ($row['order_']==0) // free-hand credit note
 			    $str = "/sales/credit_note_entry.php?ModifyCredit=".$row['trans_no'];
 			else	// credit invoice
 			    $str = "/sales/customer_credit_invoice.php?ModifyCredit=".$row['trans_no'];
-		}	    
+		}
 		break;
 	case ST_CUSTDELIVERY:
-  		if (get_voided_entry(ST_CUSTDELIVERY, $row["trans_no"]) === false)
-   			$str = "/sales/customer_delivery.php?ModifyDelivery=".$row['trans_no'];
+		if (get_voided_entry(ST_CUSTDELIVERY, $row["trans_no"]) === false)
+			$str = "/sales/customer_delivery.php?ModifyDelivery=".$row['trans_no'];
 		break;
 	case ST_CUSTPAYMENT:
-  		if (get_voided_entry(ST_CUSTPAYMENT, $row["trans_no"]) === false)
-   			$str = "/sales/customer_payments.php?trans_no=".$row['trans_no'];
+		if (get_voided_entry(ST_CUSTPAYMENT, $row["trans_no"]) === false)
+			$str = "/sales/customer_payments.php?trans_no=".$row['trans_no'];
 		break;
-	}		
+	}
 	if ($str != "" && !is_closed_trans($row['type'], $row["trans_no"]))
 		return pager_link(_('Edit'), $str, ICON_EDIT);
-	return '';	
+	return '';
 }
 
 function prt_link($row)
 {
-  	if ($row['type'] == ST_CUSTPAYMENT || $row['type'] == ST_BANKDEPOSIT) 
+	if ($row['type'] == ST_CUSTPAYMENT || $row['type'] == ST_BANKDEPOSIT)
 		return print_document_link($row['trans_no']."-".$row['type'], _("Print Receipt"), true, ST_CUSTPAYMENT, ICON_PRINT);
-  	elseif ($row['type'] == ST_BANKPAYMENT) // bank payment printout not defined yet.
+	elseif ($row['type'] == ST_BANKPAYMENT) // bank payment printout not defined yet.
 		return '';
- 	else	
- 		return print_document_link($row['trans_no']."-".$row['type'], _("Print"), true, $row['type'], ICON_PRINT);
+	else
+		return print_document_link($row['trans_no']."-".$row['type'], _("Print"), true, $row['type'], ICON_PRINT);
 }
 
 function check_overdue($row)
@@ -223,15 +223,15 @@ db_query("set @bal:=0");
 $cols = array(
 	_("Type") => array('fun'=>'systype_name', 'ord'=>''),
 	_("#") => array('fun'=>'trans_view', 'ord'=>''),
-	_("Order") => array('fun'=>'order_view'), 
-	_("Reference"), 
+	_("Order") => array('fun'=>'order_view'),
+	_("Reference"),
 	_("Date") => array('name'=>'tran_date', 'type'=>'date', 'ord'=>'desc'),
 	_("Due Date") => array('type'=>'date', 'fun'=>'due_date'),
-	_("Customer") => array('ord'=>''), 
-	_("Branch") => array('ord'=>''), 
+	_("Customer") => array('ord'=>''),
+	_("Branch") => array('ord'=>''),
 	_("Currency") => array('align'=>'center'),
-	_("Debit") => array('align'=>'right', 'fun'=>'fmt_debit'), 
-	_("Credit") => array('align'=>'right','insert'=>true, 'fun'=>'fmt_credit'), 
+	_("Debit") => array('align'=>'right', 'fun'=>'fmt_debit'),
+	_("Credit") => array('align'=>'right','insert'=>true, 'fun'=>'fmt_credit'),
 	_("RB") => array('align'=>'right', 'type'=>'amount'),
 		array('insert'=>true, 'fun'=>'gl_view'),
 		array('insert'=>true, 'fun'=>'credit_link'),
@@ -260,3 +260,4 @@ if (!@$_GET['popup'])
 	end_page(@$_GET['popup'], false, false);
 }
 ?>
+
