@@ -701,6 +701,9 @@ if ($_SESSION['Items']->trans_type == ST_SALESINVOICE) {
 }
 $textcart_mgr = new SalesTextCartManager();
 $textcart_mgr->handle_post_request();
+function display_order_in_tab($title, $cart) {
+  display_order_summary($title, $cart, true);
+}
 
 start_form();
 
@@ -713,9 +716,7 @@ if ($customer_error == "") {
 	echo "<tr><td>";
   $textcart_mgr->tab_display($orderitems
     ,$_SESSION['Items']
-    ,function($title, $cart) {
-      display_order_summary($title, $cart, true);
-    }
+    ,"display_order_in_tab"
   );
 	echo "</td></tr>";
 	echo "<tr><td>";

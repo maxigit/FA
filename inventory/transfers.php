@@ -225,6 +225,9 @@ if (isset($_GET['NewTransfer']) || !isset($_SESSION['transfer_items']))
 //-----------------------------------------------------------------------------------------------
 $textcart_mgr = new ItemsTransTextCartManager();
 $textcart_mgr->handle_post_request();
+function display_order_in_tab ($title, $cart) {
+  display_transfer_items($title, $cart);
+}
 
 start_form();
 
@@ -233,10 +236,8 @@ display_order_header($_SESSION['transfer_items']);
 start_table(TABLESTYLE, "width=70%", 10);
 start_row();
 echo "<td>";
-$textcart_mgr->tab_display(_("Items"), $_SESSION['transfer_items']
-  ,function ($title, $cart) {
-    display_transfer_items($title, $cart);
-  });
+$textcart_mgr->tab_display(_("Items"), $_SESSION['transfer_items'], "display_order_in_tab");
+
 transfer_options_controls();
 echo "</td>";
 end_row();

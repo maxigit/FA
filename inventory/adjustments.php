@@ -225,6 +225,9 @@ if (isset($_GET['NewAdjustment']) || !isset($_SESSION['adj_items']))
 //-----------------------------------------------------------------------------------------------
 $textcart_mgr = new ItemsAdjTextCartManager();
 $textcart_mgr->handle_post_request();
+  function display_order_in_tab($title, $cart) {
+    display_adjustment_items($title, $cart);
+  }
 
 start_form();
 
@@ -232,10 +235,7 @@ display_order_header($_SESSION['adj_items']);
 
 start_outer_table(TABLESTYLE, "width=70%", 10);
 
-$textcart_mgr->tab_display(_("Adjustment Items"), $_SESSION['adj_items']
-  ,function ($title, $cart) {
-    display_adjustment_items($title, $cart);
-  });
+$textcart_mgr->tab_display(_("Adjustment Items"), $_SESSION['adj_items'], "display_order_in_tab");
 adjustment_options_controls();
 
 end_outer_table(1, false);

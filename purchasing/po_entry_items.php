@@ -509,15 +509,16 @@ if (isset($_POST['CancelUpdate']) || isset($_POST['UpdateLine'])) {
 $textcart_mgr = new POTextCartManager();
 $textcart_mgr->handle_post_request();
 
+function display_order_in_tab ($title, $cart) {
+  display_po_items($cart);
+}
+
 start_form();
 
 display_po_header($_SESSION['PO']);
 echo "<br>";
 
-$textcart_mgr->tab_display('', &$_SESSION['PO'],
-  function ($title, $cart) {
-    display_po_items($cart);
-  }  );
+$textcart_mgr->tab_display('', &$_SESSION['PO'], "display_order_in_tab");
 
 start_table(TABLESTYLE2);
 textarea_row(_("Memo:"), 'Comments', null, 70, 4);
