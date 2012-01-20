@@ -939,7 +939,7 @@ include_once('xpMenu.class.php');
       $bank_account_name = $myrow['bank_account_name'];
       $bank_account = $myrow['bank_id'];
       $currency = $myrow['bank_curr_code'];
-      $raw_balance = -get_balance_before_for_bank_account($bank_account, "2012-01-01");
+      $raw_balance = -get_balance_before_for_bank_account($bank_account, "2099-01-01");
       $balance = $raw_balance*retrieve_exrate($currency,$today_sql);
 
       $pg->x[$i] = $bank_account_name;
