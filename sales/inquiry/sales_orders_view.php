@@ -229,7 +229,7 @@ if ($show_dates)
   	date_cells(_("from:"), 'OrdersAfterDate', '', null, -30);
   	date_cells(_("to:"), 'OrdersToDate', '', null, 1);
 }
-locations_list_cells(_("Location:"), 'StockLocation', true, true);
+locations_list_cells(_("Location:"), 'StockLocation', null, true, true);
 
 if($show_dates) {
 	end_row();
