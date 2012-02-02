@@ -340,4 +340,8 @@ will be equivalent to :
       ITEM-1 10
       ITEM-2 10
 
+## Installation
+The current version of `textcart` needs FA to be patched to display the `Textcart` tab. To patch it simply copy the files in the `patch` directory to their respecive location. You can do this with the following command  (from the FA directory:
+
+    cp -R ./modules/textcart/patch/ .
 
