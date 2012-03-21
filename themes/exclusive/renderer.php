@@ -250,7 +250,14 @@ include_once('xpMenu.class.php');
 			".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d WHERE trans.debtor_no=d.debtor_no
 			AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")
 			AND tran_date >= '$begin1' AND tran_date <= '$today1' GROUP by d.debtor_no ORDER BY total DESC, d.debtor_no 
-			LIMIT 10";
+			LIMIT 20";
+		$sql_total = "SELECT SUM((ov_amount + ov_discount) * rate) AS total  FROM
+			".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d WHERE trans.debtor_no=d.debtor_no
+			AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")
+			AND tran_date >= '$begin1' AND tran_date <= '$today1'";
+		$result = db_query($sql_total);
+		$my_row = db_fetch($result);
+		$total = $my_row['total'];
 		$result = db_query($sql);
 		$title = _("Top 10 customers in fiscal year");
 		br(2);
@@ -261,23 +268,30 @@ include_once('xpMenu.class.php');
 		table_header($th);
 		$k = 0; //row colour counter
 		$i = 0;
+		$threshold = $total*.20;
 		while ($myrow = db_fetch($result))
 		{
 	    	alt_table_row_color($k);
 	    	$name = $myrow["debtor_no"]." ".$myrow["name"];
     		label_cell($name);
 		    amount_cell($myrow['total']);
+		if($total > $threshold && $i<7) {
 		    $pg->x[$i] = $name; 
 		    $pg->y[$i] = $myrow['total'];
 		    $i++;
+		}
+		    $total-=$myrow['total'];
 			end_row();
 		}
+		$pg->x[$i] = 'Others';
+		$pg->y[$i] = $total;
+		$i++;
 		end_table(2);
 		$pg->title     = $title;
 		$pg->axis_x    = _("Customer");
 		$pg->axis_y    = _("Amount");
 		$pg->graphic_1 = $today;
-		$pg->type      = 2;
+		$pg->type      = 5;
 		$pg->skin      = 1;
 		$pg->built_in  = false;
 		$filename = company_path(). "/pdf_files/". uniqid("").".png";
@@ -1206,6 +1220,7 @@ if ($skip_grapic==True)
       WHERE (account = 1001 OR account = 4000)
       AND tran_date >= '".date2sql($begin)."'
       AND tran_date <= '".date2sql($end)."' 
+      AND amount < 99999
       GROUP BY  date_g
       ORDER BY date_g
       ";
