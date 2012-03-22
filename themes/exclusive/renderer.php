@@ -251,15 +251,18 @@ include_once('xpMenu.class.php');
 			AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")
 			AND tran_date >= '$begin1' AND tran_date <= '$today1' GROUP by d.debtor_no ORDER BY total DESC, d.debtor_no 
 			LIMIT 20";
-		$sql_total = "SELECT SUM((ov_amount + ov_discount) * rate) AS total  FROM
+		$sql_total = "SELECT SUM((ov_amount + ov_discount) * rate) AS total, COUNT(DISTINCT trans.debtor_no) AS customer_number  FROM
 			".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d WHERE trans.debtor_no=d.debtor_no
 			AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")
 			AND tran_date >= '$begin1' AND tran_date <= '$today1'";
 		$result = db_query($sql_total);
 		$my_row = db_fetch($result);
 		$total = $my_row['total'];
+		$totalt= $total;
+		$customer_number = $my_row['customer_number'];
+		$customer_left = $customer_number;
 		$result = db_query($sql);
-		$title = _("Top 10 customers in fiscal year");
+		$title = _("Top 20 customers in fiscal year of ".$customer_number);
 		br(2);
 		display_heading($title);
 		br();
@@ -268,23 +271,33 @@ include_once('xpMenu.class.php');
 		table_header($th);
 		$k = 0; //row colour counter
 		$i = 0;
+		$pie_number=0;
 		$threshold = $total*.20;
 		while ($myrow = db_fetch($result))
 		{
 	    	alt_table_row_color($k);
-	    	$name = $myrow["debtor_no"]." ".$myrow["name"];
+	    	//$name = $myrow["debtor_no"]." ".$myrow["name"];
+		$name = sprintf("#%02d - %s", $i+1, $myrow['name']);
     		label_cell($name);
 		    amount_cell($myrow['total']);
-		if($total > $threshold && $i<7) {
+		$totalt-=$myrow['total'];
+		if($total > $threshold && $i<10) {
 		    $pg->x[$i] = $name; 
 		    $pg->y[$i] = $myrow['total'];
-		    $i++;
-		}
 		    $total-=$myrow['total'];
+		    $customer_left--;
+		    $pie_number+=1;
+		}
+		    $i++;
 			end_row();
 		}
-		$pg->x[$i] = 'Others';
-		$pg->y[$i] = $total;
+		$other_name = sprintf('Others %d', $customer_left);
+		$pg->x[$pie_number] = $other_name;
+		$pg->y[$pie_number] = $total;
+
+		$other_name = sprintf('Others %d', $customer_number-$i);
+		label_cell($other_name);
+		amount_cell($totalt);
 		$i++;
 		end_table(2);
 		$pg->title     = $title;
