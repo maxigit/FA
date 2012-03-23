@@ -374,9 +374,9 @@ include_once('xpMenu.class.php');
 			".TB_PREF."supp_trans AS trans, ".TB_PREF."suppliers AS s WHERE trans.supplier_id=s.supplier_id
 			AND (trans.type = ".ST_SUPPINVOICE." OR trans.type = ".ST_SUPPCREDIT.")
 			AND tran_date >= '$begin1' AND tran_date <= '$today1' GROUP by s.supplier_id ORDER BY total DESC, s.supplier_id 
-			LIMIT 10";
+			LIMIT 20";
 		$result = db_query($sql);
-		$title = _("Top 10 suppliers in fiscal year");
+		$title = _("Top 20 suppliers in fiscal year");
 		br(2);
 		display_heading($title);
 		br();
@@ -471,12 +471,12 @@ include_once('xpMenu.class.php');
 		if ($manuf)
 			$sql .= "AND s.mb_flag='M' ";
 		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock ORDER BY total DESC, stock
-			LIMIT 10";
+			LIMIT 20";
 		$result = db_query($sql);
 		if ($manuf)
-			$title = _("Top 10 Manufactured Items in fiscal year");
+			$title = _("Top 20 Manufactured Items in fiscal year");
 		else	
-			$title = _("Top 10 Sold Items in fiscal year");
+			$title = _("Top 20 Sold Items in fiscal year");
 		br(2);
 		display_heading($title);
 		br();
@@ -534,12 +534,12 @@ include_once('xpMenu.class.php');
 		if ($manuf)
 			$sql .= "AND s.mb_flag='M' ";
 		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock ORDER BY total DESC, stock
-			LIMIT 10";
+			LIMIT 20";
 		$result = db_query($sql);
 		if ($manuf)
-			$title = _("Top 10 Manufactured Items in fiscal year");
+			$title = _("Top 20 Manufactured Items in fiscal year");
 		else	
-			$title = _("Top 10 Sold Items in fiscal year");
+			$title = _("Top 20 Sold Items in fiscal year");
 		br(2);
 		display_heading($title);
 		br();
@@ -597,12 +597,12 @@ include_once('xpMenu.class.php');
 		if ($manuf)
 			$sql .= "AND s.mb_flag='M' ";
 		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock ORDER BY total DESC, stock
-			LIMIT 10";
+			LIMIT 20";
 		$result = db_query($sql);
 		if ($manuf)
-			$title = _("Top 10 Manufactured Colors in fiscal year");
+			$title = _("Top 20 Manufactured Colors in fiscal year");
 		else	
-			$title = _("Top 10 Sold Colors in fiscal year");
+			$title = _("Top 20 Sold Colors in fiscal year");
 		br(2);
 		display_heading($title);
 		br();
@@ -708,9 +708,9 @@ include_once('xpMenu.class.php');
 		$sql = "SELECT SUM(-t.amount) AS total, d.reference, d.name FROM
 			".TB_PREF."gl_trans AS t,".TB_PREF."dimensions AS d WHERE
 			t.dimension".($dim_type==1 ? "" : "2")."_id = d.id AND
-			t.tran_date >= '$begin1' AND t.tran_date <= '$today1' GROUP BY d.id ORDER BY total DESC LIMIT 10";
+			t.tran_date >= '$begin1' AND t.tran_date <= '$today1' GROUP BY d.id ORDER BY total DESC LIMIT 20";
 		$result = db_query($sql, "Transactions could not be calculated");
-		$title = _("Top 10 Dimensions in fiscal year");
+		$title = _("Top 20 Dimensions in fiscal year");
 		br(2);
 		display_heading($title);
 		br();
