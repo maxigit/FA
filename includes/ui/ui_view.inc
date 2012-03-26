@@ -773,9 +773,9 @@ function price_in_words($amount, $document=0)
 	$dec = user_price_dec();
 	if ($dec > 0)
 	{
-		$divisor = pow(10, $dec);	
-		$frac = round2($amount - floor($amount), $dec) * $divisor;
-		$frac = sprintf("%0{$dec}d", $frac);
+		$divisor = pow(10, $dec);
+        $frac = round2($amount - floor($amount), $dec) * $divisor;
+		$frac = sprintf("%0{$dec}d", round2($frac, 0));
 		$and = _("and");
     	$frac = " $and $frac/$divisor";
     }
