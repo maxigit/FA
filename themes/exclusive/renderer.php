@@ -205,6 +205,7 @@ include_once('xpMenu.class.php');
         display_stock_graph();
 				display_stock_uc_topten();
 				display_color_topten();
+				display_stock_topten(false, 10, " s.stock_id like 'M_12-%'");
 				display_stock_topten();
       }
 			elseif ($selected_app->id == "manuf")
@@ -453,7 +454,7 @@ include_once('xpMenu.class.php');
 		end_table(2);
 	}
 
-	function display_stock_topten($manuf=false)
+	function display_stock_topten($manuf=false, $top=20, $filter=false)
 	{
 		global $path_to_root;
 		
@@ -468,15 +469,17 @@ include_once('xpMenu.class.php');
 			".TB_PREF."debtor_trans_details AS trans, ".TB_PREF."stock_master AS s, ".TB_PREF."debtor_trans AS d 
 			WHERE trans.stock_id=s.stock_id AND trans.debtor_trans_type=d.type AND trans.debtor_trans_no=d.trans_no
 			AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") ";
+
+		if ($filter) $sql.= " AND ($filter)";
 		if ($manuf)
 			$sql .= "AND s.mb_flag='M' ";
 		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock ORDER BY total DESC, stock
-			LIMIT 20";
+			LIMIT ".$top."";
 		$result = db_query($sql);
 		if ($manuf)
-			$title = _("Top 20 Manufactured Items in fiscal year");
+			$title = _("Top ".$top." Manufactured Items in fiscal year");
 		else	
-			$title = _("Top 20 Sold Items in fiscal year");
+			$title = _("Top ".$top." Sold Items in fiscal year");
 		br(2);
 		display_heading($title);
 		br();
@@ -530,7 +533,7 @@ include_once('xpMenu.class.php');
 			SUM(trans.quantity) AS qty FROM
 			".TB_PREF."debtor_trans_details AS trans, ".TB_PREF."stock_master AS s, ".TB_PREF."debtor_trans AS d 
 			WHERE trans.stock_id=s.stock_id AND trans.debtor_trans_type=d.type AND trans.debtor_trans_no=d.trans_no
-			AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") ";
+			AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") AND s.stock_id like 'M_12-%' ";
 		if ($manuf)
 			$sql .= "AND s.mb_flag='M' ";
 		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock ORDER BY total DESC, stock
@@ -539,7 +542,7 @@ include_once('xpMenu.class.php');
 		if ($manuf)
 			$title = _("Top 20 Manufactured Items in fiscal year");
 		else	
-			$title = _("Top 20 Sold Items in fiscal year");
+			$title = _("Top 20 Sold M_12 Items in fiscal year");
 		br(2);
 		display_heading($title);
 		br();
