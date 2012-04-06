@@ -413,6 +413,31 @@ hr {
 	color: red;
 }
 
+.on_hand_backorder {
+	background-color: #ccf;
+}
+.on_stock_borrow {
+	background-color: #ffc;
+}
+.on_hand_backorder.on_stock_borrow {
+	background-color : #cc4;
+       }	
+
+.on_stock_steal {
+	background-color: #fdc;
+}
+.on_hand_backorder.on_stock_steal {
+	background-color: #c94;
+}
+
+.on_hand_oversold {
+	background-color: #c44;
+}
+.on_hand_soldout {
+	background-color: #c00;
+}
+
+
 table.tablestyle {
 	border-collapse: collapse;
 	border: 1px solid #e1e1e1;
