@@ -24,6 +24,7 @@ class TextCartManager {
   );
 
   var $cart_mode = null;
+  var $find_count = array();
 
   function handle_post_request() {
     // Process textcart if needed
@@ -287,7 +288,11 @@ class TextCartManager {
       display_error("$stock_code qty $quantity negative quantity not allowed");
   }
 
+  // This function remember what has been found and don't find it twice.
   function find_line_number($cart, $stock_code, $quantity=null, $price=null, $discount=null,  $description=null) {
+	  $count = $this->find_count[$stock_code];
+	  $to_skip = $count+0;
+
     foreach ($cart->line_items as $line_no => $line) {
       if ($line->stock_id == $stock_code 
         //&& match_criteria($line->quantity, $quantity)
@@ -295,7 +300,15 @@ class TextCartManager {
         //&& match_criteria($line->discount_percent , $discount)
         //&& match_criteria($line->item_description, $description)
       ) {
+	      if($to_skip == 0)
+	      {
+		      $this->find_count[$stock_code] = $count+1;
           return $line_no;
+	      }
+	      else 
+	      {
+		      $to_skip -= 1;
+	      }
 
         }
     }
