@@ -232,7 +232,21 @@ class TextCartManager {
         // they are the new value
         $line_no = $this->find_line_number($cart, $stock_code);
         if (!isset($line_no)) { return; }
-        $this->update_cart_item($cart, $line_no, $stock_code, $quantity, $price, $discount, $date, $description);
+		if($quantity<0) 
+		{
+			$quantity += $this->quantity($cart, $line_no);
+			#relative update
+		}
+		$minimum_quantity = $this->unmodifiable_quantity($cart, $line_no);
+		if($quantity < $minimum_quantity)
+		{
+			display_warning("'$stock_code' has already been dispatched, use minumum quantity $minimum_quantity");
+			$quantity = $minimum_quantity;
+		}
+		if($quantity == 0)
+			$this->remove_from_cart($cart, $line_no, $stock_code);
+		else
+			$this->update_cart_item($cart, $line_no, $stock_code, $quantity, $price, $discount, $date, $description);
         break;
       case DELETE_MODE:
         $line_no = $this->find_line_number($cart, $stock_code, $quantity, $price, $discount, $description);
@@ -399,6 +413,9 @@ class TextCartManager {
 
   function unmodifiable_quantity($cart, $line_no) {
     return 0;
+  }
+  function quantity($cart, $line_no) {
+    return $cart->line_items[$line_no]->quantity;
   }
 }
 
