@@ -24,6 +24,7 @@ include_once($path_to_root . "/sales/includes/sales_db.inc");
 include_once($path_to_root . "/sales/includes/sales_ui.inc");
 include_once($path_to_root . "/reporting/includes/reporting.inc");
 include_once($path_to_root . "/taxes/tax_calc.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_manager.inc");
 
 $js = "";
 if ($use_popup_windows) {
@@ -33,6 +34,10 @@ if ($use_date_picker) {
 	$js .= get_js_date_picker();
 }
 
+// for textcart which doesn't set FreightCharges
+if (!isset($_POST['ChargeFreightCost'])) {
+	$_POST['ChargeFreightCost'] = 0;
+}
 if (isset($_GET['ModifyDelivery'])) {
 	$_SESSION['page_title'] = sprintf(_("Modifying Delivery Note # %d."), $_GET['ModifyDelivery']);
 	$help_context = "Modifying Delivery Note";
@@ -327,6 +332,11 @@ if (isset($_POST['Update']) || isset($_POST['_Location_update'])) {
 	$Ajax->activate('Items');
 }
 //------------------------------------------------------------------------------
+$textcart_mgr = new DeliverySalesTextCartManager();
+$textcart_mgr->handle_post_request();
+function display_delivery_in_tab($title, $cart) {
+  display_delivery();
+}
 start_form();
 hidden('cart_id');
 
@@ -423,9 +433,12 @@ if ($row['dissallow_invoices'] == 1)
 	end_page();
 	exit();
 }	
+function display_delivery() {
+    global $SysPrefs;
 display_heading(_("Delivery Items"));
 div_start('Items');
 start_table(TABLESTYLE, "width=80%");
+
 
 $new = $_SESSION['Items']->trans_no==0;
 $th = array(_("Item Code"), _("Item Description"), 
@@ -512,6 +525,12 @@ end_table(1);
 if ($has_marked) {
 	display_note(_("Marked items have insufficient quantities in stock as on day of delivery."), 0, 1, "class='red'");
 }
+}
+
+  $textcart_mgr->tab_display(""
+    ,$_SESSION['Items']
+    ,"display_delivery_in_tab"
+  );
 start_table(TABLESTYLE2);
 
 policy_list_row(_("Action For Balance"), "bo_policy", null);

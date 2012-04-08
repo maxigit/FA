@@ -104,6 +104,7 @@ class TextCartManager {
 ";
   var $use_price=true;
   var $use_date=false;
+  var $delete_on_zero = true;
 
   function cart_to_text($cart) {
     $text = $this->doc_text."
@@ -244,7 +245,7 @@ class TextCartManager {
 			display_warning("'$stock_code' has already been dispatched, use minumum quantity $minimum_quantity");
 			$quantity = $minimum_quantity;
 		}
-		if($quantity == 0)
+		if($quantity == 0 && $this->delete_on_zero)
 			$this->remove_from_cart($cart, $line_no, $stock_code);
 		else
 			$this->update_cart_item($cart, $line_no, $stock_code, $quantity, $price, $discount, $date, $description);
@@ -442,6 +443,41 @@ class SalesTextCartManager extends TextCartManager {
     return $cart->line_items[$line_no]->qty_done;
   }
 }
+
+class DeliverySalesTextCartManager extends SalesTextCartManager {
+	var $delete_on_zero = false;
+  function quantity($cart, $line_no) {
+    $item = $cart->line_items[$line_no];
+    return $item->quantity - $item->qty_done;
+  }
+
+  function unmodifiable_quantity($cart, $line_no) {
+    return 0;
+  }
+  function item_to_text($item, $user_price_dec) {
+      $dec = get_unit_dec($item->stock_id);
+      // dodgy format excel compatible
+      $quantity = $item->quantity - $item->qty_done;
+      if($quantity)
+      return sprintf("$item->stock_id\t+ %.${dec}f\t\$ %0.${user_price_dec}f\t%0.1f %%%s\r\n"
+        ,$item->qty_dispatched
+        ,$item->price
+        ,$item->discount_percent*100
+        ,$item->item_description ? "\t| \"$item->item_description\"" : ""
+      );
+      else
+	      return "";
+  }
+
+  function update_cart_item($cart, $line_no, $stock_code, $quantity, $price, $discount, $date, $description) {
+	  $item = $cart->line_items[$line_no];
+    if($quantity > ($item->quantity - $item->qty_done))
+      display_error("'$stock_code' can not be updated because some of it has already been dispatched or invoiced");
+    else
+	    $item->qty_dispatched = $quantity;
+  }
+} /*
+ */
 
 class POTextCartManager extends TextCartManager {
   var $cart_key = "PO";
