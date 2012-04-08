@@ -212,6 +212,9 @@ function display_order_summary($title, &$order, $editable_items=false)
 						$on_stock= "borrow";
 					}
 				}
+				else {
+					$on_stock = "dispatched";
+				}
 
 
 				// end

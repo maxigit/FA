@@ -438,6 +438,7 @@ hr {
 }
 
 
+
 table.tablestyle {
 	border-collapse: collapse;
 	border: 1px solid #e1e1e1;
@@ -738,4 +739,11 @@ div.note_msg {
 #title {
 	margin-bottom: 10px;
 	width: 100%;
+}
+.on_stock_dispatched {
+	background-color: #666;
+}
+.on_stock_dispatched * {
+	color :white;
+	background-color: #888;
 }
