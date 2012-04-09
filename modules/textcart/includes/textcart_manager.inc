@@ -1,5 +1,7 @@
 <?php
 include_once($path_to_root . "/modules/textcart/includes/utilities.inc");
+include_once($path_to_root . "/includes/manufacturing.inc");
+
 define ('INSERT_MODE', 1);
 define ('UPDATE_MODE', 2);
 define ('DELETE_MODE', 3);
@@ -454,17 +456,54 @@ class DeliverySalesTextCartManager extends SalesTextCartManager {
   function unmodifiable_quantity($cart, $line_no) {
     return 0;
   }
+
+  function get_location() {
+    return $_POST['Location'];
+  }
+  function location_list() {
+	  if(!$this->_location_list) {
+	  //
+	  // get all locations
+	  $ll = array($this->get_location());
+	  $sql = "SELECT loc_code FROM ".TB_PREF."locations WHERE !inactive";
+	  $result = db_query($sql);
+	  while($row = db_fetch($result)) {
+		  $loc = $row['loc_code'];
+		  if ($loc != $this->get_location()) $ll[]=$loc;
+	  }
+
+	  $this->_location_list = $ll;
+
+	  }
+
+	  return $this->_location_list;
+  }
+
+  function demand($stock_id) {
+	  $result = array();
+	  foreach($this->location_list() as $location) {
+		  $result[] = sprintf("%s: %d / %d", $location,  get_qoh_on_date($stock_id, $location, $this->cart->$due_date),
+			  - get_demand_qty($stock_id, $location));
+	  }
+
+	  return $result;
+  }
+
   function item_to_text($item, $user_price_dec) {
       $dec = get_unit_dec($item->stock_id);
       // dodgy format excel compatible
       $quantity = $item->quantity - $item->qty_done;
       if($quantity)
-      return sprintf("$item->stock_id\t+ %.${dec}f\t\$ %0.${user_price_dec}f\t%0.1f %%%s\r\n"
+      {
+      $demand = join(", ",$this->demand($item->stock_id));
+      return sprintf("$item->stock_id\t+ %.${dec}f\t\$ %0.${user_price_dec}f\t%0.1f %%%s -- %s\r\n"
         ,$item->qty_dispatched
         ,$item->price
         ,$item->discount_percent*100
         ,$item->item_description ? "\t| \"$item->item_description\"" : ""
+	,$demand
       );
+      }
       else
 	      return "";
   }
