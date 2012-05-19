@@ -478,12 +478,24 @@ class DeliverySalesTextCartManager extends SalesTextCartManager {
 
 	  return $this->_location_list;
   }
+  function cart_to_text($cart) {
+    $text = $this->doc_text."
+
+
+
+"; // empty line are important
+foreach($this->location_list() as $location) {
+	$text.="$location, on_demand, on_order, " ;
+}
+$text.="\n";
+    return $text.$this->cart_to_text_v($cart);
+  }
 
   function demand($stock_id) {
 	  $result = array();
 	  foreach($this->location_list() as $location) {
-		  $result[] = sprintf("%s: %d / %d", $location,  get_qoh_on_date($stock_id, $location, $this->cart->$due_date),
-			  - get_demand_qty($stock_id, $location));
+		  $result[] = sprintf("%d, %d, %d", $location,  get_qoh_on_date($stock_id, $location, $this->cart->$due_date),
+			  -get_demand_qty($stock_id, $location), get_on_porder_qty($stock_item, $location));
 	  }
 
 	  return $result;
