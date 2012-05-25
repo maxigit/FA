@@ -133,6 +133,7 @@ class email
 		$this->header .= "MIME-Version: 1.0\n";
 		$this->header .= "Content-Type: multipart/mixed;\n boundary=\"$this->boundary\"\n";
 		$this->header .= "This is a multi-part message in MIME format.\n";
+		$this->header .= "--".$this->boundary."\n";
 
         // Attachment hinzufügen
         $max = count($this->attachment);
