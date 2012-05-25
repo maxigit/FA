@@ -94,6 +94,10 @@ function print_credits()
 			}
 			else
 				$rep->title = _('CREDIT NOTE');
+
+			// MAE override filemae
+			$rep->filename = strtr("MAE-CR-" . $myrow['DebtorName'] . "-". $i. ".pdf", " ", "_");
+
 			$contacts = get_branch_contacts($branch['branch_code'], 'invoice', $branch['debtor_no'], false);
 			$rep->SetCommonData($myrow, $branch, $sales_order, $baccount, ST_CUSTCREDIT, $contacts);
 			$rep->NewPage();
