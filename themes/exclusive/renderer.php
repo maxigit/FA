@@ -247,12 +247,12 @@ include_once('xpMenu.class.php');
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
-		$sql = "SELECT SUM((ov_amount + ov_discount) * rate) AS total,d.debtor_no, d.name FROM
+		$sql = "SELECT SUM((ov_amount + ov_discount) * rate*IF(trans.type = ".ST_CUSTCREDIT.", -1, 1)) AS total,d.debtor_no, d.name FROM
 			".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d WHERE trans.debtor_no=d.debtor_no
 			AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")
 			AND tran_date >= '$begin1' AND tran_date <= '$today1' GROUP by d.debtor_no ORDER BY total DESC, d.debtor_no 
 			LIMIT 20";
-		$sql_total = "SELECT SUM((ov_amount + ov_discount) * rate) AS total, COUNT(DISTINCT trans.debtor_no) AS customer_number  FROM
+		$sql_total = "SELECT SUM((ov_amount + ov_discount) * rate*IF(trans.type = ".ST_CUSTCREDIT.", -1, 1)) AS total, COUNT(DISTINCT trans.debtor_no) AS customer_number  FROM
 			".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d WHERE trans.debtor_no=d.debtor_no
 			AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")
 			AND tran_date >= '$begin1' AND tran_date <= '$today1'";
