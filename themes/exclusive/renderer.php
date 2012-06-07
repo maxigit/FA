@@ -1021,9 +1021,12 @@ if ($skip_grapic==True)
 	function display_cash_flow($total_bank)
   {
     global $path_to_root;
-		$begin = begin_fiscalyear();
 		$today = Today();
+		$begin = add_years($today, -1);
 		$begin1 = date2sql($begin);
+		$overdue = add_days($today, -14);
+		$begin1 = date2sql($begin);
+		$overdue1 = date2sql($overdue);
 		$today1 = date2sql($today);
     $fortnight = add_days($today,14);
     $fortnight1 = date2sql($fortnight);
@@ -1047,8 +1050,6 @@ if ($skip_grapic==True)
     $rows=array(array("Bank", $total_bank));
     if (date_diff2($pvat_day,$today,"s") <=0 )
       $rows[]=array("VAT", get_vat_balance($bvat_day1, $evat_day1));
-    $rows[]=array("Overdue", get_customer_balance($begin1,$today1));
-    $rows[]=array("*  Supplier", -get_supplier_balance($begin1,$today1));
 
     if (date_diff2($pvat_day, $today, "s") > 0  && date_diff2($pvat_day ,$fortnight, "s") <= 0 )
       $rows[]=array("VAT", get_vat_balance($bvat_day1, $evat_day1));
@@ -1067,7 +1068,7 @@ if ($skip_grapic==True)
     #next months
     $d=$month;
     $d1=$month1;
-    for($j=2; $j <= 5 ; $j++)
+    for($j=2; $j <= 2 ; $j++)
     {
       $e=add_months($d,1);
       $e1= date2sql($e);
@@ -1077,6 +1078,8 @@ if ($skip_grapic==True)
       $d1=$e1;
 
     }
+    $rows[]=array("Overdue", get_customer_balance($begin1,$today1));
+    $rows[]=array("*  Supplier", -get_supplier_balance($begin1,$today1));
 
     while ($myrow = $rows[$i])
     {
