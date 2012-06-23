@@ -235,7 +235,7 @@ class TextCartManager {
         // we modifidy the first element, we can't use the attributes as criteria as 
         // they are the new value
         $line_no = $this->find_line_number($cart, $stock_code);
-        if (!isset($line_no)) { return; }
+        if (!isset($line_no)) { break; }
 		if($quantity<0) 
 		{
 			$quantity += $this->quantity($cart, $line_no);
