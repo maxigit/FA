@@ -49,11 +49,11 @@ function get_supplier_id($supplier) {
 }
 
 function get_dimension_by_name($name) {
-    if ($name = '') return 0;
+    if ($name == '') return 0;
 
-    $sql = "SELECT * FROM ".TB_PREF."dimensions WHERE name=$name";
+    $sql = "SELECT * FROM ".TB_PREF."dimensions WHERE name=\"".$name."\"";
     $result = db_query($sql, "Could not find dimension");
-    if ($db_num_rows($result) == 0) return -1;
+    if (db_num_rows($result) == 0) return -1;
     $row = db_fetch_row($result);
     if (!$row[0]) return -1;
     return $row[0];
