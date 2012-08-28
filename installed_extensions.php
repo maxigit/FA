@@ -6,7 +6,7 @@
 	FA extension system documentation.
 */
 
-$next_extension_id = 13; // unique id for next installed extension
+$next_extension_id = 28; // unique id for next installed extension
 
 $installed_extensions = array (
   0 => 
@@ -82,15 +82,6 @@ $installed_extensions = array (
     'active' => true,
     'path' => 'themes/studio',
   ),
-  10 => 
-  array (
-    'name' => 'Report Generator',
-    'package' => 'repgen',
-    'version' => '2.3.2-1',
-    'type' => 'extension',
-    'active' => true,
-    'path' => 'modules/repgen',
-  ),
   11 => 
   array (
     'name' => 'zen_import',
@@ -108,6 +99,61 @@ $installed_extensions = array (
     'type' => 'extension',
     'active' => true,
     'path' => 'modules/rep_annual_expense_breakdown',
+  ),
+  13 => 
+  array (
+    'name' => 'textcart',
+    'package' => 'textcart',
+    'version' => '2.3.9-1',
+    'type' => 'extension',
+    'active' => true,
+    'path' => 'modules/textcart',
+  ),
+  15 => 
+  array (
+    'name' => 'Report Generator',
+    'package' => 'repgen',
+    'version' => '2.3.9-2',
+    'type' => 'extension',
+    'active' => true,
+    'path' => 'modules/repgen',
+  ),
+  16 => 
+  array (
+    'name' => 'Requisitions',
+    'package' => 'requisitions',
+    'version' => '2.3.3-8',
+    'type' => 'extension',
+    'active' => true,
+    'path' => 'modules/requisitions',
+  ),
+  17 => 
+  array (
+    'name' => 'Bank Statement w/ Reconcile',
+    'package' => 'rep_statement_reconcile',
+    'version' => '2.3.3-2',
+    'type' => 'extension',
+    'active' => true,
+    'path' => 'modules/rep_statement_reconcile',
+  ),
+  24 => 
+  array (
+    'name' => 'Inventory History',
+    'package' => 'rep_inventory_history',
+    'version' => '2.3.2-1',
+    'type' => 'extension',
+    'active' => true,
+    'path' => 'modules/rep_inventory_history',
+  ),
+  27 => 
+  array (
+    'package' => 'rep_picking_list',
+    'name' => 'rep_picking_list',
+    'version' => '-',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/rep_picking_list',
+    'active' => false,
   ),
 );
 ?>

@@ -747,3 +747,8 @@ div.note_msg {
 	color :white;
 	background-color: #888;
 }
+
+.on_stocki_dispatched * {
+	color: #888;
+	//background-color: #ccc;
+}

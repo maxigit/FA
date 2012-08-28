@@ -351,11 +351,14 @@ div.tabs a:hover {
 }
 
 .stockmankobg {
-	background-color: pink;
+	background-color: red;
 }
 
 .stockmankofg {
 	color: red;
+}
+.on_stock_borrow {
+	background-color: orange;
 }
 
 table.tablestyle {

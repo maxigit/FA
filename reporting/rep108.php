@@ -117,8 +117,8 @@ function print_statements()
 			$rep->Info($params, $cols, null, $aligns);
 		}
 
-		$rep->filename = "MAE-ST-" . strtr($myrow['DebtorName'], " ", "_") ."--" . strtr(Today(), "/", "-") . ".pdf";
-		$contacts = get_customer_contacts($myrow['debtor_no'], 'invoice');
+		//$rep->filename = "MAE-ST-" . strtr(urldecode($myrow['DebtorName']), " '", "__") ."--" . strtr(Today(), "/", "-") . ".pdf";
+		$contacts = array_merge(get_customer_contacts($myrow['debtor_no'], 'invoice'), get_customer_contacts($myrow['debtor_no'], 'general'));
 		//= get_branch_contacts($branch['branch_code'], 'invoice', $branch['debtor_no']);
 		$rep->SetCommonData($myrow, null, null, $baccount, ST_STATEMENT, $contacts);
 		$rep->NewPage();

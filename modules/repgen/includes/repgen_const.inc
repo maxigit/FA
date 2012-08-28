@@ -6,7 +6,7 @@
 
 /*   REPGEN constants. For other language copy the file <language>.inc over repgen_const.inc
 */
-$_SESSION['get_text']->add_domain($_SESSION['language']->code, $path_to_root.'/modules/repgen/lang');
+$GetText->add_domain($_SESSION['language']->code, $path_to_root.'/modules/repgen/lang');
 
 // used in repgen_main
 define("CREATE",_("Create a Report")); // button create
