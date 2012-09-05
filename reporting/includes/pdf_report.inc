@@ -440,6 +440,25 @@ class FrontReport extends Cpdf
 		$this->row = $temp;
 	}
 
+	function Header22()
+	{
+		global $path_to_root, $print_as_quote,
+			$print_invoice_no, $packing_slip, $dflt_lang; // FIXME should be passed as params
+
+		$doctype = $this->formData['doctype'];
+		$header2type = true;
+
+		$this->SetLang(@$this->formData['rep_lang'] ? $this->formData['rep_lang']
+ 			: ($_SESSION["wa_current_user"]->prefs->language ? $_SESSION["wa_current_user"]->prefs->language : $dflt_lang));
+
+ 		 // leave layout files names without path to enable including
+ 		 // modified versions from company/x/reporting directory
+		include("includes/doctext.inc");
+		include("includes/header3.inc");
+
+		$this->row = $temp;
+	}
+
 	// Alternate header style which also supports a simple footer
 	function Header3()
 	{

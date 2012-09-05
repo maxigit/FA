@@ -68,7 +68,7 @@ function print_deliveries()
 			$rep = new FrontReport(_('DELIVERY'), "DeliveryNoteBulk", user_pagesize());
 		else
 			$rep = new FrontReport(_('PACKING SLIP'), "PackingSlipBulk", user_pagesize());
-		$rep->SetHeaderType('Header2');
+		$rep->SetHeaderType('Header22');
 		$rep->currency = $cur;
 		$rep->Font();
 		$rep->Info($params, $cols, null, $aligns);
