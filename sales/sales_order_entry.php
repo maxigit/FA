@@ -250,6 +250,7 @@ function copy_to_cart()
 	$cart->document_date = $_POST['OrderDate'];
 
 	$newpayment = false;
+
 	if (isset($_POST['payment']) && ($cart->payment != $_POST['payment'])) {
 		$cart->payment = $_POST['payment'];
 		$cart->payment_terms = get_payment_terms($_POST['payment']);
@@ -259,7 +260,7 @@ function copy_to_cart()
 		if ($newpayment) {
 			$cart->due_date = $cart->document_date;
 			$cart->phone = $cart->cust_ref = $cart->delivery_address = '';
-			$cart->ship_via = 1;
+			$cart->ship_via = 0;
 			$cart->deliver_to = '';
 		}
 	} else {
@@ -753,6 +754,7 @@ if ($customer_error == "") {
 } else {
 	display_error($customer_error);
 }
+
 end_form();
 end_page();
 ?>
