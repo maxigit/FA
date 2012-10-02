@@ -208,6 +208,50 @@ function passBack(value) {
 }
 
 /*
+	Normalize date format using previous input value to guess missing date elements.
+	Helps fast date input field change with only single or double numbers (for day or day-and-month fragments)
+*/
+function fix_date(date, last)
+{
+	var dat = last.split(user.datesep);
+	var cur = date.split(user.datesep);
+	var day, month, year;
+	var day1, month1, year1;
+
+// TODO: user.date as default?
+// TODO: user.datesys
+	if (date == "" || date == last) // should we return an empty date or should we return last?
+		return date;
+	if (user.datefmt == 0 || user.datefmt == 3) // set defaults
+	{
+		day = dat[1]; month = dat[0]; year = dat[2];
+		day1 = cur[1]; month1 = cur[0]; year1 = cur[2];
+	} else if (user.datefmt == 1 || user.datefmt == 4){
+		day = dat[0]; month = dat[1]; year = dat[2];
+		day1 = cur[0]; month1 = cur[1]; year1 = cur[2];
+	} else {
+		day = dat[2]; month = dat[1]; year = dat[0];
+		day1 = cur[2]; month1 = cur[1]; year1 = cur[0];
+	}	
+	if (day1 != undefined && day1 != "") // day entered
+		day = day1;
+	if (month1 != undefined && month1 != "") // month entered
+		month = month1;
+	if (year1 != undefined && year1 != "") // year entered
+		year = year1;
+	if (user.datefmt<3 && day<10) day = '0'+parseInt(day, 10);
+	if (user.datefmt<3 && month<10) month = '0'+parseInt(month, 10);
+	if (year<100) year = year<60 ? (2000+parseInt(year,10)) : (1900+parseInt(year,10));
+
+//	console.info(day,month,year)
+	if (user.datefmt == 0 || user.datefmt==3)
+		return month+user.datesep+day+user.datesep+year;
+	if (user.datefmt == 1 || user.datefmt==4)
+		return day+user.datesep+month+user.datesep+year;
+	return year+user.datesep+month+user.datesep+day;
+}
+
+/*
  Behaviour definitions
 */
 var inserts = {
