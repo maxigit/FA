@@ -906,7 +906,9 @@ include_once('xpMenu.class.php');
 
       $pg->x[$i] = $bank_account_name;
       $pg->y[$i] = $balance;
-      $total += $balance;
+      if($bank_account_name != "Cambridge Mercantile Group") {
+	      $total += $balance;
+      }
       $pg->z[$i] = $total;
       $i++;
 
