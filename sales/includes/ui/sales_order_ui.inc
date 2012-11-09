@@ -168,6 +168,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 		$qoh_msg = '';
 		if (!$editable_items || $id != $line_no)
 		{
+			// Elax: Display different colors depening of stock and orders
 			if (!$SysPrefs->allow_negative_stock() && is_inventory_item($stock_item->stock_id)) {
 							$on_hand = "";
 							$on_stock = "";
