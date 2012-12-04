@@ -12,6 +12,7 @@
 $path_to_root="..";
 $page_security = 'SA_ATTACHDOCUMENT';
 
+include_once($path_to_root . "/includes/db_pager.inc");
 include_once($path_to_root . "/includes/session.inc");
 
 include_once($path_to_root . "/includes/date_functions.inc");
@@ -97,22 +98,24 @@ if ($Mode == 'ADD_ITEM' || $Mode == 'UPDATE_ITEM')
 			fwrite($fp, $index_file);
 			fclose($fp);
 		}
+
+		$filename = basename($_FILES['filename']['name']);
+		$filesize = $_FILES['filename']['size'];
+		$filetype = $_FILES['filename']['type'];
+
 		// file name compatible with POSIX
 		// protect against directory traversal
 		if ($Mode == 'UPDATE_ITEM')
 		{
 			$unique_name = preg_replace('/[^a-zA-Z0-9.\-_]/', '', $_POST['unique_name']);
-			if ($Mode == 'UPDATE_ITEM' && file_exists($dir."/".$unique_name))
+			if ($filename && file_exists($dir."/".$unique_name))
 				unlink($dir."/".$unique_name);
 		}
 		else
 			$unique_name = uniqid('');
-		move_uploaded_file($tmpname, $dir."/".$unique_name);
 
 		//save the file
-		$filename = basename($_FILES['filename']['name']);
-		$filesize = $_FILES['filename']['size'];
-		$filetype = $_FILES['filename']['type'];
+		move_uploaded_file($tmpname, $dir."/".$unique_name);
 
 		if ($Mode == 'ADD_ITEM')
 		{
@@ -127,6 +130,8 @@ if ($Mode == 'ADD_ITEM' || $Mode == 'UPDATE_ITEM')
 			display_notification(_("Attachment has been updated.")); 
 		}
 	}
+	refresh_pager('trans_table');
+	$Ajax->activate('_page_body');
 	$Mode = 'RESET';
 }
 
@@ -164,31 +169,51 @@ function viewing_controls()
 
 }
 
+function trans_view($trans)
+{
+	return get_trans_view_str($trans["type_no"], $trans["trans_no"]);
+}
+
+function edit_link($row)
+{
+  	return button('Edit'.$row["id"], _("Edit"), _("Edit"), ICON_EDIT);
+}
+
+function view_link($row)
+{
+  	return button('view'.$row["id"], _("View"), _("View"), ICON_VIEW);
+}
+
+function download_link($row)
+{
+  	return button('download'.$row["id"], _("Download"), _("Download"), ICON_DOWN);
+}
+
+function delete_link($row)
+{
+  	return button('Delete'.$row["id"], _("Delete"), _("Delete"), ICON_DELETE);
+}
+
 function display_rows($type)
 {
-	$rows = get_attached_documents($type);
-	$th = array(_("#"), _("Description"), _("Filename"), _("Size"), _("Filetype"), _("Date Uploaded"), "", "", "", "");
-	
-	start_table(TABLESTYLE);
-	table_header($th);
-	$k = 0;
-	while ($row = db_fetch($rows))
-	{
-		alt_table_row_color($k);
-		
-		label_cell(get_trans_view_str($type, $row['trans_no']));
-		label_cell($row['description']);
-		label_cell($row['filename']);
-		label_cell($row['filesize']);
-		label_cell($row['filetype']);
-		label_cell(sql2date($row['tran_date']));
- 		edit_button_cell("Edit".$row['id'], _("Edit"));
- 		button_cell("view".$row['id'], _("View"), false, ICON_VIEW);
- 		button_cell("download".$row['id'], _("Download"), false, ICON_DOWN);
- 		delete_button_cell("Delete".$row['id'], _("Delete"));
-    	end_row();
-	}	
-	end_table(1);
+	$sql = get_sql_for_attached_documents($type);
+	$cols = array(
+		_("#") => array('fun'=>'trans_view', 'ord'=>''),
+	    _("Description") => array('name'=>'description'),
+	    _("Filename") => array('name'=>'filename'),
+	    _("Size") => array('name'=>'filesize'),
+	    _("Filetype") => array('name'=>'filetype'),
+	    _("Date Uploaded") => array('name'=>'tran_date', 'type'=>'date'),
+	    	array('insert'=>true, 'fun'=>'edit_link'),
+	    	array('insert'=>true, 'fun'=>'view_link'),
+	    	array('insert'=>true, 'fun'=>'download_link'),
+	    	array('insert'=>true, 'fun'=>'delete_link')
+	    );	
+		$table =& new_db_pager('trans_tbl', $sql, $cols);
+
+		$table->width = "60%";
+
+		display_db_pager($table);
 }
 
 //----------------------------------------------------------------------------------------
@@ -199,6 +224,7 @@ viewing_controls();
 
 display_rows($_POST['filterType']);
 
+br(2);
 
 start_table(TABLESTYLE2);
 

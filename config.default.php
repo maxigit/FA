@@ -68,10 +68,13 @@ if (!isset($path_to_root) || isset($_GET['path_to_root']) || isset($_POST['path_
 	$power_by 		= "FrontAccounting";
 	$power_url 		= "http://frontaccounting.com";
 
+	/* No check on edit conflicts. Maybe needed to be set to 1 in certains Windows Servers */
+	$no_check_edit_conflicts = 0;
+	
 	/* Do not print zero lines amount of 0.00 in Sales Documents if service item. 1 = do not */
 	$no_zero_lines_amount = 1;
 
-	/* Use icon for editkey (=true) righ of combobox. 1 = use, 0 = do not use */
+	/* Use icon for editkey (=true) right of combobox. 1 = use, 0 = do not use */
 	$use_icon_for_editkey = 0;
 
 	/* Creates automatic a default branch with contact. Value 0 do not create auto branch */
@@ -87,6 +90,8 @@ if (!isset($path_to_root) || isset($_GET['path_to_root']) || isset($_POST['path_
 	$use_date_picker = 1;
 
 	/* use Audit Trails in GL */
+	/* This variable is deprecated. Setting this to 1, will stamp the user name in the memo fields in GL */
+	/* This has been superseded with built in Audit Trail */
 	$use_audit_trail = 0;
 
 	/* $show_voiced_gl_trans = 0, setting this to 1 will show the voided gl trans */
@@ -107,6 +112,7 @@ if (!isset($path_to_root) || isset($_GET['path_to_root']) || isset($_POST['path_
  	// Wiki context help configuration
  	// If your help wiki use translated page titles uncomment next line
  	// $old_style_help = 1; // this setting is depreciated and subject to removal in next FA versions
+	$old_style_help = 0;
 	// 	locally installed wiki module
 	// $help_base_url = $path_to_root.'/modules/wiki/index.php?n='._('Help').'.';
 	// 	context help feed from frontaccounting.com
@@ -125,6 +131,7 @@ if (!isset($path_to_root) || isset($_GET['path_to_root']) || isset($_POST['path_
 	$date_system = 0;
 
 	/* email stock location if order below reorder-level */
+	/* Remember to set an email on the Location(s). */
 	$loc_notification = 0;
 
 	/* print_invoice_no. 0 = print reference number, 1 = print invoice number */
@@ -136,26 +143,28 @@ if (!isset($path_to_root) || isset($_GET['path_to_root']) || isset($_POST['path_
 	/* suppress tax rates on documents. 0 = no, 1 = yes. */
 	$suppress_tax_rates = 0;
 	
-	$dateformats 	= array("MMDDYYYY", "DDMMYYYY", "YYYYMMDD");
+	$dateformats 	= array("MMDDYYYY", "DDMMYYYY", "YYYYMMDD","MmmDDYYYY", "DDMmmYYYY", "YYYYMmmDD");
 	$dateseps 		= array("/", ".", "-", " ");
 	$thoseps 		= array(",", ".", " ");
 	$decseps 		= array(".", ",");
-	// defalt dateformats and dateseps indexes used before user login
+
+	/* default dateformats and dateseps indexes used before user login */
 	$dflt_date_fmt = 0;
 	$dflt_date_sep = 0;
 
-	$pagesizes 		= array("Letter", "A4"); // default PDF pagesize
+	/* default PDF pagesize taken from /reporting/includes/tcpdf.php */
+	$pagesizes 		= array("Letter", "A4");
 
 	/* Accounts Payable */
 	/* System check to see if quantity charged on purchase invoices exceeds the quantity received.
-	If this parameter is checked the proportion by which the purchase invoice is an overcharge
-	referred to before reporting an error */
+	   If this parameter is checked the proportion by which the purchase invoice is an overcharge
+	   referred to before reporting an error */
 
 	$check_qty_charged_vs_del_qty = true;
 
 	/* System check to see if price charged on purchase invoices exceeds the purchase order price.
-	If this parameter is checked the proportion by which the purchase invoice is an overcharge
-	referred to before reporting an error */
+	   If this parameter is checked the proportion by which the purchase invoice is an overcharge
+	   referred to before reporting an error */
 
 	$check_price_charged_vs_order_price = True;
 
@@ -179,7 +188,8 @@ if (!isset($path_to_root) || isset($_GET['path_to_root']) || isset($_POST['path_
 	$pic_height 	= 50;
 	$max_image_size = 500;
 
-	/* skin for Business Graphics, 1, 2 or 3 */
+	/* skin for Business Graphics. 1 = Office, 2 = Matrix, or 3 = Spring. 
+	   Pallete skin attributes set in reporting/includes/class.graphic.inc */
 	$graph_skin 	= 1;
 
 /*	
@@ -239,5 +249,33 @@ if (!defined('ICON_EDIT'))
  	define("ICON_SUBMIT", "ok.gif");
  	define("ICON_ESCAPE", "escape.png");	
 }
+
+/* 
+	Display a dropdown select box for choosing Company to login if false.
+	Show a blank editbox only if true where the Company NickName
+	will have to be manually entered. This is when privacy is needed.
+*/
+$text_company_selection  = false;
+
+/*  Should FA hide menu items (Applications, Modules, and Actions) from the user if they don't have access to them? 
+    0 for no       1 for yes
+*/
+
+	$hide_inaccessible_menu_items = 0;
+
+/*
+	Brute force prevention.
+	$login_delay seconds delay is required between login attempts after $login_max_attemps failed logins.
+	Set $login_delay to 0 to disable the feature (not recommended)
+*/
+$login_delay = 30;
+$login_max_attempts = 10;
+
+/*
+	Choose Exchange Rate Provider
+	Default is ECB for backwards compatibility
+*/
+$xr_providers = array("ECB", "YAHOO", "GOOGLE", "BLOOMBERG");
+$dflt_xr_provider = 0;
 
 ?>

@@ -18,7 +18,7 @@ if (!defined('TB_PREF')) {
 
 class current_user
 {
-	var $user;
+	var $user = 0;
 	var $loginname;
 	var $username;
 	var $name;
@@ -58,8 +58,8 @@ class current_user
 
 	function login($company, $loginname, $password)
 	{
-		global $security_areas, $security_groups, $security_headings, $path_to_root;
-		
+		global $security_areas, $security_groups, $security_headings, $path_to_root, $login_delay;
+
 		$this->set_company($company);
 	    $this->logged = false;
 
@@ -72,6 +72,9 @@ class current_user
 
 		if (!isset($Auth_Result))	// if not used: standard method
 			$Auth_Result = get_user_auth($loginname, md5($password));
+
+		if ($login_delay > 0)
+			write_login_filelog($loginname, $Auth_Result);
 
 		if ($Auth_Result)
 		{
@@ -159,6 +162,74 @@ class current_user
 	function can_access_page($page_level)
 	{
 		return $this->can_access($page_level);
+	}
+
+	function check_application_access($waapp)
+	{
+		if (!$this->hide_inaccessible_menu_items())
+		{
+			return true;
+		}
+
+		foreach ($waapp->modules as $module)
+		{
+			if ($this->check_module_access($module))
+			{
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
+	function check_module_access($module)
+	{
+
+		if (!$this->hide_inaccessible_menu_items())
+		{
+			return true;
+		}
+
+		if (sizeof($module->lappfunctions) > 0)
+		{
+			foreach ($module->lappfunctions as $appfunction)
+			{
+				if ($appfunction->label != "" && $this->can_access_page($appfunction->access))
+				{
+					return true;
+				}
+			}
+		}
+
+		if (sizeof($module->rappfunctions) > 0)
+		{
+			foreach ($module->rappfunctions as $appfunction)
+			{
+				if ($appfunction->label != "" && $this->can_access_page($appfunction->access))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+
+	}
+
+	function hide_inaccessible_menu_items()
+	{
+		global $hide_inaccessible_menu_items;
+
+		if (!isset($hide_inaccessible_menu_items) || $hide_inaccessible_menu_items == 0)
+		{
+			return false;
+		}
+
+		else
+		{
+			return true;
+		}
 	}
 
 	function set_db_connection($id = -1)
@@ -568,5 +639,6 @@ function company_path($comp=null)
 	return ($comp_path[0]=='.' ? $path_to_root.'/'.basename($comp_path) : $comp_path)
 			. '/'.$comp;
 }
+
 
 ?>

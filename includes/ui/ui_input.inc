@@ -623,8 +623,12 @@ function date_cells($label, $name, $title = null, $check=null, $inc_days=0,
 		}
 	}
 	if ($use_date_picker)
+	{
+		$calc_image = (file_exists("$path_to_root/themes/".user_theme()."/images/cal.gif")) ? 
+			"$path_to_root/themes/".user_theme()."/images/cal.gif" : "$path_to_root/themes/default/images/cal.gif";
 		$post_label = "<a tabindex='-1' href=\"javascript:date_picker(document.getElementsByName('$name')[0]);\">"
-		. "	<img src='$path_to_root/themes/default/images/cal.gif' width='16' height='16' border='0' alt='"._('Click Here to Pick up the date')."'></a>\n";
+		. "	<img src='$calc_image' width='16' height='16' border='0' alt='"._('Click Here to Pick up the date')."'></a>\n";
+	}	
 	else
 		$post_label = "";
 
@@ -640,8 +644,8 @@ function date_cells($label, $name, $title = null, $check=null, $inc_days=0,
 		$aspect .= ' style="color:#FF0000"';
 
 	default_focus($name);
-
-	echo "<input type=\"text\" name=\"$name\" $class $aspect size=\"10\" maxlength=\"12\" value=\"" 
+	$size = (user_date_format()>3)?11:10; 
+	echo "<input type=\"text\" name=\"$name\" class=\"$class\" $aspect size=\"$size\" maxlength=\"12\" value=\"" 
 	 . $_POST[$name]. "\""
 	 .($title ? " title='$title'": '')." > $post_label";
 	echo "</td>\n";

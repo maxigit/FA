@@ -57,11 +57,6 @@ if (isset($_POST['_DatePaid_changed'])) {
   $Ajax->activate('_ex_rate');
 }
 
-if (list_updated('supplier_id') || list_updated('bank_account')) {
-  $_SESSION['alloc']->read();
-  $_POST['memo_'] = $_POST['amount'] = '';
-  $Ajax->activate('alloc_tbl');
-}
 //----------------------------------------------------------------------------------------
 
 if (!isset($_POST['bank_account'])) { // first page call
@@ -100,9 +95,10 @@ if (isset($_GET['AddedID'])) {
 
     display_note(get_gl_view_str(ST_SUPPAYMENT, $payment_id, _("View the GL &Journal Entries for this Payment")));
 
+	hyperlink_no_params($path_to_root . "/purchasing/inquiry/supplier_allocation_inquiry.php?supplier_id=", _("Select Another &Supplier Transaction for Payment"));
 //    hyperlink_params($path_to_root . "/purchasing/allocations/supplier_allocate.php", _("&Allocate this Payment"), "trans_no=$payment_id&trans_type=22");
 
-	hyperlink_params($_SERVER['PHP_SELF'], _("Enter another supplier &payment"), "supplier_id=" . $_POST['supplier_id']);
+	hyperlink_params($_SERVER['PHP_SELF'], _("Enter Another Supplier &Payment"), "supplier_id=" . $_POST['supplier_id']);
 
 	display_footer_exit();
 }
@@ -277,6 +273,12 @@ start_form();
 	table_section(1);
 
     supplier_list_row(_("Payment To:"), 'supplier_id', null, false, true);
+
+	if (list_updated('supplier_id') || list_updated('bank_account')) {
+	  $_SESSION['alloc']->read();
+	  $_POST['memo_'] = $_POST['amount'] = '';
+	  $Ajax->activate('alloc_tbl');
+	}
 
 	set_global_supplier($_POST['supplier_id']);
 	

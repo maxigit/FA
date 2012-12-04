@@ -56,10 +56,13 @@
 				echo "<div class=tabs>";
 				foreach($applications as $app)
 				{
-					$acc = access_string($app->name);
-					echo "<a class='".($sel_app == $app->id ? 'selected' : 'menu_tab')
-						."' href='$local_path_to_root/index.php?application=".$app->id
-						."'$acc[1]>" .$acc[0] . "</a>";
+                    if ($_SESSION["wa_current_user"]->check_application_access($app))
+                    {
+						$acc = access_string($app->name);
+						echo "<a class='".($sel_app == $app->id ? 'selected' : 'menu_tab')
+							."' href='$local_path_to_root/index.php?application=".$app->id
+							."'$acc[1]>" .$acc[0] . "</a>";
+					}		
 				}
 				echo "</div>";
 
@@ -141,9 +144,13 @@
 			global $path_to_root;
 			
 			$selected_app = $waapp->get_selected_application();
+			if (!$_SESSION["wa_current_user"]->check_application_access($selected_app))
+				return;
 
 			foreach ($selected_app->modules as $module)
 			{
+        		if (!$_SESSION["wa_current_user"]->check_module_access($module))
+        			continue;
 				// image
 				echo "<tr>";
 				// values
@@ -163,7 +170,7 @@
 					{
 							echo $img.menu_link($appfunction->link, $appfunction->label)."<br>\n";
 					}
-					else 
+					elseif (!$_SESSION["wa_current_user"]->hide_inaccessible_menu_items()) 
 					{
 							echo $img.'<span class="inactive">'
 								.access_string($appfunction->label, true)
@@ -183,7 +190,7 @@
 						{
 								echo $img.menu_link($appfunction->link, $appfunction->label)."<br>\n";
 						}
-						else 
+						elseif (!$_SESSION["wa_current_user"]->hide_inaccessible_menu_items()) 
 						{
 								echo $img.'<span class="inactive">'
 									.access_string($appfunction->label, true)

@@ -19,6 +19,9 @@ function url_get_contents($url, $timeout=10)
 	// get the host name and url path
 	$parsedUrl = parse_url($url);
 
+	if (@$parsedUrl['scheme'] == 'file')
+		return file_get_contents($parsedUrl['path']);
+
 	$host = $parsedUrl['host'];
 
 	if (isset($parsedUrl['path'])) {
@@ -60,11 +63,13 @@ function url_get_contents($url, $timeout=10)
 			"Referer: http://$host\r\n\r\n");
 
 		// retrieve the response from the remote server
-		$len =0;
+		$unblocked=0;
+
 		while ($line = fread($fp, 4096)) {
 			$response .= $line;
-			if ($host=='localhost')
+			if ($host=='localhost' && !$unblocked++)
 				stream_set_blocking($fp, 0); // just after connection switch to nonblocking mode
+			usleep(10);
 		}
 		fclose( $fp );
 
@@ -83,6 +88,8 @@ function url_get_contents($url, $timeout=10)
 function url_copy($from, $to, $timeout=10)
 {
 	$f = fopen($to, 'wb');
-	fwrite($f, url_get_contents($from, $timeout));
+	if (!$f || !fwrite($f, url_get_contents($from, $timeout)))
+		return false;
 	fclose($f);
+	return true;
 }
