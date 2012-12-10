@@ -437,10 +437,10 @@ function display_delivery() {
     global $SysPrefs;
 
     if(!isset($_GET['qty'])) {
-	hyperlink_params("$path_to_root/sales/customer_delivery.php", _("Reset quantity"), "OrderNumber={$_GET['OrderNumber']}&qty=0");
+	hyperlink_params("$path_to_root/sales/customer_delivery.php", _("Set quantity to zero"), "OrderNumber={$_GET['OrderNumber']}&qty=0");
     }
     else {
-	hyperlink_params("$path_to_root/sales/customer_delivery.php", _("Normal quantity"), "OrderNumber={$_GET['OrderNumber']}");
+	hyperlink_params("$path_to_root/sales/customer_delivery.php", _("Reset quantity"), "OrderNumber={$_GET['OrderNumber']}");
     }
 
 display_heading(_("Delivery Items"));
