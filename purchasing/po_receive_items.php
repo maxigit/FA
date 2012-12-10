@@ -82,6 +82,11 @@ function display_po_receive_items()
     	    	$ln_itm->receive_qty = $qty_outstanding;
     		}
 
+		if(isset($_GET['qty'])) {
+			$ln_itm->receive_qty = $_GET['qty'];
+		}
+
+
     		$line_total = ($ln_itm->receive_qty * $ln_itm->price);
     		$total += $line_total;
 
@@ -327,6 +332,13 @@ start_form();
 
 display_grn_summary($_SESSION['PO'], true);
 display_heading(_("Items to Receive"));
+
+    if(!isset($_GET['qty'])) {
+	hyperlink_params("$path_to_root/purchasing/po_receive_items.php", _("Set quantity to zero"), "OrderNumber={$_GET['PONumber']}&qty=0");
+    }
+    else {
+	hyperlink_params("$path_to_root/purchasing/po_receive_items.php", _("Reset quantity"), "OrderNumber={$_GET['PONumber']}");
+    }
 display_po_receive_items();
 
 echo '<br>';

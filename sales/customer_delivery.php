@@ -435,6 +435,14 @@ if ($row['dissallow_invoices'] == 1)
 }	
 function display_delivery() {
     global $SysPrefs;
+
+    if(!isset($_GET['qty'])) {
+	hyperlink_params("$path_to_root/sales/customer_delivery.php", _("Set quantity to zero"), "OrderNumber={$_GET['OrderNumber']}&qty=0");
+    }
+    else {
+	hyperlink_params("$path_to_root/sales/customer_delivery.php", _("Reset quantity"), "OrderNumber={$_GET['OrderNumber']}");
+    }
+
 display_heading(_("Delivery Items"));
 div_start('Items');
 start_table(TABLESTYLE, "width=80%");
@@ -483,6 +491,9 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	label_cell($ln_itm->units);
 	qty_cell($ln_itm->qty_done, false, $dec);
 
+	if(isset($_GET['qty'])) {
+		$ln_itm->qty_dispatched = min($_GET['qty'], $ln_itm->qty_dispatched);
+	}
 	small_qty_cells(null, 'Line'.$line, qty_format($ln_itm->qty_dispatched, $ln_itm->stock_id, $dec), null, null, $dec);
 
 	$display_discount_percent = percent_format($ln_itm->discount_percent*100) . "%";
