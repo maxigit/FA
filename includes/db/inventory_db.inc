@@ -61,8 +61,9 @@ function get_quantity_booked_for_other($stock_id, $order)
 	$reference = $order->reference;
 	$order_date = $order->document_date;
 
-	$sql = "SELECT SUM(quantity - qty_sent) FROM ".TB_PREF."sales_order_details
+	$sql = "SELECT SUM((quantity - qty_sent)*order_weight) FROM ".TB_PREF."sales_order_details
 		NATURAL JOIN ".TB_PREF."sales_orders
+		JOIN ".TB_PREF."locations ON (loc_code = from_stk_loc)
 		WHERE stk_code = '$stock_id'
 		AND (ord_date < '$order_date'
 			OR (ord_date = '$order_date' AND reference < '$reference'))";
@@ -72,10 +73,10 @@ function get_quantity_booked_for_other($stock_id, $order)
 
     $myrow = db_fetch_row($result);
 
-    print $stock_id;
+    //print $stock_id;
     $result = $myrow[0];
     if(!isset($result)) $result = 0;
-    print $result;
+    //print $result;
     return $result+0;
 }
 
