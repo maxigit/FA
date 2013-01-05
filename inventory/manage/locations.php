@@ -52,7 +52,7 @@ if ($Mode=='ADD_ITEM' || $Mode=='UPDATE_ITEM')
     	{
     
     		update_item_location($selected_id, $_POST['location_name'], $_POST['delivery_address'],
-    			$_POST['phone'], $_POST['phone2'], $_POST['fax'], $_POST['email'], $_POST['contact']);	
+    			$_POST['phone'], $_POST['phone2'], $_POST['order_weight'], $_POST['stock_weight'], $_POST['fax'], $_POST['email'], $_POST['contact']);	
 			display_notification(_('Selected location has been updated'));
     	} 
     	else 
@@ -143,7 +143,7 @@ $result = get_item_locations(check_value('show_inactive'));
 
 start_form();
 start_table(TABLESTYLE);
-$th = array(_("Location Code"), _("Location Name"), _("Address"), _("Phone"), _("Secondary Phone"), "", "");
+$th = array(_("Location Code"), _("Location Name"), _("Address"), _("Phone"), _("Secondary Phone"), _("Order weight"), _("Stock wegiht"), "", "");
 inactive_control_column($th);
 table_header($th);
 $k = 0; //row colour counter
@@ -157,6 +157,8 @@ while ($myrow = db_fetch($result))
 	label_cell($myrow["delivery_address"]);
 	label_cell($myrow["phone"]);
 	label_cell($myrow["phone2"]);
+	label_cell($myrow["order_weight"]);
+	label_cell($myrow["stock_weight"]);
 	inactive_control_cell($myrow["loc_code"], $myrow["inactive"], 'locations', 'loc_code');
  	edit_button_cell("Edit".$myrow["loc_code"], _("Edit"));
  	delete_button_cell("Delete".$myrow["loc_code"], _("Delete"));
@@ -184,6 +186,8 @@ if ($selected_id != -1)
 		$_POST['contact'] = $myrow["contact"];
 		$_POST['phone'] = $myrow["phone"];
 		$_POST['phone2'] = $myrow["phone2"];
+		$_POST['order_weight'] = $myrow["order_weight"];
+		$_POST['stock_weight'] = $myrow["stock_weight"];
 		$_POST['fax'] = $myrow["fax"];
 		$_POST['email'] = $myrow["email"];
 	}
@@ -203,6 +207,8 @@ textarea_row(_("Address:"), 'delivery_address', null, 35, 5);
 
 text_row_ex(_("Telephone No:"), 'phone', 32, 30);
 text_row_ex(_("Secondary Phone Number:"), 'phone2', 32, 30);
+text_row_ex(_("Order weight:"), 'order_weight', 32, 30);
+text_row_ex(_("Stock weight:"), 'stock_weight', 32, 30);
 text_row_ex(_("Facsimile No:"), 'fax', 32, 30);
 email_row_ex(_("E-mail:"), 'email', 30);
 
