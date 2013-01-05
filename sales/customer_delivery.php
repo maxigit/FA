@@ -104,6 +104,7 @@ if (isset($_GET['OrderNumber']) && $_GET['OrderNumber'] > 0) {
 	adjust_shipping_charge($ord, $_GET['OrderNumber']);
  
 	$_SESSION['Items'] = $ord;
+	$_SESSION['OriginalOrder'] = new Cart(ST_SALESORDER, $_GET['OrderNumber'],false);
 	copy_from_cart();
 
 } elseif (isset($_GET['ModifyDelivery']) && $_GET['ModifyDelivery'] > 0) {
