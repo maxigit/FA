@@ -48,6 +48,37 @@ function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0)
     return $myrow[0];
 }
 
+/* Get quantity available for a specific order
+ * depending on its place in the order queue.
+ * It doesn't take the location into account.
+ */
+function get_quantity_booked_for_other($stock_id, $order)
+{
+	if(!isset($order)) {
+		display_error('order not set');
+
+	}
+	$reference = $order->reference;
+	$order_date = $order->document_date;
+
+	$sql = "SELECT SUM(quantity - qty_sent) FROM ".TB_PREF."sales_order_details
+		NATURAL JOIN ".TB_PREF."sales_orders
+		WHERE stk_code = '$stock_id'
+		AND (ord_date < '$order_date'
+			OR (ord_date = '$order_date' AND reference < '$reference'))";
+
+
+    $result = db_query($sql, "QOH calulcation failed");
+
+    $myrow = db_fetch_row($result);
+
+    print $stock_id;
+    $result = $myrow[0];
+    if(!isset($result)) $result = 0;
+    print $result;
+    return $result+0;
+}
+
 //--------------------------------------------------------------------------------------
 
 function get_item_edit_info($stock_id)

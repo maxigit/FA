@@ -104,6 +104,7 @@ if (isset($_GET['OrderNumber']) && $_GET['OrderNumber'] > 0) {
 	adjust_shipping_charge($ord, $_GET['OrderNumber']);
  
 	$_SESSION['Items'] = $ord;
+	$_SESSION['OriginalOrder'] = new Cart(ST_SALESORDER, $_GET['OrderNumber'],false);
 	copy_from_cart();
 
 } elseif (isset($_GET['ModifyDelivery']) && $_GET['ModifyDelivery'] > 0) {
@@ -463,19 +464,22 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	}
 	// if it's a non-stock item (eg. service) don't show qoh
 	$show_qoh = true;
-	if ($SysPrefs->allow_negative_stock() || !has_stock_holding($ln_itm->mb_flag) ||
+	if (/*$SysPrefs->allow_negative_stock()||*/  !has_stock_holding($ln_itm->mb_flag) ||
 		$ln_itm->qty_dispatched == 0) {
 		$show_qoh = false;
 	}
 
 	if ($show_qoh) {
 		$qoh = get_qoh_on_date($ln_itm->stock_id, $_POST['Location'], $_POST['DispatchDate']);
+		$qbooked = get_quantity_booked_for_other($ln_itm->stock_id, $_SESSION['OriginalOrder']);
+		$qoh = max(0+$qoh-$qbooked, 0);
 	}
 
 	if ($show_qoh && ($ln_itm->qty_dispatched > $qoh)) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='stockmankobg'");
 		$has_marked = true;
+		$ln_itm->qty_dispatched = $qoh;
 	} else {
 		alt_table_row_color($k);
 	}
