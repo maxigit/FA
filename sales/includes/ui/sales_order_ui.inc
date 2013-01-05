@@ -179,7 +179,9 @@ function display_order_summary($title, &$order, $editable_items=false)
 					$qoh = get_qoh_on_date($stock_item->stock_id, 
 						$_POST['Location'], $_POST['delivery_date']);
 					$qoh_all = get_qoh_on_date($stock_item->stock_id) + get_on_porder_qty($stock_item->stock_id);
-					$total_demand = get_demand_qty($stock_item->stock_id) - $quantity_on_database;
+					//$total_demand = get_demand_qty($stock_item->stock_id) - $quantity_on_database;
+					$total_demand = get_quantity_booked_for_other($stock_item->stock_id, $order);
+					//print "total $total_demand, qoh_all $qoh_all";
 
 					// begin
 					//  on hand ? 

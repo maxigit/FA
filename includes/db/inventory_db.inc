@@ -11,23 +11,25 @@
 ***********************************************************************/
 function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0)
 {
+        $sql = "SELECT SUM(qty) FROM ".TB_PREF."stock_moves NATURAL JOIN ".TB_PREF."locations";
+
     if ($date_ == null)
     {
-        $sql = "SELECT SUM(qty) FROM ".TB_PREF."stock_moves
-            WHERE stock_id=".db_escape($stock_id);
+	    $sql.= " WHERE stock_id=".db_escape($stock_id);
         $date_ = Today();
         $date = date2sql($date_);
     }
     else
     {
         $date = date2sql($date_);
-        $sql = "SELECT SUM(qty) FROM ".TB_PREF."stock_moves
-            WHERE stock_id=".db_escape($stock_id)."
+	$sql .= " WHERE stock_id=".db_escape($stock_id)."
             AND tran_date <= '$date'"; 
     }
         
     if ($location != null)
         $sql .= " AND loc_code = ".db_escape($location);
+    else // All location, we exclude location with 0 stock  weight
+        $sql .= " AND stock_weight > 0 ";
 
     $result = db_query($sql, "QOH calulcation failed");
 
