@@ -472,7 +472,7 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	if ($show_qoh) {
 		$qoh = get_qoh_on_date($ln_itm->stock_id, $_POST['Location'], $_POST['DispatchDate']);
 		$qbooked = get_quantity_booked_for_other($ln_itm->stock_id, $_SESSION['OriginalOrder']);
-		$qoh = max(0+$qoh-$qbooked, 0);
+		$qavailable = max(0+$qoh-$qbooked, 0);
 	}
 
 	if ($show_qoh && ($ln_itm->qty_dispatched > $qoh)) {
@@ -480,6 +480,11 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 		start_row("class='stockmankobg'");
 		$has_marked = true;
 		$ln_itm->qty_dispatched = $qoh;
+	} else if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable)) {
+		// oops, we don't have enough of one of the component items
+		start_row("class='limited'");
+		$has_marked = true;
+		$ln_itm->qty_dispatched = $qavailable;
 	} else {
 		alt_table_row_color($k);
 	}
