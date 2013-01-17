@@ -419,7 +419,7 @@ hr {
 .on_stock_borrow {
 	background-color: #ffc;
 }
-.on_hand_backorder.on_stock_borrow {
+.on_hand_backorder.on_stock_borrow, .limited {
 	background-color : #cc4;
        }	
 
