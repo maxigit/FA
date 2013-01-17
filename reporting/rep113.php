@@ -42,9 +42,11 @@ function print_credits()
 	$email = $_POST['PARAM_3'];
 	$paylink = $_POST['PARAM_4'];
 	$comments = $_POST['PARAM_5'];
+	$orientation = $_POST['PARAM_6'];
 
 	if (!$from || !$to) return;
 
+	$orientation = ($orientation ? 'L' : 'P');
 	$dec = user_price_dec();
 
  	$fno = explode("-", $from);
@@ -62,13 +64,9 @@ function print_credits()
 	$cur = get_company_Pref('curr_default');
 
 	if ($email == 0)
-	{
-		$rep = new FrontReport(_('CREDIT NOTE'), "InvoiceBulk", user_pagesize());
-		$rep->SetHeaderType('Header2');
-		$rep->currency = $cur;
-		$rep->Font();
-		$rep->Info($params, $cols, null, $aligns);
-	}
+		$rep = new FrontReport(_('CREDIT NOTE'), "InvoiceBulk", user_pagesize(), 9, $orientation);
+    if ($orientation == 'L')
+    	recalculate_cols($cols);
 
 	for ($i = $from; $i <= $to; $i++)
 	{
@@ -84,38 +82,39 @@ function print_credits()
 			$sales_order = null;
 			if ($email == 1)
 			{
-				$rep = new FrontReport("", "", user_pagesize());
-			    $rep->SetHeaderType('Header2');
-				$rep->currency = $cur;
-				$rep->Font();
+				$rep = new FrontReport("", "", user_pagesize(), 9, $orientation);
 				$rep->title = _('CREDIT NOTE');
 				$rep->filename = "CreditNote" . $myrow['reference'] . ".pdf";
-				$rep->Info($params, $cols, null, $aligns);
 			}
 			else
 				$rep->title = _('CREDIT NOTE');
-		$rep->filename = strtr("MAE-CR-" . $myrow['DebtorName'] . "-". $i. ".pdf", " ", "_");
+			$rep->filename = strtr("MAE-CR-" . $myrow['DebtorName'] . "-". $i. ".pdf", " ", "_");
+			$rep->SetHeaderType('Header2');
+			$rep->currency = $cur;
+			$rep->Font();
+			$rep->Info($params, $cols, null, $aligns);
+
 			$contacts = get_branch_contacts($branch['branch_code'], 'invoice', $branch['debtor_no'], false);
 			$rep->SetCommonData($myrow, $branch, $sales_order, $baccount, ST_CUSTCREDIT, $contacts);
 			$rep->NewPage();
 
-   			$result = get_customer_trans_details(ST_CUSTCREDIT, $i);
+			$result = get_customer_trans_details(ST_CUSTCREDIT, $i);
 			$SubTotal = 0;
 			while ($myrow2=db_fetch($result))
 			{
 				if ($myrow2["quantity"] == 0)
 					continue;
-					
+
 				$Net = round2($sign * ((1 - $myrow2["discount_percent"]) * $myrow2["unit_price"] * $myrow2["quantity"]),
-				   user_price_dec());
+					user_price_dec());
 				$SubTotal += $Net;
-	    		$DisplayPrice = number_format2($myrow2["unit_price"],$dec);
-	    		$DisplayQty = number_format2($sign*$myrow2["quantity"],get_qty_dec($myrow2['stock_id']));
-	    		$DisplayNet = number_format2($Net,$dec);
-	    		if ($myrow2["discount_percent"]==0)
-		  			$DisplayDiscount ="";
-	    		else
-		  			$DisplayDiscount = number_format2($myrow2["discount_percent"]*100,user_percent_dec()) . "%";
+				$DisplayPrice = number_format2($myrow2["unit_price"],$dec);
+				$DisplayQty = number_format2($sign*$myrow2["quantity"],get_qty_dec($myrow2['stock_id']));
+				$DisplayNet = number_format2($Net,$dec);
+				if ($myrow2["discount_percent"]==0)
+					$DisplayDiscount ="";
+				else
+					$DisplayDiscount = number_format2($myrow2["discount_percent"]*100,user_percent_dec()) . "%";
 				$rep->TextCol(0, 1,	$myrow2['stock_id'], -2);
 				$oldrow = $rep->row;
 				$rep->TextColLines(1, 2, $myrow2['StockDescription'], -2);
@@ -139,10 +138,10 @@ function print_credits()
 				$rep->TextColLines(1, 5, $memo, -2);
 			}
 
-   			$DisplaySubTot = number_format2($SubTotal,$dec);
-   			$DisplayFreight = number_format2($sign*$myrow["ov_freight"],$dec);
+			$DisplaySubTot = number_format2($SubTotal,$dec);
+			$DisplayFreight = number_format2($sign*$myrow["ov_freight"],$dec);
 
-    		$rep->row = $rep->bottomMargin + (15 * $rep->lineHeight);
+			$rep->row = $rep->bottomMargin + (15 * $rep->lineHeight);
 			$doctype = ST_CUSTCREDIT;
 
 			$rep->TextCol(3, 6, _("Sub-total"), -2);
@@ -153,42 +152,42 @@ function print_credits()
 			$rep->NewLine();
 			$tax_items = get_trans_tax_details(ST_CUSTCREDIT, $i);
 			$first = true;
-    		while ($tax_item = db_fetch($tax_items))
-    		{
-    			if ($tax_item['amount'] == 0)
-    				continue;
-    			$DisplayTax = number_format2($sign*$tax_item['amount'], $dec);
-    			
-    			if (isset($suppress_tax_rates) && $suppress_tax_rates == 1)
-    				$tax_type_name = $tax_item['tax_type_name'];
-    			else
-    				$tax_type_name = $tax_item['tax_type_name']." (".$tax_item['rate']."%) ";
+			while ($tax_item = db_fetch($tax_items))
+			{
+				if ($tax_item['amount'] == 0)
+					continue;
+				$DisplayTax = number_format2($sign*$tax_item['amount'], $dec);
 
-    			if ($tax_item['included_in_price'])
-    			{
-    				if (isset($alternative_tax_include_on_docs) && $alternative_tax_include_on_docs == 1)
-    				{
-    					if ($first)
-    					{
+				if (isset($suppress_tax_rates) && $suppress_tax_rates == 1)
+					$tax_type_name = $tax_item['tax_type_name'];
+				else
+					$tax_type_name = $tax_item['tax_type_name']." (".$tax_item['rate']."%) ";
+
+				if ($tax_item['included_in_price'])
+				{
+					if (isset($alternative_tax_include_on_docs) && $alternative_tax_include_on_docs == 1)
+					{
+						if ($first)
+						{
 							$rep->TextCol(3, 6, _("Total Tax Excluded"), -2);
 							$rep->TextCol(6, 7,	number_format2($sign*$tax_item['net_amount'], $dec), -2);
 							$rep->NewLine();
-    					}
+						}
 						$rep->TextCol(3, 6, $tax_type_name, -2);
 						$rep->TextCol(6, 7,	$DisplayTax, -2);
 						$first = false;
-    				}
-    				else
+					}
+					else
 						$rep->TextCol(3, 7, _("Included") . " " . $tax_type_name . _("Amount") . ": " . $DisplayTax, -2);
 				}
-    			else
-    			{
+				else
+				{
 					$rep->TextCol(3, 6, $tax_type_name, -2);
 					$rep->TextCol(6, 7,	$DisplayTax, -2);
 				}
 				$rep->NewLine();
-    		}
-    		$rep->NewLine();
+			}
+			$rep->NewLine();
 			$DisplayTotal = number_format2($sign*($myrow["ov_freight"] + $myrow["ov_gst"] +
 				$myrow["ov_amount"]+$myrow["ov_freight_tax"]),$dec);
 			$rep->Font('bold');
