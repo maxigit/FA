@@ -12,7 +12,7 @@
 //-----------------------------------------------------------------------------
 // insert/update sales delivery
 //
-function write_sales_delivery(&$delivery,$bo_policy)
+function write_sales_delivery(&$delivery,$bo_policy, $bo_location)
 {
 	global $Refs;
 
@@ -57,6 +57,15 @@ function write_sales_delivery(&$delivery,$bo_policy)
 		delete_comments(ST_CUSTDELIVERY, $delivery_no);
 	}
 
+	# Update the locaation
+	if(isset($bo_location)) {
+		$sql = "UPDATE ".TB_PREF."sales_orders
+			SET from_stk_loc = '".$bo_location."'
+			WHERE order_no = ".$delivery->order_no." AND
+			trans_type = ".ST_SALESORDER;
+
+		db_query($sql, "can't update location");
+	}
 	foreach ($delivery->line_items as $line_no => $delivery_line) {
 
 		$line_price = $delivery_line->line_price();
