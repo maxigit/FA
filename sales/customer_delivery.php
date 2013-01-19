@@ -308,11 +308,12 @@ if (isset($_POST['process_delivery']) && check_data() && check_qoh()) {
 	} else {
 		$bo_policy = 1;
 	}
+
 	$newdelivery = ($dn->trans_no == 0);
 
 	copy_to_cart();
 	if ($newdelivery) new_doc_date($dn->document_date);
-	$delivery_no = $dn->write($bo_policy);
+	$delivery_no = $dn->write($bo_policy, $_POST['bo_location']);
 	if ($delivery_no == -1)
 	{
 		display_error(_("The entered reference is already in use."));
@@ -558,6 +559,8 @@ $textcart_mgr->tab_display(""
 start_table(TABLESTYLE2);
 
 policy_list_row(_("Action For Balance"), "bo_policy", null);
+label_cell(_("Move Order to"), "class='label'");
+locations_list_cells(null, 'bo_location', 'BACK', false, true);
 
 textarea_row(_("Memo"), 'Comments', null, 50, 4);
 

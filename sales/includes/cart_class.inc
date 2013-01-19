@@ -241,7 +241,7 @@ class cart
 	// Writing new/modified sales document to database.
 	// Makes parent documents for direct delivery/invoice by recurent call.
 	// $policy - 0 or 1:  writeoff/return for IV, back order/cancel for DN
-	function write($policy=0) { 
+	function write($policy=0, $bo_location=null) { 
 		begin_transaction(); // prevents partial database changes in case of direct delivery/invoice
 		if ($this->reference != 'auto' && $this->trans_no == 0 && !is_new_reference($this->reference, $this->trans_type))
 		{
@@ -280,7 +280,7 @@ class cart
 			case ST_CUSTCREDIT:
 				$ret = write_credit_note($this, $policy); break;
 			case ST_CUSTDELIVERY:
-				$ret = write_sales_delivery($this, $policy); break;
+				$ret = write_sales_delivery($this, $policy, $bo_location); break;
 			case ST_SALESORDER:
 			case ST_SALESQUOTE:
 				if ($this->trans_no==0)	// new document
