@@ -479,12 +479,16 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='stockmankobg'");
 		$has_marked = true;
-		$ln_itm->qty_dispatched = $qoh;
+		if(!isset($_GET['qty'])) {
+			$ln_itm->qty_dispatched = $qoh;
+		}
 	} else if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable)) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='limited'");
 		$has_marked = true;
-		$ln_itm->qty_dispatched = $qavailable;
+		if(!isset($_GET['qty'])) {
+			$ln_itm->qty_dispatched = $qavailable;
+		}
 	} else {
 		alt_table_row_color($k);
 	}
@@ -547,10 +551,10 @@ if ($has_marked) {
 }
 }
 
-  $textcart_mgr->tab_display(""
-    ,$_SESSION['Items']
-    ,"display_delivery_in_tab"
-  );
+$textcart_mgr->tab_display(""
+	,$_SESSION['Items']
+	,"display_delivery_in_tab"
+);
 start_table(TABLESTYLE2);
 
 policy_list_row(_("Action For Balance"), "bo_policy", null);
@@ -560,9 +564,9 @@ textarea_row(_("Memo"), 'Comments', null, 50, 4);
 end_table(1);
 div_end();
 submit_center_first('Update', _("Update"),
-  _('Refresh document page'), true);
+	_('Refresh document page'), true);
 submit_center_last('process_delivery', _("Process Dispatch"),
-  _('Check entered data and save document'), 'default');
+	_('Check entered data and save document'), 'default');
 
 end_form();
 
