@@ -17,7 +17,7 @@
 \--------------------------------------------------*/
 
 body {
-  background-color: #eee;
+  background-color: #0ec;
   background-image: url(images/body_bg.png);
   background-repeat: repeat-x;
   margin: 0;
@@ -69,7 +69,7 @@ input.small {
 }
 
 a, a:active {
-  	color: #045c97;
+  	color: #094;
 	text-decoration: none;
 }
 a:hover, a:focus {
@@ -77,7 +77,7 @@ a:hover, a:focus {
 	text-decoration: underline;
 }
 a:visited {
-  	color: #045c97;
+  	color: #094;
 	text-decoration: none;
 }
 .clear {
@@ -151,7 +151,7 @@ a:visited {
 /* Body */
 .fa-body {
   width: 100%;
-  background-color: #fff;
+  background-color: #efe;
   background-image: url(images/content_bg.png);
   background-repeat: repeat-x;
   float: left;
@@ -309,7 +309,7 @@ hr {
 
 .tableheader {
 	font-weight: bold;
-	background-color: #7895ac;
+	background-color: #094;
 	color: #fff;
 	text-align: center;
 }
