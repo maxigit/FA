@@ -1,6 +1,6 @@
 .PHONY: dumps/fa/db.sql output/restore_db.log
 
-dumps/fa/db.sql
+dumps/fa/db.sql:
 	mysqldump -ufa_test -p --add-drop-table  --dump-date --opt --skip-extended-insert fa_test > $@
 
 dump: dumps/fa/db.sql
