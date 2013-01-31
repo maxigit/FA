@@ -205,7 +205,7 @@ include_once('xpMenu.class.php');
         display_stock_graph();
 				display_stock_uc_topten();
 				display_color_topten();
-				display_stock_topten(false, 10, " s.stock_id like 'M_12-%'");
+				display_stock_topten(false, 10, " s.stock_id like 'M___-%'");
 				display_stock_topten();
       }
 			elseif ($selected_app->id == "manuf")
@@ -533,7 +533,7 @@ include_once('xpMenu.class.php');
 			SUM(trans.quantity) AS qty FROM
 			".TB_PREF."debtor_trans_details AS trans, ".TB_PREF."stock_master AS s, ".TB_PREF."debtor_trans AS d 
 			WHERE trans.stock_id=s.stock_id AND trans.debtor_trans_type=d.type AND trans.debtor_trans_no=d.trans_no
-			AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") AND s.stock_id like 'M_12-%' ";
+			AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") AND s.stock_id like 'M___-%' ";
 		if ($manuf)
 			$sql .= "AND s.mb_flag='M' ";
 		$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock ORDER BY total DESC, stock
