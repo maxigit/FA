@@ -236,6 +236,12 @@ include_once('xpMenu.class.php');
 			}	
 		}
 	}
+		function begin_date() {
+			$date = Today();
+    list($day, $month, $year) = explode_date_to_dmy($date);
+   	return __date($year, 1, 1);
+			return begin_fiscalyear();
+		};
 	
 	function display_customer_topten()
 	{
@@ -243,7 +249,7 @@ include_once('xpMenu.class.php');
 		
 		$pg = new graph();
 
-		$begin = begin_fiscalyear();
+		$begin = begin_date();
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
@@ -367,7 +373,7 @@ include_once('xpMenu.class.php');
 		
 		$pg = new graph();
 
-		$begin = begin_fiscalyear();
+		$begin = begin_date();
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
@@ -460,7 +466,7 @@ include_once('xpMenu.class.php');
 		
 		$pg = new graph();
 
-		$begin = begin_fiscalyear();
+		$begin = begin_date();
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
@@ -525,7 +531,7 @@ include_once('xpMenu.class.php');
 		
 		$pg = new graph();
 
-		$begin = begin_fiscalyear();
+		$begin = begin_date();
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
@@ -588,7 +594,7 @@ include_once('xpMenu.class.php');
 		
 		$pg = new graph();
 
-		$begin = begin_fiscalyear();
+		$begin = begin_date();
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
@@ -650,7 +656,7 @@ include_once('xpMenu.class.php');
 		
 		$pg = new graph();
 
-		$begin = begin_fiscalyear();
+		$begin = begin_date();
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
@@ -704,7 +710,7 @@ include_once('xpMenu.class.php');
 		
 		$pg = new graph();
 
-		$begin = begin_fiscalyear();
+		$begin = begin_date();
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
@@ -758,7 +764,7 @@ include_once('xpMenu.class.php');
 		
 		$pg = new graph();
 
-		$begin = begin_fiscalyear();
+		$begin = begin_date();
 		$today = Today();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
@@ -1146,7 +1152,7 @@ if ($skip_grapic==True)
 
  function get_initial_stock($date)
 	{
-		$begin = begin_fiscalyear();
+		$begin = begin_date();
 
     $sql = "SELECT sum(amount)
       FROM ".TB_PREF."gl_trans
