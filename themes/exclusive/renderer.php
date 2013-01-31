@@ -237,10 +237,13 @@ include_once('xpMenu.class.php');
 		}
 	}
 		function begin_date() {
-			$date = Today();
+			$date = end_fiscalyear();
     list($day, $month, $year) = explode_date_to_dmy($date);
    	return __date($year, 1, 1);
 			return begin_fiscalyear();
+		};
+		function end_date() {
+			return Today();
 		};
 	
 	function display_customer_topten()
@@ -250,7 +253,7 @@ include_once('xpMenu.class.php');
 		$pg = new graph();
 
 		$begin = begin_date();
-		$today = Today();
+		$today = end_date();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
 		$sql = "SELECT SUM((ov_amount + ov_discount) * rate*IF(trans.type = ".ST_CUSTCREDIT.", -1, 1)) AS total,d.debtor_no, d.name FROM
@@ -324,7 +327,7 @@ include_once('xpMenu.class.php');
 		end_row();
 		end_table(1);
 		
-		$today = date2sql(Today());
+		$today = date2sql(end_date());
 		$sql = "SELECT trans.trans_no, trans.reference,	trans.tran_date, trans.due_date, debtor.debtor_no, 
 			debtor.name, branch.br_name, debtor.curr_code,
 			(trans.ov_amount + trans.ov_gst + trans.ov_freight 
@@ -374,7 +377,7 @@ include_once('xpMenu.class.php');
 		$pg = new graph();
 
 		$begin = begin_date();
-		$today = Today();
+		$today = end_date();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
 		$sql = "SELECT SUM((trans.ov_amount + trans.ov_discount) * rate) AS total, s.supplier_id, s.supp_name FROM
@@ -421,7 +424,7 @@ include_once('xpMenu.class.php');
 		end_row();
 		end_table(1);
 		
-		$today = date2sql(Today());
+		$today = date2sql(end_date());
 		$sql = "SELECT trans.trans_no, trans.reference, trans.tran_date, trans.due_date, s.supplier_id, 
 			s.supp_name, s.curr_code,
 			(trans.ov_amount + trans.ov_gst + trans.ov_discount) AS total,  
@@ -467,7 +470,7 @@ include_once('xpMenu.class.php');
 		$pg = new graph();
 
 		$begin = begin_date();
-		$today = Today();
+		$today = end_date();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
 		$sql = "SELECT SUM((trans.unit_price * trans.quantity) * d.rate) AS total, s.stock_id as stock, s.description, 
@@ -532,7 +535,7 @@ include_once('xpMenu.class.php');
 		$pg = new graph();
 
 		$begin = begin_date();
-		$today = Today();
+		$today = end_date();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
 		$sql = "SELECT SUM((trans.unit_price * trans.quantity) * d.rate) AS total, LEFT(s.stock_id,8) as stock, s.description, 
@@ -595,7 +598,7 @@ include_once('xpMenu.class.php');
 		$pg = new graph();
 
 		$begin = begin_date();
-		$today = Today();
+		$today = end_date();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
 		$sql = "SELECT SUM((trans.unit_price * trans.quantity) * d.rate) AS total, SUBSTRING(s.stock_id,10,4) as stock, s.description, 
@@ -657,7 +660,7 @@ include_once('xpMenu.class.php');
 		$pg = new graph();
 
 		$begin = begin_date();
-		$today = Today();
+		$today = end_date();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
     $sql = "SELECT SUM(qty) AS qty, SUM(qty*standard_cost) cost, stock_id
@@ -711,7 +714,7 @@ include_once('xpMenu.class.php');
 		$pg = new graph();
 
 		$begin = begin_date();
-		$today = Today();
+		$today = end_date();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
 		$sql = "SELECT SUM(-t.amount) AS total, d.reference, d.name FROM
@@ -765,7 +768,7 @@ include_once('xpMenu.class.php');
 		$pg = new graph();
 
 		$begin = begin_date();
-		$today = Today();
+		$today = end_date();
 		$begin1 = date2sql($begin);
 		$today1 = date2sql($today);
 		$sql = "SELECT SUM(amount) AS total, c.class_name, c.ctype FROM
@@ -884,7 +887,7 @@ include_once('xpMenu.class.php');
 	function display_bank_info()
   {
     global $path_to_root;
-    $today = Today();
+    $today = end_date();
     $today_sql = date2sql($today);
 
     # find list of bank and current balance
@@ -954,7 +957,7 @@ include_once('xpMenu.class.php');
   function display_loan_info($total,$skip_graphic)
   {
     global $path_to_root;
-    $today = Today();
+    $today = end_date();
     $today_sql = date2sql($today);
 
     $pg = new graph();
@@ -1029,7 +1032,7 @@ if ($skip_grapic==True)
 	function display_cash_flow($total_bank)
   {
     global $path_to_root;
-		$today = Today();
+		$today = end_date();
 		$begin = add_years($today, -1);
 		$begin1 = date2sql($begin);
 		$overdue = add_days($today, -14);
@@ -1138,7 +1141,7 @@ if ($skip_grapic==True)
 
   function get_tax_date($start=true)
   {
-    $date = Today();
+    $date = end_date();
     $row = get_company_prefs();
     $edate = add_months($date, -$row['tax_last']);
     $edate = end_month($edate);
@@ -1168,7 +1171,7 @@ if ($skip_grapic==True)
 
  function display_stock_graph()
 	{
-    $end = Today();
+    $end = end_date();
 
     $date_format = "DATE_FORMAT(tran_date, '%y-%m')";
     $begin = add_years($end,-1);
@@ -1235,7 +1238,7 @@ if ($skip_grapic==True)
  function display_sales_graph()
 	{
     $title = "Sales/Week";
-    $end = Today();
+    $end = end_date();
     $begin = add_months($end,-3);
 
     $date_format = "DATE_FORMAT(tran_date, '%u')";
@@ -1294,7 +1297,7 @@ if ($skip_grapic==True)
  function display_account_graph($month)
 	{
     $title = "Sales/Week";
-    $end = Today();
+    $end = end_date();
 
     $date_format = "DATE_FORMAT(tran_date, '%u-%b')";
     if ($month)
