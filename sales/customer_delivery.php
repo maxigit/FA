@@ -329,7 +329,7 @@ if (isset($_POST['process_delivery']) && check_data() && check_qoh()) {
 	}	
 }
 
-if (isset($_POST['Update']) || isset($_POST['_Location_update'])) {
+if (isset($_POST['Update']) || isset($_POST['_Location_update']) || isset($_POST['qty'])) {
 	$Ajax->activate('Items');
 }
 //------------------------------------------------------------------------------
@@ -437,13 +437,6 @@ if ($row['dissallow_invoices'] == 1)
 function display_delivery() {
     global $SysPrefs;
 
-    if(!isset($_GET['qty'])) {
-	hyperlink_params("$path_to_root/sales/customer_delivery.php", _("Set quantity to zero"), "OrderNumber={$_GET['OrderNumber']}&qty=0");
-    }
-    else {
-	hyperlink_params("$path_to_root/sales/customer_delivery.php", _("Reset quantity"), "OrderNumber={$_GET['OrderNumber']}");
-    }
-
 display_heading(_("Delivery Items"));
 div_start('Items');
 start_table(TABLESTYLE, "width=80%");
@@ -462,10 +455,9 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	if ($ln_itm->quantity==$ln_itm->qty_done) {
 		continue; //this line is fully delivered
 	}
-	if(isset($_POST['_Location_update'])) {
+	if(isset($_POST['_Location_update']) || isset($_POST['clear_quantity']) || isset($_POST['reset_quantity'])) {
 		// reset quantity
 		$ln_itm->qty_dispatched = $ln_itm->quantity-$ln_itm->qty_done;
-		$_POST['Line'.$line]=null; /// clear post so value displayed in the fiel is the 'new' quantity
 	}
 	// if it's a non-stock item (eg. service) don't show qoh
 	$show_qoh = true;
@@ -484,16 +476,12 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='stockmankobg'");
 		$has_marked = true;
-		if(!isset($_GET['qty'])) {
 			$ln_itm->qty_dispatched = $qoh;
-		}
 	} else if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable)) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='limited'");
 		$has_marked = true;
-		if(!isset($_GET['qty'])) {
 			$ln_itm->qty_dispatched = $qavailable;
-		}
 	} else {
 		alt_table_row_color($k);
 	}
@@ -509,9 +497,10 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	label_cell($ln_itm->units);
 	qty_cell($ln_itm->qty_done, false, $dec);
 
-	if(isset($_GET['qty'])) {
-		$ln_itm->qty_dispatched = min($_GET['qty'], $ln_itm->qty_dispatched);
+	if(isset($_POST['clear_quantity'])) {
+		$ln_itm->qty_dispatched = 0;
 	}
+	$_POST['Line'.$line]=$ln_itm->qty_dispatched; /// clear post so value displayed in the fiel is the 'new' quantity
 	small_qty_cells(null, 'Line'.$line, qty_format($ln_itm->qty_dispatched, $ln_itm->stock_id, $dec), null, null, $dec);
 
 	$display_discount_percent = percent_format($ln_itm->discount_percent*100) . "%";
@@ -568,6 +557,14 @@ textarea_row(_("Memo"), 'Comments', null, 50, 4);
 
 end_table(1);
 div_end();
+if($_POST['clear_quantity']) {
+	submit_center('reset_quantity', 'Reset quantity',
+		_('Refresh document page'), true);
+}
+else  {
+	submit_center('clear_quantity', 'Clear quantity',
+		_('Refresh document page'), true);
+}
 submit_center_first('Update', _("Update"),
 	_('Refresh document page'), true);
 submit_center_last('process_delivery', _("Process Dispatch"),
