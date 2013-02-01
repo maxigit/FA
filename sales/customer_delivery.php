@@ -462,6 +462,11 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	if ($ln_itm->quantity==$ln_itm->qty_done) {
 		continue; //this line is fully delivered
 	}
+	if(isset($_POST['_Location_update'])) {
+		// reset quantity
+		$ln_itm->qty_dispatched = $ln_itm->quantity-$ln_itm->qty_done;
+		$_POST['Line'.$line]=null; /// clear post so value displayed in the fiel is the 'new' quantity
+	}
 	// if it's a non-stock item (eg. service) don't show qoh
 	$show_qoh = true;
 	if (/*$SysPrefs->allow_negative_stock()||*/  !has_stock_holding($ln_itm->mb_flag) ||
