@@ -224,7 +224,7 @@ $reports->addReport(RC_INVENTORY, 303, _('Stock &Check Sheets'),
 			_('Suppress Zeros') => 'YES_NO',
 			_('Comments') => 'TEXTBOX',
 			_('Orientation') => 'ORIENTATION',
-			_('Destination') => 'DESTINATION'
+			_('Destination') => 'DESTINATION',
 			_('Item Like') => 'TEXT'));
 $reports->addReport(RC_INVENTORY, 307, _('Inventory &Movement Report'),
 	array(	_('Start Date') => 'DATEBEGINM',
@@ -234,7 +234,6 @@ $reports->addReport(RC_INVENTORY, 307, _('Inventory &Movement Report'),
 			_('Comments') => 'TEXTBOX',
 			_('Orientation') => 'ORIENTATION',
 			_('Destination') => 'DESTINATION'));				
->>>>>>> 4eb63da... New report, Inventory Movements, added to FrontAccounting core.
 $reports->addReport(RC_INVENTORY, 304, _('Inventory &Sales Report'),
 	array(	_('Start Date') => 'DATEBEGINM',
 			_('End Date') => 'DATEENDM',
