@@ -1409,7 +1409,7 @@ function workcenter_list_row($label, $name, $selected_id=null, $all_option=false
 
 //-----------------------------------------------------------------------------------------------
 
-function bank_accounts_list($name, $selected_id=null, $submit_on_change=false)
+function bank_accounts_list($name, $selected_id=null, $submit_on_change=false, $spec_option=false)
 {
 	$sql = "SELECT ".TB_PREF."bank_accounts.id, bank_account_name, bank_curr_code, inactive
 		FROM ".TB_PREF."bank_accounts";
@@ -1418,6 +1418,8 @@ function bank_accounts_list($name, $selected_id=null, $submit_on_change=false)
 	array(
 		'format' => '_format_add_curr',
 		'select_submit'=> $submit_on_change,
+		'spec_option' => $spec_option,
+		'spec_id' => '',
 		'async' => false
 	) );
 }
@@ -2201,19 +2203,13 @@ function security_roles_list_row($label, $name, $selected_id=null, $new_item=fal
 	echo "</tr>\n";
 }
 
-function tab_list_row($label, $name, $selected_id=null, $all = false)
+function tab_list_row($label, $name, $selected_id=null)
 {
 	global $installed_extensions;
 	
 	$tabs = array();
 	foreach ($_SESSION['App']->applications as $app) {
 		$tabs[$app->id] = access_string($app->name, true);
-	}
-	if ($all) {	// add also not active ext. modules
-		foreach ($installed_extensions as $ext) {
-			if ($ext['type'] == 'module' && !$ext['active'])
-				$tabs[$ext['tab']] = access_string($ext['title'], true);
-		}
 	}
 	echo "<tr>\n";
 	echo "<td class='label'>$label</td><td>\n";
