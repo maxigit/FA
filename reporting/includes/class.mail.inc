@@ -31,8 +31,8 @@
 class email
 {
     var $to = array();
-    var $cc = array('max+auto@maxandellie.com');
-    var $bcc = array('fadmin@maxandellie.com');
+    var $cc = array();
+    var $bcc = array();
     var $attachment = array();
     var $boundary = "";
     var $header = "";
