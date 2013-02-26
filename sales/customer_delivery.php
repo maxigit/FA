@@ -477,12 +477,12 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='stockmankobg'");
 		$has_marked = true;
-			$ln_itm->qty_dispatched = $qoh;
+			$ln_itm->qty_dispatched = max($qoh, 0);
 	} else if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable)) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='limited'");
 		$has_marked = true;
-			$ln_itm->qty_dispatched = $qavailable;
+			$ln_itm->qty_dispatched = (int) $qavailable;
 	} else {
 		alt_table_row_color($k);
 	}
