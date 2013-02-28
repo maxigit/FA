@@ -477,7 +477,7 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='stockmankobg'");
 		$has_marked = true;
-			$ln_itm->qty_dispatched = max($qoh, 0);
+			$ln_itm->qty_dispatched = max(0, min($qavailable, $qoh));
 	} else if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable)) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='limited'");
