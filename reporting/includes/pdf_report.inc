@@ -989,7 +989,7 @@ class FrontReport extends Cpdf
 			// are world readable
 			//if ($email == 1 )
 			if (1 == 1 )
-				$fname = $dir.'/'.$this->filename;
+				$fname = $dir.'/'.preg_replace('/&[^;]*;/', '_', $this->filename);
 			else	
 				$fname = $dir.'/'.uniqid('').'.pdf';
 			$this->Output($fname, 'F');

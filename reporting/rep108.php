@@ -112,7 +112,7 @@ function print_statements()
 			$rep->Info($params, $cols, null, $aligns);
 		}
 
-		//$rep->filename = "MAE-ST-" . strtr(urldecode($myrow['DebtorName']), " '", "__") ."--" . strtr(Today(), "/", "-") . ".pdf";
+		$rep->filename = "MAE-ST-" . strtr($myrow['DebtorName'], " '", "__") ."--" . strtr(Today(), "/", "-") . ".pdf";
 		$contacts = array_merge(get_customer_contacts($myrow['debtor_no'], 'invoice'), get_customer_contacts($myrow['debtor_no'], 'general'));
 		// last version: 2.3.14: $contacts = get_customer_contacts($myrow['debtor_no'], 'invoice');
 		$rep->SetHeaderType('Header2');

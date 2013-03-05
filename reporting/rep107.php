@@ -87,7 +87,7 @@ function print_invoices()
 			}
 			else
 				$rep->title = _('INVOICE');
-		//$rep->filename = strtr("MAE-IN-" . $myrow['DebtorName'] ."-" . $i . ".pdf", " ", "_");
+			$rep->filename = strtr("MAE-IN-" . $myrow['DebtorName'] ."-" . $i . ".pdf", " ", "_");
 			$rep->SetHeaderType('Header2');
 			$rep->currency = $cur;
 			$rep->Font();
