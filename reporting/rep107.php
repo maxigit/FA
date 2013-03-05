@@ -39,10 +39,11 @@ function print_invoices()
 	$from = $_POST['PARAM_0'];
 	$to = $_POST['PARAM_1'];
 	$currency = $_POST['PARAM_2'];
-	$email = $_POST['PARAM_3'];
-	$pay_service = $_POST['PARAM_4'];
-	$comments = $_POST['PARAM_5'];
-	$orientation = $_POST['PARAM_6'];
+	$customer = $_POST['PARAM_3'];
+	$email = $_POST['PARAM_4'];
+	$pay_service = $_POST['PARAM_5'];
+	$comments = $_POST['PARAM_6'];
+	$orientation = $_POST['PARAM_7'];
 
 	if (!$from || !$to) return;
 
@@ -73,6 +74,10 @@ function print_invoices()
 				continue;
 			$sign = 1;
 			$myrow = get_customer_trans($i, ST_SALESINVOICE);
+
+			if(isset($customer) && $myrow['debtor_no'] != $customer) {
+				continue;
+			}
 			$baccount = get_default_bank_account($myrow['curr_code']);
 			$params['bankaccount'] = $baccount['id'];
 
