@@ -740,9 +740,9 @@ div.note_msg {
 	margin-bottom: 10px;
 	width: 100%;
 }
-// -- Begining of Dashboard
+/** -- Begining of Dashboard **/
 
-.column{
+.column {
     width:49%;
     margin-right:.5%;
     min-height:300px;
@@ -796,7 +796,7 @@ div.note_msg {
 .dataform h2{
 	margin-top:0;
     margin-bottom:10px;
-    background:#e4ecec;
+    background:#ececec;
     border-bottom:1px solid #eee;
     font-family:Verdana;
     font-weight: bold;
@@ -806,7 +806,7 @@ div.note_msg {
     padding: 5px;
 }
 
-// -- End of Dashboard
+/* -- End of Dashboard */
 .on_stock_dispatched {
 	background-color: #666;
 }
