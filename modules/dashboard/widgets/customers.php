@@ -22,7 +22,7 @@ class customers
     {
         if (isset($params))
         {
-            $data=json_decode(html_entity_decode($params));
+            $data=json_decode(html_entity_decode($params, ENT_QUOTES));
             if ($data != null) {
                 if ($data->top != '')
                     $this->top = $data->top;
