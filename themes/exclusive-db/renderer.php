@@ -161,7 +161,92 @@ include_once('xpMenu.class.php');
 			echo "</div>\n"; // fa-main
 		}
 
+		// Display dashboard 
 		function display_applications(&$waapp)
+		{
+            global $path_to_root, $use_popup_windows;
+            include_once("$path_to_root/includes/ui.inc");
+            include_once($path_to_root . "/reporting/includes/class.graphic.inc");
+
+			$selected_app = $waapp->get_selected_application();
+			if (!$_SESSION["wa_current_user"]->check_application_access($selected_app))
+				return;
+
+            // first have a look through the directory,
+            // and remove old temporary pdfs and pngs
+            $dir = company_path(). '/pdf_files';
+
+            if ($d = @opendir($dir)) {
+                while (($file = readdir($d)) !== false) {
+                    if (!is_file($dir.'/'.$file) || $file == 'index.php') continue;
+                // then check to see if this one is too old
+                    $ftime = filemtime($dir.'/'.$file);
+                 // seems 3 min is enough for any report download, isn't it?
+                    if (time()-$ftime > 180){
+                        unlink($dir.'/'.$file);
+                    }
+                }
+                closedir($d);
+            }
+
+            //if ($selected_app->id == 'system') {
+            //    include($path_to_root . "/includes/system_tests.inc");
+            //    $title = "Display System Diagnostics";
+            //    br(2);
+            //    display_heading($title);
+            //    br();
+            //    display_system_tests();
+            //    return;
+            //}
+
+            $dashboard_app = $waapp->get_application("Dashboard");
+            echo '<div id="console" ></div>';
+
+            $userid = $_SESSION["wa_current_user"]->user;
+            $sql = "SELECT DISTINCT column_id FROM ".TB_PREF."dashboard_widgets"
+                    ." WHERE user_id =".db_escape($userid)
+                    ." AND app=".db_escape($selected_app->id)
+                    ." ORDER BY column_id";
+            $columns=db_query($sql);
+            while($column=db_fetch($columns))
+              {
+                  echo '<div class="column" id="column'.$column['column_id'].'" >';
+                  $sql = "SELECT * FROM ".TB_PREF."dashboard_widgets"
+                        ." WHERE column_id=".db_escape($column['column_id'])
+                        ." AND user_id = ".db_escape($userid)
+                        ." AND app=".db_escape($selected_app->id)
+                        ." ORDER BY sort_no";
+                  $items=db_query($sql);
+                  while($item=db_fetch($items))
+                  {
+                      $widgetData = $dashboard_app->get_widget($item['widget']);
+                      echo '
+                      <div class="dragbox" id="item'.$item['id'].'">
+                          <h2>'.$item['description'].'</h2>
+                              <div id="widget_div_'.$item['id'].'" class="dragbox-content" ';
+                      if($item['collapsed']==1)
+                          echo 'style="display:none;" ';
+                      echo '>';
+                      if ($widgetData != null) {
+                          if ($_SESSION["wa_current_user"]->can_access_page($widgetData->access))
+                          {
+                              include_once ($path_to_root . $widgetData->path);
+                              $className = $widgetData->name;
+                              $widgetObject = new $className($item['param']);
+                              $widgetObject->render($item['id'],$item['description']);
+                          } else {
+                              echo "<center><br><br><br><b>";
+                              echo _("The security settings on your account do not permit you to access this function");
+                              echo "</b>";
+                              echo "<br><br><br><br></center>";
+                          }
+                      }
+                      echo '</div></div>';
+                  }
+                  echo '</div>';
+              }
+        }
+		function display_applications_old(&$waapp)
 		{
 			global $path_to_root, $use_popup_windows;
 			include_once("$path_to_root/includes/ui.inc");
