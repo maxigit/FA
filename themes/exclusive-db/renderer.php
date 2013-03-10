@@ -34,6 +34,13 @@ include_once('xpMenu.class.php');
 		function menu_header($title, $no_menu, $is_index)
 		{
 			global $path_to_root, $help_base_url, $power_by, $version, $db_connections, $installed_extensions;
+            if (!$no_menu) {
+                echo "<script type='text/javascript' src='$path_to_root/themes/dashboard/js/jquery-1.3.2.js'></script>\n";
+                echo "<script type='text/javascript' src='$path_to_root/themes/dashboard/js/jquery-ui-1.7.2.custom.min.js'></script>\n";
+                echo "<script type='text/javascript' src='$path_to_root/themes/dashboard/js/jquery.json-2.2.min.js'></script>\n";
+                echo "<script type='text/javascript' src='$path_to_root/themes/dashboard/js/dashboard.js'></script>\n";
+                echo "<script type='text/javascript' src='https://www.google.com/jsapi'></script>\n";
+            }
 
 			$sel_app = $_SESSION['sel_app'];
 			echo "<div class='fa-main'>\n";
