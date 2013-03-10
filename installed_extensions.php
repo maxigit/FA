@@ -6,7 +6,7 @@
 	FA extension system documentation.
 */
 
-$next_extension_id = 28; // unique id for next installed extension
+$next_extension_id = 30; // unique id for next installed extension
 
 $installed_extensions = array (
   0 => 
@@ -154,6 +154,24 @@ $installed_extensions = array (
     'type' => 'extension',
     'path' => 'modules/rep_picking_list',
     'active' => false,
+  ),
+  28 => 
+  array (
+    'name' => 'Theme Dashboard',
+    'package' => 'dashboard_theme',
+    'version' => '2.3.15-1',
+    'type' => 'theme',
+    'active' => false,
+    'path' => 'themes/dashboard',
+  ),
+  29 => 
+  array (
+    'name' => 'Company Dashboard',
+    'package' => 'dashboard',
+    'version' => '2.3.15-3',
+    'type' => 'extension',
+    'active' => false,
+    'path' => 'modules/dashboard',
   ),
 );
 ?>
