@@ -215,11 +215,18 @@ include_once('xpMenu.class.php');
                     ." AND app=".db_escape($selected_app->id)
                     ." ORDER BY column_id";
             $columns=db_query($sql);
-            while($column=db_fetch($columns))
+	    $max_column_id = 6;
+	    // This could be done in only one SQl query, but I want to modidy
+	    // the code as less as I could.
+	    while($column=db_fetch($columns)) {
+		    $max_column_id = max($max_column_id, $column['column_id']);
+	    }
+		$column=-1;
+	    while(++$column<$max_column_id)
               {
-                  echo '<div class="column" id="column'.$column['column_id'].'" >';
+                  echo '<div class="column" id="column'.$column.'" >';
                   $sql = "SELECT * FROM ".TB_PREF."dashboard_widgets"
-                        ." WHERE column_id=".db_escape($column['column_id'])
+                        ." WHERE column_id=".db_escape($column)
                         ." AND user_id = ".db_escape($userid)
                         ." AND app=".db_escape($selected_app->id)
                         ." ORDER BY sort_no";
