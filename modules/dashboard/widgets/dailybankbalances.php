@@ -35,38 +35,52 @@ class dailybankbalances
         }
     }
 
-    function render($id, $title)
-    {
-        global $path_to_root;
-        include_once($path_to_root."/reporting/includes/class.graphic.inc");
 
-        $today = date2sql(Today());
-        if (!isset($data->days_past))
-            $this->days_past = 30;
-        if (!isset($data->days_future))
-            $this->days_future = 30;
-
+	function get_bank_transactions($from, $to, &$rows) {
         $sql = "SELECT bank_act, bank_account_name, trans_date, amount"
               ." FROM ("
               ." SELECT bank_act, bank_account_name, null trans_date, SUM(amount) amount"
               ." FROM ".TB_PREF."bank_trans bt"
               ." INNER JOIN ".TB_PREF."bank_accounts ba ON bt.bank_act = ba.id"
               ." WHERE bank_act = ".$this->bank_act
-              ." AND trans_date < now() - INTERVAL ".$this->days_past." DAY"
+              ." AND trans_date < '$from'"
               ." GROUP BY bank_act, bank_account_name"
               ." UNION ALL"
               ." SELECT bank_act, bank_account_name, trans_date, SUM(amount) amount"
               ." FROM 0_bank_trans bt"
               ." INNER JOIN ".TB_PREF."bank_accounts ba ON bt.bank_act = ba.id"
               ." WHERE bank_act = ".$this->bank_act
-              ." AND trans_date < now() + INTERVAL ".$this->days_future." DAY"
-              ." AND trans_date > now() - INTERVAL ".$this->days_past." DAY"
+              ." AND trans_date < '$to' "
+              ." AND trans_date >= '$from'" 
               ." GROUP BY bank_act, trans_date, bank_account_name"
               ." ) trans"
               ." ORDER BY bank_account_name, trans_date";
         $result = db_query($sql);
+        while($r = db_fetch_assoc($result)) {
+			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => 'transaction');
+		}
 
-        $rows = array();
+	}
+
+    function render($id, $title)
+    {
+        global $path_to_root;
+        include_once($path_to_root."/reporting/includes/class.graphic.inc");
+
+        $today = Today();
+        if (!isset($data->days_past))
+            $this->days_past = 30;
+        if (!isset($data->days_future))
+            $this->days_future = 30;
+		$from = add_days($today, -$this->days_past);
+		$to = add_days($today, $this->days_future);
+
+		$to_sql = date2sql($to);
+		$from_sql = date2sql($from);
+
+        $transactions = array();
+		$this->get_bank_transactions($from_sql, $to_sql, $transactions);
+
         //flag is not needed
         $flag = true;
         $table = array();
@@ -80,7 +94,8 @@ class dailybankbalances
         $last_day = 0;
         $date = add_days(Today(), -$this->days_past);
         $balance_date = $date;
-        while($r = db_fetch_assoc($result)) {
+		$i=0;
+        while($r = $transactions[$i]) {
             if ($r['trans_date'] == null) {
                 $total = $r['amount'];
             } else {
@@ -99,8 +114,9 @@ class dailybankbalances
                 $rows[] = array('c' => $temp);
                 $date = $balance_date;
             }
+			$i+=1;
         }
-        $end_date = add_days(Today(), $this->days_future);
+        $end_date = $to;
         while (date1_greater_date2 ($end_date, $date)) {
             $temp = array();
             $temp[] = array('v' => (string) $date, 'f' => $date);
