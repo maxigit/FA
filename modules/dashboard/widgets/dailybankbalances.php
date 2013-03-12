@@ -109,6 +109,7 @@ class dailybankbalances
             $last_day++;
             $date = add_days($date,1);
         }
+            $date = add_days($date,1);
 
         $table['rows'] = $rows;
         $jsonTable = json_encode($table);
