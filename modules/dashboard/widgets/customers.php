@@ -87,7 +87,7 @@ class customers
             {
                 alt_table_row_color($k);
                 $name = $myrow["name"]."   - ".$myrow["debtor_no"];
-                label_cell(1+$i++);
+                label_cell(sprintf('#%02d',1+$i++));
                 label_cell($name);
                 amount_cell($myrow['total']);
                 end_row();

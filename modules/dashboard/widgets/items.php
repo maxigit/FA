@@ -84,7 +84,7 @@ class items
             {
                 alt_table_row_color($k);
                 $name = $myrow["stock_id"];
-                label_cell($rank++);
+                label_cell(sprintf('#%02d', $rank++));
                 label_cell($name);
                 amount_cell($myrow['total']);
                 qty_cell($myrow['qty']);
