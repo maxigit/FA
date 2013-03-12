@@ -35,8 +35,9 @@ class dailybankbalances
         }
     }
 
-
 	function get_bank_transactions($from, $to, &$rows) {
+		$to_sql = date2sql($to);
+		$from_sql = date2sql($from);
         $sql = "SELECT bank_act, bank_account_name, trans_date, amount"
               ." FROM ("
               ." SELECT bank_act, bank_account_name, null trans_date, SUM(amount) amount"
@@ -50,8 +51,8 @@ class dailybankbalances
               ." FROM 0_bank_trans bt"
               ." INNER JOIN ".TB_PREF."bank_accounts ba ON bt.bank_act = ba.id"
               ." WHERE bank_act = ".$this->bank_act
-              ." AND trans_date < '$to' "
-              ." AND trans_date >= '$from'" 
+              ." AND trans_date < '$to_sql' "
+              ." AND trans_date >= '$from_sql'" 
               ." GROUP BY bank_act, trans_date, bank_account_name"
               ." ) trans"
               ." ORDER BY bank_account_name, trans_date";
@@ -61,6 +62,35 @@ class dailybankbalances
 		}
 
 	}
+
+
+	function get_pending_invoices($from, $to, &$rows) {
+		$to_sql = date2sql($to);
+		$from_sql = date2sql($from);
+		# We first get all thes overdueinvoices
+		# And stick them at the end.
+		# If they are late, there are chances that the customer
+		# won't be that easy to pay
+		$basic_sql = "SELECT sum(if(type = ".ST_CUSTCREDIT." OR type =".ST_CUSTPAYMENT.", -1, 1)
+					*( ov_amount+ov_gst+ov_freight+ov_freight_tax+ov_discount-alloc
+					)*rate) AS amount,
+					due_date AS trans_date
+					FROM ".TB_PREF."debtor_trans
+					WHERE type IN (".ST_SALESINVOICE.", ".ST_CUSTCREDIT.", ".ST_CUSTPAYMENT.")";
+		$sql = $basic_sql . " AND (due_date <= '$from_sql' OR due_date >= '$to_sql')";
+        $result = db_query($sql);
+		$r = db_fetch_assoc($result);
+		$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => 'transaction');
+
+		$sql = $basic_sql . " AND (due_date > '$from_sql' AND due_date < '$to_sql')";
+		$sql .= " GROUP BY trans_date";
+        $result = db_query($sql);
+        while($r = db_fetch_assoc($result)) {
+			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => 'transaction');
+		}
+
+	}
+
 
     function render($id, $title)
     {
@@ -75,11 +105,12 @@ class dailybankbalances
 		$from = add_days($today, -$this->days_past);
 		$to = add_days($today, $this->days_future);
 
-		$to_sql = date2sql($to);
-		$from_sql = date2sql($from);
-
         $transactions = array();
-		$this->get_bank_transactions($from_sql, $to_sql, $transactions);
+		$this->get_bank_transactions($from, $to, $transactions);
+		$this->get_pending_invoices($today, $to, $transactions);
+
+		usort($transactions, function($a, $b) { return strcmp($a["trans_date"], $b["trans_date"]); } );
+		print_r($transactions);
 
         //flag is not needed
         $flag = true;
