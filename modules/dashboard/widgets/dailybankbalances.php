@@ -128,6 +128,8 @@ class dailybankbalances
         $total = 0;
 	$forecast = 0;
         $last_day = 0;
+	$transaction = 0;
+	$customer_invoice = 0;
         $date = add_days(Today(), -$this->days_past);
         $balance_date = $date;
 		$i=0;
@@ -136,8 +138,6 @@ class dailybankbalances
                 $total = $r['amount'];
 		$forecast = $total;
             } else {
-		$transaction = 0;
-		$customer_invoice = 0;
 
                 $balance_date = sql2date($r['trans_date']);
                 while (date1_greater_date2 ($balance_date, $date) ) {
@@ -146,9 +146,11 @@ class dailybankbalances
                     $temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
                     $temp[] = array('v' => (float) $forecast, 'f' => number_format2($forecast, user_price_dec()));
                     $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
-                    //$temp[] = array('v' => (float) $customer_invoice, 'f' => number_format2($customer_invoice, user_price_dec()));
+                    $temp[] = array('v' => (float) $customer_invoice, 'f' => number_format2($customer_invoice, user_price_dec()));
                     $rows[] = array('c' => $temp);
                     $date = add_days($date,1);
+			$transaction = 0;
+			$customer_invoice = 0;
                 }
                 $temp = array();
 		switch($r['type']) {
@@ -163,18 +165,18 @@ class dailybankbalances
 			break;
 	
 		}
+            }
+			$i+=1;
+        }
                 $temp[] = array('v' => (string) $balance_date, 'f' => $balance_date);
                 $temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 	    $temp[] = array('v' => (float) $forecast, 'f' => number_format2($forecast, user_price_dec()));
 	    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
-	    //$temp[] = array('v' => (float) $customer_invoice, 'f' => number_format2($customer_invoice, user_price_dec()));
+	    $temp[] = array('v' => (float) $customer_invoice, 'f' => number_format2($customer_invoice, user_price_dec()));
                 $rows[] = array('c' => $temp);
                 $date = $balance_date;
-            }
-			$i+=1;
-        }
-/*
             $date = add_days($date,1);
+/*
         $end_date = $to;
         while (date1_greater_date2 ($end_date, $date)) {
             $temp = array();
