@@ -80,13 +80,13 @@ class dailybankbalances
 		$sql = $basic_sql . " AND (due_date <= '$from_sql' OR due_date >= '$to_sql')";
         $result = db_query($sql);
 		$r = db_fetch_assoc($result);
-		$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => 'transaction');
+		$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => 'customer invoice');
 
 		$sql = $basic_sql . " AND (due_date > '$from_sql' AND due_date < '$to_sql')";
 		$sql .= " GROUP BY trans_date";
         $result = db_query($sql);
         while($r = db_fetch_assoc($result)) {
-			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => 'transaction');
+			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => 'customer invoice');
 		}
 
 	}
@@ -117,11 +117,16 @@ class dailybankbalances
         $table = array();
         $table['cols'] = array(
             array('label' => 'Date', 'type' => 'string'),
-            array('label' => 'Balance', 'type' => 'number')
+            array('label' => 'Balance', 'type' => 'number'),
+            array('label' => 'Forecast', 'type' => 'number'),
+            array('label' => 'Transaction', 'type' => 'number'),
+            array('label' => 'Customer Invoice', 'type' => 'number')
         );
 
+	// We group all transactions by type
         $rows = array();
         $total = 0;
+	$forecast = 0;
         $last_day = 0;
         $date = add_days(Today(), -$this->days_past);
         $balance_date = $date;
@@ -129,34 +134,60 @@ class dailybankbalances
         while($r = $transactions[$i]) {
             if ($r['trans_date'] == null) {
                 $total = $r['amount'];
+		$forecast = $total;
             } else {
+		$transaction = 0;
+		$customer_invoice = 0;
+
                 $balance_date = sql2date($r['trans_date']);
                 while (date1_greater_date2 ($balance_date, $date) ) {
                     $temp = array();
                     $temp[] = array('v' => (string) $date, 'f' => $date);
                     $temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
+                    $temp[] = array('v' => (float) $forecast, 'f' => number_format2($forecast, user_price_dec()));
+                    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
+                    //$temp[] = array('v' => (float) $customer_invoice, 'f' => number_format2($customer_invoice, user_price_dec()));
                     $rows[] = array('c' => $temp);
                     $date = add_days($date,1);
                 }
-                $total += $r['amount'];
                 $temp = array();
+		switch($r['type']) {
+		case 'transaction':
+			$total += $r['amount'];
+			$forecast+=  $r['amount'];
+			$transaction = $r['amount'];
+			break;
+		case 'customer invoice':
+			$customer_invoice = $r['amount'];
+			$forecast+=  $r['amount'];
+			break;
+	
+		}
                 $temp[] = array('v' => (string) $balance_date, 'f' => $balance_date);
                 $temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
+	    $temp[] = array('v' => (float) $forecast, 'f' => number_format2($forecast, user_price_dec()));
+	    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
+	    //$temp[] = array('v' => (float) $customer_invoice, 'f' => number_format2($customer_invoice, user_price_dec()));
                 $rows[] = array('c' => $temp);
                 $date = $balance_date;
             }
 			$i+=1;
         }
+/*
+            $date = add_days($date,1);
         $end_date = $to;
         while (date1_greater_date2 ($end_date, $date)) {
             $temp = array();
             $temp[] = array('v' => (string) $date, 'f' => $date);
             $temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
+	    $temp[] = array('v' => (float) $forecast, 'f' => number_format2($forecast, user_price_dec()));
+	    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
+	    $temp[] = array('v' => (float) $customer_invoice, 'f' => number_format2($customer_invoice, user_price_dec()));
             $rows[] = array('c' => $temp);
             $last_day++;
             $date = add_days($date,1);
         }
-            $date = add_days($date,1);
+*/
 
         $table['rows'] = $rows;
         $jsonTable = json_encode($table);
