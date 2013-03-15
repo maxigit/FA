@@ -203,8 +203,12 @@ function drawChart".$id."() {
         if ($this->graph_type != 'Table')
             $js .="height: 300, ";
         $js .= "title: '".$title."'
+		,seriesType:'bars'
+		,series: {0: {type: 'steppedArea'}
+		, 1: {type: 'steppedArea', color:'purple'}
+    }
     };
-  var chart".$id." = new google.visualization.".$this->graph_type."(document.getElementById('widget_div_".$id."'));
+  var chart".$id." = new google.visualization.ComboChart(document.getElementById('widget_div_".$id."'));
   chart".$id.".draw(data, options);
 }";
         add_js_source($js);
