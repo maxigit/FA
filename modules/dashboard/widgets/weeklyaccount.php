@@ -38,10 +38,12 @@ class weeklyaccount
 	
 
 
-	function get_account_transaction($from, $to, &$rows, $type) {
-		$to_sql = date2sql($to);
-		$from_sql = date2sql($from);
-		$basic_sql = "SELECT -sum(amount) AS amount, SUBDATE(tran_date, weekday(tran_date)) AS trans_date
+	function get_account_transaction($from, $to, &$rows, $type, $offset) {
+		if(!isset($offset)) $offset = 0;
+		$from_sql = date2sql(add_days($from,$offset));
+		$to_sql = date2sql(add_days($to,$offset));
+
+		$basic_sql = "SELECT -sum(amount) AS amount, ADDDATE(SUBDATE(tran_date, weekday(tran_date)), ".-$offset." ) AS trans_date
 					FROM ".TB_PREF."gl_trans
 					WHERE account IN (4000)";
 		$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
@@ -75,6 +77,7 @@ class weeklyaccount
 
 	$transactions = array();
 		$this->get_account_transaction($from, $to, $transactions, 'transaction');
+		$this->get_account_transaction($from, $to, $transactions, 'previous', -52*7);
 
 		usort($transactions, function($a, $b) { return strcmp($a["trans_date"], $b["trans_date"]); } );
 		print_r($transactions);
@@ -85,13 +88,15 @@ class weeklyaccount
 	$table['cols'] = array(
 	    array('label' => 'Date', 'type' => 'string'),
 	    //array('label' => 'Balance', 'type' => 'number'),
-	    array('label' => 'Transaction', 'type' => 'number')
+	    array('label' => 'Transaction', 'type' => 'number'),
+	    array('label' => 'Previous Year', 'type' => 'number')
 	);
 
 	// We group all transactions by type
 	$rows = array();
 	$total = 0;
 	$transaction = 0;
+	$previous = 0;
 	$last_day = 0;
 	$date = add_days(Today(), -$this->weeks_past);
 	$balance_date = $date;
@@ -107,15 +112,21 @@ class weeklyaccount
 		    $temp[] = array('v' => (string) $date, 'f' => $date);
 		    //$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 		    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
+		    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
 		    $rows[] = array('c' => $temp);
 		    $date = add_days($date,7);
 			$transaction = 0;
+			$previous = 0;
 		}
 		$temp = array();
 		switch($r['type']) {
 		case 'transaction':
 			$total += $r['amount'];
 			$transaction = $r['amount'];
+			break;
+		case 'previous':
+			$total += $r['amount'];
+			$previous = $r['amount'];
 			break;
 		}
 	    }
@@ -124,6 +135,7 @@ class weeklyaccount
 	$temp[] = array('v' => (string) $balance_date, 'f' => $balance_date);
 	//$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 	    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
+	    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
 	$rows[] = array('c' => $temp);
 	$date = $balance_date;
 	$date = add_days($date,7);
@@ -160,7 +172,7 @@ class weeklyaccount
 			$js .="height: 300, ";
 		$js .= "title: '".$title."'
 			,seriesType:'bars'
-			,series: {1: {type: 'steppedArea'}
+			,series: {10: {type: 'steppedArea'}
 			, 0: {type: 'bar'}
 			, bar: {groupWidth: 100}
 			, isStacked: true
