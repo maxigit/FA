@@ -18,24 +18,29 @@ class weeklyaccount
     var $weeks_future;
     var $bank_act;
     var $graph_type;
+function week_of_month($date) {
+	$next_date = add_months($date, 1);
+	$days = -date_diff2($date, $next_date, 'd');
+	return $days/7.0;
+	}
 
     function weeklyaccount($params='')
     {
-        if (isset($params))
-        {
-            $data=json_decode(html_entity_decode($params));
-            if ($data != null) {
-                $this->bank_act = $data->bank_act;
-                $this->graph_type = $data->graph_type;
-                if ($data->weeks_past != '')
-                    $this->weeks_past = $data->weeks_past;
-                if ($data->weeks_future != '')
-                    $this->weeks_future = $data->weeks_future;
-            }
-        }
+	if (isset($params))
+	{
+	    $data=json_decode(html_entity_decode($params));
+	    if ($data != null) {
+		$this->bank_act = $data->bank_act;
+		$this->graph_type = $data->graph_type;
+		if ($data->weeks_past != '')
+		    $this->weeks_past = $data->weeks_past;
+		if ($data->weeks_future != '')
+		    $this->weeks_future = $data->weeks_future;
+	    }
+	}
     }
 
-	
+
 
 
 	function get_account_transaction($from, $to, &$rows, $type, $offset) {
@@ -78,7 +83,7 @@ class weeklyaccount
 		}
 
 	}
-	
+
 
 
 
@@ -144,7 +149,7 @@ class weeklyaccount
 			$transaction = 0;
 			$previous = 0;
 			$budget -= $week_budget;
-			$week_budget = min($budget, $week_budget);
+			//$week_budget = min($budget, $week_budget);
 		}
 		$temp = array();
 		switch($r['type']) {
@@ -158,8 +163,8 @@ class weeklyaccount
 			break;
 		case 'budget':
 			$total += $r['amount'];
-			$budget += $r['amount'];
-			$week_budget = $budget/5;
+			$budget = $r['amount'];
+			$week_budget = $budget/$this->week_of_month($date);
 			break;
 		}
 	    }
@@ -171,7 +176,7 @@ class weeklyaccount
 	    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
 	    $temp[] = array('v' => (float) $week_budget, 'f' => number_format2($week_budget, user_price_dec()));
 			$budget -= $week_budget;
-			$week_budget = min($budget, $week_budget);
+			//$week_budget = min($budget, $week_budget);
 	$rows[] = array('c' => $temp);
 	$date = $balance_date;
 	$date = add_days($date,7);
