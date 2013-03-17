@@ -89,7 +89,7 @@ class weeklyaccount
 
 	$today = Today();
 	if (!isset($data->weeks_past))
-	    $this->weeks_past = 52;
+	    $this->weeks_past = 16;
 	if (!isset($data->weeks_future))
 	    $this->weeks_future = 4;
 	$from = add_days($today, -$this->weeks_past*7);
