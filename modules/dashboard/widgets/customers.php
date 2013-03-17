@@ -22,7 +22,7 @@ class customers
     {
         if (isset($params))
         {
-            $data=json_decode(html_entity_decode($params));
+            $data=json_decode(html_entity_decode($params, ENT_QUOTES));
             if ($data != null) {
                 if ($data->top != '')
                     $this->top = $data->top;
@@ -47,6 +47,24 @@ class customers
         $today = Today();
         $begin1 = date2sql($begin);
         $today1 = date2sql($today);
+
+
+
+	// Compute the total for the same criteria
+	$sql_total = "SELECT SUM((ov_amount + ov_discount) * rate*IF(trans.type = ".ST_CUSTCREDIT.", -1, 1)) AS total, COUNT(DISTINCT trans.debtor_no) AS customer_number  FROM
+		".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d WHERE trans.debtor_no=d.debtor_no
+		AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")
+		AND tran_date >= '$begin1' AND tran_date <= '$today1'";
+        if ($this->data_filter != '')
+            $sql_total .= ' AND '.$this->data_filter;
+	$result = db_query($sql_total);
+	$my_row = db_fetch($result);
+	$total = $my_row['total'];
+	$totalt= $total;
+	$customer_number = $my_row['customer_number'];
+	$customer_left = $customer_number;
+
+
         $sql = "SELECT SUM((ov_amount + ov_discount) * rate * IF(trans.type = ".ST_CUSTCREDIT.", -1, 1)) AS total,d.debtor_no, d.name"
             ." FROM ".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d"
             ." WHERE trans.debtor_no=d.debtor_no"
@@ -58,8 +76,9 @@ class customers
             ." LIMIT ".$this->top;
         $result = db_query($sql);
 
+
         if ($this->graph_type=='Table') {
-            $th = array(_("Customer"), _("Amount"));
+            $th = array(_("Rank"),_("Customer"), _("Amount"));
             start_table(TABLESTYLE, "width=98%");
             table_header($th);
             $k = 0; //row colour counter
@@ -67,21 +86,33 @@ class customers
             while ($myrow = db_fetch($result))
             {
                 alt_table_row_color($k);
-                $name = $myrow["debtor_no"]." ".$myrow["name"];
+                $name = $myrow["name"]."   - ".$myrow["debtor_no"];
+                label_cell(sprintf('#%02d',1+$i++));
                 label_cell($name);
                 amount_cell($myrow['total']);
                 end_row();
+		$total-=$myrow['total'];
+		$customer_left--;
             }
+	$other_name = sprintf('Others %d', $customer_left);
+	label_cell("");
+	label_cell($other_name);
+	amount_cell($total);
             end_table(1);
         } else {
             $pg = new graph();
             $i = 0;
             while ($myrow = db_fetch($result))
             {
-                $pg->x[$i] = $myrow["debtor_no"]." ".$myrow["name"];
+                $pg->x[$i] = "#".($i+1)." ". $myrow["name"]."   - ".$myrow["debtor_no"];
                 $pg->y[$i] = $myrow['total'];
+		$total-=$myrow['total'];
+		$customer_left--;
                 $i++;
             }
+		$other_name = sprintf('Others %d', $customer_left);
+		$pg->x[$i] = $other_name;
+		$pg->y[$i] = $total;
             $pg->title     = $title;
             $pg->axis_x    = _("Customer");
             $pg->axis_y    = _("Amount");

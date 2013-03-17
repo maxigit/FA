@@ -35,42 +35,33 @@ class dailysales
 
     function render($id, $title)
     {
-        $sql = 'SELECT * FROM (SELECT max(trans_date) `Week End`, '
+        $begin = begin_fiscalyear();
+        $today = Today();
+        $begin1 = date2sql($begin);
+        $today1 = date2sql($today);
+
+        $sql = 'SELECT * FROM (SELECT subdate(trans_date, weekday(trans_date)) `Week Start`, '
             .'weekofyear(trans_date) `Week No`, '
-            .'sum(case when weekday(trans_date)=0 then gross_output else 0 end) Monday, '
-            .'sum(case when weekday(trans_date)=1 then gross_output else 0 end) Tuesday, '
-            .'sum(case when weekday(trans_date)=2 then gross_output else 0 end) Wednesday, '
-            .'sum(case when weekday(trans_date)=3 then gross_output else 0 end) Thursday, '
-            .'sum(case when weekday(trans_date)=4 then gross_output else 0 end) Friday, '
-            .'sum(case when weekday(trans_date)=5 then gross_output else 0 end) Saturday, '
-            .'sum(case when weekday(trans_date)=6 then gross_output else 0 end) Sunday '
-            .'FROM (SELECT bt.trans_date trans_date, '
-                .'sum((ttd.net_amount+ttd.amount)*ex_rate) gross_output, '
-                .'sum(ttd.net_amount*ex_rate) net_output, '
-                .'sum(ttd.amount*ex_rate) payable  '
-            .'FROM '.TB_PREF.'bank_trans bt  '
-            .'INNER JOIN '.TB_PREF.'cust_allocations ca  '
-                .'ON bt.type = ca.trans_type_from  '
-                .'AND bt.trans_no = ca.trans_no_from  '
-            .'INNER JOIN '.TB_PREF.'debtor_trans dt  '
-                .'ON dt.type = ca.trans_type_from  '
-                .'AND dt.trans_no = ca.trans_no_from  '
-            .'INNER JOIN '.TB_PREF.'debtors_master dm '
-                .'ON dt.debtor_no = dm.debtor_no '
-            .'INNER JOIN '.TB_PREF.'trans_tax_details ttd  '
-                .'ON ttd.trans_type = ca.trans_type_to  '
-                .'AND ttd.trans_no = ca.trans_no_to  '
-            .'INNER JOIN '.TB_PREF.'tax_types tt  '
-                .'ON tt.id = ttd.tax_type_id  ';
+            .'sum(case when weekday(trans_date)=0 then amount else 0 end) Monday, '
+            .'sum(case when weekday(trans_date)=1 then amount else 0 end) Tuesday, '
+            .'sum(case when weekday(trans_date)=2 then amount else 0 end) Wednesday, '
+            .'sum(case when weekday(trans_date)=3 then amount else 0 end) Thursday, '
+            .'sum(case when weekday(trans_date)=4 then amount else 0 end) Friday, '
+            .'sum(case when weekday(trans_date)=5 then amount else 0 end) Saturday, '
+            .'sum(case when weekday(trans_date)=6 then amount else 0 end) Sunday '
+            .'FROM (SELECT ttd.tran_date AS trans_date, '
+                .'sum(ttd.net_amount*ex_rate) amount '
+            .'FROM  '.TB_PREF.'trans_tax_details ttd  '
+	    .'WHERE  ttd.trans_type = '.ST_SALESINVOICE ." AND tran_date >= '$begin1' AND tran_date <= '$today1'";
         if ($this->data_filter != '')
-            $sql .= ' WHERE '.$this->data_filter;
-        $sql .= ' GROUP BY bt.trans_date  '
+            $sql .= ' AND '.$this->data_filter;
+        $sql .= ' GROUP BY trans_date  '
             .') days '
             .'GROUP BY weekofyear(trans_date) '
             .'ORDER BY max(trans_date) desc ';
         if (isset($this->top))
             $sql .= ' limit '.$this->top;
-        $sql .= ") weeks ORDER BY `Week End`";
+        $sql .= ") weeks ORDER BY `Week Start`";
         $result = db_query($sql) or die(_('Error getting daily sales data'));
 
         $rows = array();
@@ -78,7 +69,7 @@ class dailysales
         $flag = true;
         $table = array();
         $table['cols'] = array(
-            array('label' => 'Week End', 'type' => 'string'),
+            array('label' => 'Week Start', 'type' => 'string'),
             array('label' => 'Monday', 'type' => 'number'),
             array('label' => 'Tuesday', 'type' => 'number'),
             array('label' => 'Wednesday', 'type' => 'number'),
@@ -92,7 +83,7 @@ class dailysales
         while($r = db_fetch_assoc($result)) {
             $temp = array();
             // the following line will used to slice the Pie chart
-            $temp[] = array('v' => (string) $r['Week End'], 'f' => sql2date($r['Week End']));
+            $temp[] = array('v' => (string) $r['Week Start'], 'f' => sql2date($r['Week Start']));
             $temp[] = array('v' => (float) $r['Monday'], 'f' => number_format2($r['Monday'], user_price_dec()));
             $temp[] = array('v' => (float) $r['Tuesday'], 'f' => number_format2($r['Tuesday'], user_price_dec()));
             $temp[] = array('v' => (float) $r['Wednesday'], 'f' => number_format2($r['Wednesday'], user_price_dec()));
