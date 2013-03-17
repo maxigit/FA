@@ -14,8 +14,8 @@ class weeklyaccount
 {
     var $page_security = 'SA_GLANALYTIC';
 
-    var $days_past;
-    var $days_future;
+    var $weeks_past;
+    var $weeks_future;
     var $bank_act;
     var $graph_type;
 
@@ -27,10 +27,10 @@ class weeklyaccount
             if ($data != null) {
                 $this->bank_act = $data->bank_act;
                 $this->graph_type = $data->graph_type;
-                if ($data->days_past != '')
-                    $this->days_past = $data->days_past;
-                if ($data->days_future != '')
-                    $this->days_future = $data->days_future;
+                if ($data->weeks_past != '')
+                    $this->weeks_past = $data->weeks_past;
+                if ($data->weeks_future != '')
+                    $this->weeks_future = $data->weeks_future;
             }
         }
     }
@@ -38,21 +38,21 @@ class weeklyaccount
 	
 
 
-	function get_account_transaction($from, $to, &$rows) {
+	function get_account_transaction($from, $to, &$rows, $type) {
 		$to_sql = date2sql($to);
 		$from_sql = date2sql($from);
-		$basic_sql = "SELECT sum(amount) AS amount, SUBDATE(tran_date, weekday(tran_date)) AS trans_date
+		$basic_sql = "SELECT -sum(amount) AS amount, SUBDATE(tran_date, weekday(tran_date)) AS trans_date
 					FROM ".TB_PREF."gl_trans
 					WHERE account IN (4000)";
 		$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
 		$result = db_query($sql);
 		$r = db_fetch_assoc($result);
-		//$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => 'transaction');
+		//$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => $type);
 
 		$sql = $basic_sql." AND (tran_date > '$from_sql' AND tran_date < '$to_sql') GROUP BY trans_date";
 	$result = db_query($sql);
 	while($r = db_fetch_assoc($result)) {
-			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => 'transaction');
+			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => $type);
 		}
 
 	}
@@ -66,15 +66,15 @@ class weeklyaccount
 	include_once($path_to_root."/reporting/includes/class.graphic.inc");
 
 	$today = Today();
-	if (!isset($data->days_past))
-	    $this->days_past = 60;
-	if (!isset($data->days_future))
-	    $this->days_future = 60;
-		$from = add_days($today, -$this->days_past);
-		$to = add_days($today, $this->days_future);
+	if (!isset($data->weeks_past))
+	    $this->weeks_past = 52;
+	if (!isset($data->weeks_future))
+	    $this->weeks_future = 4;
+		$from = add_days($today, -$this->weeks_past*7);
+		$to = add_days($today, $this->weeks_future*7);
 
 	$transactions = array();
-		$this->get_account_transaction($from, $to, $transactions);
+		$this->get_account_transaction($from, $to, $transactions, 'transaction');
 
 		usort($transactions, function($a, $b) { return strcmp($a["trans_date"], $b["trans_date"]); } );
 		print_r($transactions);
@@ -93,7 +93,7 @@ class weeklyaccount
 	$total = 0;
 	$transaction = 0;
 	$last_day = 0;
-	$date = add_days(Today(), -$this->days_past);
+	$date = add_days(Today(), -$this->weeks_past);
 	$balance_date = $date;
 		$i=0;
 	while($r = $transactions[$i]) {
@@ -179,12 +179,12 @@ class weeklyaccount
 			'ColumnChart' => _("Column Chart"),
 			'Table' => _("Table")
 		);
-		$_POST['days_past'] = $this->days_past;
-		$_POST['days_future'] = $this->days_future;
+		$_POST['weeks_past'] = $this->weeks_past;
+		$_POST['weeks_future'] = $this->weeks_future;
 		$_POST['bank_act'] = $this->bank_act;
 		$_POST['graph_type'] = $this->graph_type;
-		text_row_ex(_("Days in past:"), 'days_past', 2);
-		text_row_ex(_("Days in future:"), 'days_future', 2);
+		text_row_ex(_("Weeks in past:"), 'weeks_past', 2);
+		text_row_ex(_("Weeks in future:"), 'weeks_future', 2);
 		bank_accounts_list_cells(_("Account:"), 'bank_act', null);
 		select_row(_("Graph Type"), "graph_type", null, $graph_types, null);
 	}
@@ -207,8 +207,8 @@ class weeklyaccount
 
 	function save_param()
 	{
-		$param = array('days_past' => $_POST['days_past'],
-			'days_future' => $_POST['days_future'],
+		$param = array('weeks_past' => $_POST['weeks_past'],
+			'weeks_future' => $_POST['weeks_future'],
 			'bank_act' => $_POST['bank_act'],
 			'graph_type' => $_POST['graph_type']);
 		return json_encode($param);
