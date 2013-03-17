@@ -47,7 +47,7 @@ class weeklyaccount
 		$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
 		$result = db_query($sql);
 		$r = db_fetch_assoc($result);
-		$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => 'transaction');
+		//$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => 'transaction');
 
 		$sql = $basic_sql." AND (tran_date > '$from_sql' AND tran_date < '$to_sql') GROUP BY trans_date";
 	$result = db_query($sql);
@@ -84,12 +84,14 @@ class weeklyaccount
 	$table = array();
 	$table['cols'] = array(
 	    array('label' => 'Date', 'type' => 'string'),
-	    array('label' => 'Balance', 'type' => 'number')
+	    //array('label' => 'Balance', 'type' => 'number'),
+	    array('label' => 'Transaction', 'type' => 'number')
 	);
 
 	// We group all transactions by type
 	$rows = array();
 	$total = 0;
+	$transaction = 0;
 	$last_day = 0;
 	$date = add_days(Today(), -$this->days_past);
 	$balance_date = $date;
@@ -103,9 +105,10 @@ class weeklyaccount
 		while (date1_greater_date2 ($balance_date, $date) ) {
 		    $temp = array();
 		    $temp[] = array('v' => (string) $date, 'f' => $date);
-		    $temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
+		    //$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
+		    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
 		    $rows[] = array('c' => $temp);
-		    $date = add_days($date,1);
+		    $date = add_days($date,7);
 			$transaction = 0;
 		}
 		$temp = array();
@@ -119,10 +122,11 @@ class weeklyaccount
 			$i+=1;
 	}
 	$temp[] = array('v' => (string) $balance_date, 'f' => $balance_date);
-	$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
+	//$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
+	    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
 	$rows[] = array('c' => $temp);
 	$date = $balance_date;
-	$date = add_days($date,1);
+	$date = add_days($date,7);
 /*
 	$end_date = $to;
 	while (date1_greater_date2 ($end_date, $date)) {
@@ -156,8 +160,8 @@ class weeklyaccount
 			$js .="height: 300, ";
 		$js .= "title: '".$title."'
 			,seriesType:'bars'
-			,series: {0: {type: 'steppedArea'}
-			, 1: {type: 'steppedArea'}
+			,series: {1: {type: 'steppedArea'}
+			, 0: {type: 'bar'}
 			, bar: {groupWidth: 100}
 			, isStacked: true
     }
