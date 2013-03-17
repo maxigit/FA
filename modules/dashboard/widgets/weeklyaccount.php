@@ -238,12 +238,7 @@ function week_of_month($date) {
 	}
  */
 
-	//$table['rows'] = $rows;
-	//$table['rows'] = array_merge(array_slice($rows,3, 71), array_slice($rows, 75, 15));
-	//$table['rows'] = array_merge(array_slice($rows,0, 3), array_slice($rows, 6, 150));
-	$table['rows'] = array_merge(array_slice($rows,0, 3), array_slice($rows, 6, 84));
-	//$table['rows'] = array_merge(array($rows[0], $rows[74]), array_slice($rows, 75, 15));
-	//$table['rows'] = array($rows[3], $rows[6], $rows[75], $rows[76], $rows[89]);
+	$table['rows'] = $rows;
 	$jsonTable = json_encode($table);
 
 	$js =
