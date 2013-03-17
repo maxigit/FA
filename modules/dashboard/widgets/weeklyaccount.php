@@ -72,8 +72,8 @@ class weeklyaccount
 	    $this->weeks_past = 52;
 	if (!isset($data->weeks_future))
 	    $this->weeks_future = 4;
-		$from = add_days($today, -$this->weeks_past*7);
-		$to = add_days($today, $this->weeks_future*7);
+	$from = add_days($today, -$this->weeks_past*7);
+	$to = add_days($today, $this->weeks_future*7);
 
 	$transactions = array();
 		$this->get_account_transaction($from, $to, $transactions, 'transaction');
@@ -98,7 +98,7 @@ class weeklyaccount
 	$transaction = 0;
 	$previous = 0;
 	$last_day = 0;
-	$date = add_days(Today(), -$this->weeks_past);
+	$date = $from; //add_days(Today(), -$this->weeks_past);
 	$balance_date = $date;
 		$i=0;
 	while($r = $transactions[$i]) {
@@ -172,7 +172,7 @@ class weeklyaccount
 			$js .="height: 300, ";
 		$js .= "title: '".$title."'
 			,seriesType:'bars'
-			,series: {10: {type: 'steppedArea'}
+			,series: {1: {type: 'steppedArea'}
 			, 0: {type: 'bar'}
 			, bar: {groupWidth: 100}
 			, isStacked: true
