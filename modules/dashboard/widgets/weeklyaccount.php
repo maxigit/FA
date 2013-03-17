@@ -19,6 +19,7 @@ class weeklyaccount
     var $bank_act;
     var $graph_type;
 function week_of_month($date) {
+	if ($this->by_month) return 1;
 	$next_date = add_months($date, 1);
 	$days = -date_diff2($date, $next_date, 'd');
 	return $days/7.0;
@@ -36,6 +37,7 @@ function week_of_month($date) {
 		    $this->weeks_past = $data->weeks_past;
 		if ($data->weeks_future != '')
 		    $this->weeks_future = $data->weeks_future;
+		$this->by_month = $data->by_month;
 	    }
 	}
     }
@@ -45,10 +47,22 @@ function week_of_month($date) {
 
 	function get_account_transaction($from, $to, &$rows, $type, $offset) {
 		if(!isset($offset)) $offset = 0;
-		$from_sql = date2sql(add_days($from,$offset));
-		$to_sql = date2sql(add_days($to,$offset));
+		if($this->by_month) {
+			$from_sql = date2sql(add_months($from,$offset));
+			$to_sql = date2sql(add_months($to,$offset));
+		}
+		else {
+			$from_sql = date2sql(add_days($from,$offset*7));
+			$to_sql = date2sql(add_days($to,$offset*7));
+		}
+				
 
-		$basic_sql = "SELECT -sum(amount) AS amount, ADDDATE(SUBDATE(tran_date, weekday(tran_date)), ".-$offset." ) AS trans_date
+		$basic_sql = "SELECT -sum(amount) AS amount,".
+			($this->by_month ?
+			  "ADDDATE(ADDDATE(SUBDATE(tran_date, day(tran_date)),-1), INTERVAL  ".(-$offset)." MONTH )"
+				
+			 : "ADDDATE(SUBDATE(tran_date, weekday(tran_date)), ".-($offset*7)." )")
+		." AS trans_date
 					FROM ".TB_PREF."gl_trans
 					WHERE account IN (4000)";
 		$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
@@ -97,12 +111,18 @@ function week_of_month($date) {
 	    $this->weeks_past = 16;
 	if (!isset($this->weeks_future))
 	    $this->weeks_future = 4;
+	if($this->by_month) {
+	$from = add_months($today, -$this->weeks_past);
+	$to = add_months($today, $this->weeks_future);
+	}
+	else {
 	$from = add_days($today, -$this->weeks_past*7);
 	$to = add_days($today, $this->weeks_future*7);
+	}
 
 	$transactions = array();
 		$this->get_account_transaction($from, $to, $transactions, 'transaction');
-		$this->get_account_transaction($from, $to, $transactions, 'previous', -52*7);
+		$this->get_account_transaction($from, $to, $transactions, 'previous', -($this->by_month ? 12 : 52));
 		$this->get_account_budget($from, $to, $transactions, 'budget');
 
 		usort($transactions, function($a, $b) { return strcmp($a["trans_date"], $b["trans_date"]); } );
@@ -145,7 +165,11 @@ function week_of_month($date) {
 		    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
 		    $temp[] = array('v' => (float) $week_budget, 'f' => number_format2($week_budget, user_price_dec()));
 		    $rows[] = array('c' => $temp);
-		    $date = add_days($date,7);
+		    if($this->by_month)
+			    $date = add_months($date,1);
+		    else
+			    $date = add_days($date,7);
+
 			$transaction = 0;
 			$previous = 0;
 			$budget -= $week_budget;
@@ -179,7 +203,10 @@ function week_of_month($date) {
 			//$week_budget = min($budget, $week_budget);
 	$rows[] = array('c' => $temp);
 	$date = $balance_date;
-	$date = add_days($date,7);
+	    if($this->by_month)
+		    $date = add_months($date,1);
+	    else
+		    $date = add_days($date,7);
 /*
 	$end_date = $to;
 	while (date1_greater_date2 ($end_date, $date)) {
@@ -233,13 +260,19 @@ function week_of_month($date) {
 			'ComboChart' => _("Chart"),
 			'Table' => _("Table")
 		);
+		$by_months = array(
+			0 => _("Week"),
+			1 => _("Month")
+		);
 		$_POST['weeks_past'] = $this->weeks_past;
 		$_POST['weeks_future'] = $this->weeks_future;
 		$_POST['bank_act'] = $this->bank_act;
+		$_POST['by_month'] = $this->by_month;
 		$_POST['graph_type'] = $this->graph_type;
 		text_row_ex(_("Weeks in past:"), 'weeks_past', 2);
 		text_row_ex(_("Weeks in future:"), 'weeks_future', 2);
-		bank_accounts_list_cells(_("Account:"), 'bank_act', null);
+		//bank_accounts_list_cells(_("Account:"), 'bank_act', null);
+		select_row(_("Period"), "by_month", null, $by_months, null);
 		select_row(_("Graph Type"), "graph_type", null, $graph_types, null);
 	}
 
@@ -264,7 +297,8 @@ function week_of_month($date) {
 		$param = array('weeks_past' => $_POST['weeks_past'],
 			'weeks_future' => $_POST['weeks_future'],
 			'bank_act' => $_POST['bank_act'],
-			'graph_type' => $_POST['graph_type']);
+			'graph_type' => $_POST['graph_type'],
+			'by_month' => $_POST['by_month']);
 		return json_encode($param);
 	}
 
