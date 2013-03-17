@@ -120,6 +120,7 @@ class weeklyaccount
 	$transaction = 0;
 	$previous = 0;
 	$budget = 0;
+	$week_budget = 0;
 	$last_day = 0;
 	$date = $from; //add_days(Today(), -$this->weeks_past);
 	$balance_date = $date;
@@ -136,12 +137,13 @@ class weeklyaccount
 		    //$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 		    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
 		    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
-		    $temp[] = array('v' => (float) $budget, 'f' => number_format2($budget, user_price_dec()));
+		    $temp[] = array('v' => (float) $week_budget, 'f' => number_format2($budget, user_price_dec()));
 		    $rows[] = array('c' => $temp);
 		    $date = add_days($date,7);
 			$transaction = 0;
 			$previous = 0;
-			$budget = 0;
+			$budget -= $week_budget;
+			$week_budget = min($budget, $week_budget);
 		}
 		$temp = array();
 		switch($r['type']) {
@@ -156,6 +158,7 @@ class weeklyaccount
 		case 'budget':
 			$total += $r['amount'];
 			$budget = $r['amount'];
+			$week_budget = $budget/4;
 			break;
 		}
 	    }
@@ -165,7 +168,9 @@ class weeklyaccount
 	//$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 	    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
 	    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
-	    $temp[] = array('v' => (float) $budget, 'f' => number_format2($budget, user_price_dec()));
+	    $temp[] = array('v' => (float) $week_budget, 'f' => number_format2($budget, user_price_dec()));
+			$budget -= $week_budget;
+			$week_budget = min($budget, $week_budget);
 	$rows[] = array('c' => $temp);
 	$date = $balance_date;
 	$date = add_days($date,7);
@@ -203,10 +208,10 @@ class weeklyaccount
 		$js .= "title: '".$title."'
 			,seriesType:'bars'
 			,series: {1: {type: 'steppedArea'}
-			, 0: {type: 'bar'}
+				, 2: {type: 'steppedArea'}
+				, 0: {type: 'bar'}}
 			, bar: {groupWidth: 100}
-			, isStacked: true
-    }
+			, isStacked: false
     };
 	var chart".$id." = new google.visualization.ComboChart(document.getElementById('widget_div_".$id."'));
 	chart".$id.".draw(data, options);
