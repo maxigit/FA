@@ -204,7 +204,9 @@ class weeklyaccount
 	function drawChart".$id."() {
 		var data = new google.visualization.DataTable(".$jsonTable.");
 		var options = {";
-		if ($this->graph_type != 'Table')
+		if ($this->graph_type == 'Table') {
+			$js .= "sortAscending: false, sortColumn: 0,  ";
+		}
 			$js .="height: 300, ";
 		$js .= "title: '".$title."'
 			,seriesType:'bars'
