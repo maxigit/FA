@@ -61,7 +61,7 @@ function week_of_month($date) {
 
 		$basic_sql = "SELECT -sum(amount) AS amount,".
 			($this->by_month ?
-			  "ADDDATE(ADDDATE(SUBDATE(tran_date, day(tran_date)),-1), INTERVAL  ".(-$offset)." MONTH )"
+			  "ADDDATE(SUBDATE(tran_date, DAYOFMONTH(tran_date)-1), INTERVAL  ".(-$offset)." MONTH )"
 				
 			 : "ADDDATE(SUBDATE(tran_date, weekday(tran_date)), ".-($offset*7)." )")
 		." AS trans_date
@@ -128,8 +128,8 @@ function week_of_month($date) {
 	$budget = 0;
 	$week_budget = 0;
 	$last_day = 0;
-	$date = $from; //add_days(Today(), -$this->weeks_past);
-	$balance_date = $date;
+	//$date = nil;// $from; //add_days(Today(), -$this->weeks_past);
+	$balance_date = nil;// $date;
 		$i=0;
 	while($r = $transactions[$i]) {
 	    if ($r['trans_date'] == null) {
@@ -137,6 +137,7 @@ function week_of_month($date) {
 	    } else {
 
 		$balance_date = sql2date($r['trans_date']);
+		if(!isset($date)) $date = $balance_date;
 		while (date1_greater_date2 ($balance_date, $date) ) {
 		    $temp = array();
 		    $temp[] = array('v' => (string) $date, 'f' => $date);
