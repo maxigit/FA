@@ -215,8 +215,8 @@ function week_of_month($date) {
 			$js .="height: 300, ";
 		$js .= "title: '".$title."'
 			,seriesType:'bars'
-			,series: {1: {type: 'bar'}
-				, 2: {type: 'steppedArea'}
+			,series: {1: {type: 'bar', areaOpacity: 0.1}
+				, 2: {type: 'steppedArea', areaOpacity: 0.1}
 				, 0: {type: 'bar'}}
 			, bar: {groupWidth: 20}
 			, isStacked: false
