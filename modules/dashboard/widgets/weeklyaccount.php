@@ -89,7 +89,7 @@ class weeklyaccount
 
 	$today = Today();
 	if (!isset($data->weeks_past))
-	    $this->weeks_past = 12;
+	    $this->weeks_past = 52;
 	if (!isset($data->weeks_future))
 	    $this->weeks_future = 4;
 	$from = add_days($today, -$this->weeks_past*7);
@@ -158,8 +158,8 @@ class weeklyaccount
 			break;
 		case 'budget':
 			$total += $r['amount'];
-			$budget = $r['amount'];
-			$week_budget = $budget/4;
+			$budget += $r['amount'];
+			$week_budget = $budget/5;
 			break;
 		}
 	    }
@@ -211,7 +211,7 @@ class weeklyaccount
 			,series: {1: {type: 'bar'}
 				, 2: {type: 'steppedArea'}
 				, 0: {type: 'bar'}}
-			, bar: {groupWidth: 80}
+			, bar: {groupWidth: 20}
 			, isStacked: false
     };
 	var chart".$id." = new google.visualization.".$this->graph_type."(document.getElementById('widget_div_".$id."'));
