@@ -75,12 +75,14 @@ function week_of_month($date) {
 			$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
 			$result = db_query($sql);
 			$r = db_fetch_assoc($result);
-			$rows[]= array('trans_date' => $from_sql, 'amount' => $this->convert*$r['amount'] , 'type' => $type);
+			print_r($r);
+			$rows[]= array('trans_date' => '2000-01-01', 'amount' => $this->convert*$r['amount'] , 'type' => $type);
 		}
 
 		$sql = $basic_sql." AND (tran_date > '$from_sql' AND tran_date < '$to_sql') GROUP BY trans_date";
 	$result = db_query($sql);
 	while($r = db_fetch_assoc($result)) {
+			print_r($r);
 			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $this->convert*$r['amount'] , 'type' => $type);
 		}
 
@@ -155,9 +157,7 @@ function week_of_month($date) {
 	$balance_date = nil;// $date;
 	$i=0;
 	while($r = $transactions[$i]) {
-		if ($r['trans_date'] == null) {
-			$total = $r['amount'];
-		} else {
+		if ($r['trans_date'] != '2000-01-01') {
 
 			$balance_date = sql2date($r['trans_date']);
 			if(!isset($date)) $date = $balance_date;
@@ -184,23 +184,23 @@ function week_of_month($date) {
 				$budget -= $week_budget;
 				//$week_budget = min($budget, $week_budget);
 			}
+		}
 			$temp = array();
 			switch($r['type']) {
 			case 'transaction':
 				$total += $r['amount'];
-				$transaction = $r['amount'];
+				$transaction += $r['amount'];
 				break;
 			case 'previous':
 				$previous_total += $r['amount'];
-				$previous = $r['amount'];
+				$previous += $r['amount'];
 				break;
 			case 'budget':
 				$total += $r['amount'];
-				$budget = $r['amount'];
+				$budget += $r['amount'];
 				$week_budget = $budget/$this->week_of_month($date);
 				break;
 			}
-		}
 		$i+=1;
 	}
 	$temp[] = array('v' => (string) $balance_date, 'f' => $balance_date);
