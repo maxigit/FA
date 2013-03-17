@@ -58,6 +58,8 @@ class hooks_dashboard extends hooks {
                 '/modules/dashboard/widgets/dimensions.php', 'SA_DIMENSIONREP');
                 $app->add_widget('reminders',_('Reminders'),
                 '/modules/dashboard/widgets/reminders.php', 'SA_SETUPDISPLAY');
+                $app->add_widget('weeklyaccount',_('Weekly account'),
+		'/modules/dashboard/widgets/weeklyaccount.php', 'SA_GLANALYTIC');
                 break;
         }
     }

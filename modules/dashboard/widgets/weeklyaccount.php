@@ -41,20 +41,18 @@ class weeklyaccount
 	function get_account_transaction($from, $to, &$rows) {
 		$to_sql = date2sql($to);
 		$from_sql = date2sql($from);
-		$basic_sql = "SELECT sum(amount) AS amount, MIN(tran_date) AS min_trans_date
+		$basic_sql = "SELECT sum(amount) AS amount, SUBDATE(tran_date, weekday(tran_date)) AS trans_date
 					FROM ".TB_PREF."gl_trans
 					WHERE account IN (4000)";
-		$sql = $basic_sql . " AND (due_date <= '$from_sql')";
+		$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
 		$result = db_query($sql);
 		$r = db_fetch_assoc($result);
-		$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => 'account');
+		$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => 'transaction');
 
-		$sql = "SELECT amount, SUBDATE(min_trans_date, weekday(min_trans_date) AS trans_date FROM $basic_sql
-			AND (due_date > '$from_sql' AND due_date < '$to_sql')";
-		$sql .= " GROUP BY trans_date";
+		$sql = $basic_sql." AND (tran_date > '$from_sql' AND tran_date < '$to_sql') GROUP BY trans_date";
 	$result = db_query($sql);
 	while($r = db_fetch_assoc($result)) {
-			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => 'account');
+			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => 'transaction');
 		}
 
 	}
