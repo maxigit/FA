@@ -45,7 +45,9 @@ function week_of_month($date) {
 
 
 
-	function get_account_transaction($from, $to, &$rows, $type, $offset) {
+	function get_account_transaction($from, $to, &$rows, $type, $offset, $table) {
+		if(!isset($table)) $table = 'gl_trans';
+
 		if(!isset($offset)) $offset = 0;
 		if($this->by_month) {
 			$from_sql = date2sql(add_months($from,$offset));
@@ -63,7 +65,7 @@ function week_of_month($date) {
 				
 			 : "ADDDATE(SUBDATE(tran_date, weekday(tran_date)), ".-($offset*7)." )")
 		." AS trans_date
-					FROM ".TB_PREF."gl_trans
+					FROM ".TB_PREF.$table."
 					WHERE account IN (4000)";
 		$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
 		$result = db_query($sql);
@@ -77,28 +79,6 @@ function week_of_month($date) {
 		}
 
 	}
-	function get_account_budget($from, $to, &$rows, $type, $offset) {
-		if(!isset($offset)) $offset = 0;
-		$from_sql = date2sql(add_days($from,$offset));
-		$to_sql = date2sql(add_days($to,$offset));
-
-		$basic_sql = "SELECT -sum(amount) AS amount, ADDDATE(SUBDATE(tran_date, weekday(tran_date)), ".-$offset." ) AS trans_date
-					FROM ".TB_PREF."budget_trans
-					WHERE account IN (4000)";
-		$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
-		$result = db_query($sql);
-		$r = db_fetch_assoc($result);
-		//$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => $type);
-
-		$sql = $basic_sql." AND (tran_date > '$from_sql' AND tran_date < '$to_sql') GROUP BY trans_date";
-	$result = db_query($sql);
-	while($r = db_fetch_assoc($result)) {
-			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => $type);
-		}
-
-	}
-
-
 
 
     function render($id, $title)
@@ -123,7 +103,7 @@ function week_of_month($date) {
 	$transactions = array();
 		$this->get_account_transaction($from, $to, $transactions, 'transaction');
 		$this->get_account_transaction($from, $to, $transactions, 'previous', -($this->by_month ? 12 : 52));
-		$this->get_account_budget($from, $to, $transactions, 'budget');
+		$this->get_account_transaction($from, $to, $transactions, 'budget', 0, 'budget_trans');
 
 		usort($transactions, function($a, $b) { return strcmp($a["trans_date"], $b["trans_date"]); } );
 		print_r($transactions);
