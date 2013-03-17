@@ -214,7 +214,7 @@ class weeklyaccount
 			, bar: {groupWidth: 80}
 			, isStacked: false
     };
-	var chart".$id." = new google.visualization.ComboChart(document.getElementById('widget_div_".$id."'));
+	var chart".$id." = new google.visualization.".$this->graph_type."(document.getElementById('widget_div_".$id."'));
 	chart".$id.".draw(data, options);
     }";
 	add_js_source($js);
@@ -223,8 +223,7 @@ class weeklyaccount
 	function edit_param()
 	{
 		$graph_types = array(
-			'LineChart' => _("Line Chart"),
-			'ColumnChart' => _("Column Chart"),
+			'ComboChart' => _("Chart"),
 			'Table' => _("Table")
 		);
 		$_POST['weeks_past'] = $this->weeks_past;
