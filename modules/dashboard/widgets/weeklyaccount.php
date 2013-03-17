@@ -88,9 +88,9 @@ class weeklyaccount
 	include_once($path_to_root."/reporting/includes/class.graphic.inc");
 
 	$today = Today();
-	if (!isset($data->weeks_past))
+	if (!isset($this->weeks_past))
 	    $this->weeks_past = 16;
-	if (!isset($data->weeks_future))
+	if (!isset($this->weeks_future))
 	    $this->weeks_future = 4;
 	$from = add_days($today, -$this->weeks_past*7);
 	$to = add_days($today, $this->weeks_future*7);
