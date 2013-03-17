@@ -58,6 +58,26 @@ class weeklyaccount
 		}
 
 	}
+	function get_account_budget($from, $to, &$rows, $type, $offset) {
+		if(!isset($offset)) $offset = 0;
+		$from_sql = date2sql(add_days($from,$offset));
+		$to_sql = date2sql(add_days($to,$offset));
+
+		$basic_sql = "SELECT -sum(amount) AS amount, ADDDATE(SUBDATE(tran_date, weekday(tran_date)), ".-$offset." ) AS trans_date
+					FROM ".TB_PREF."budget_trans
+					WHERE account IN (4000)";
+		$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
+		$result = db_query($sql);
+		$r = db_fetch_assoc($result);
+		//$rows[]= array('trans_date' => $to_sql, 'amount' => $r['amount'] , 'type' => $type);
+
+		$sql = $basic_sql." AND (tran_date > '$from_sql' AND tran_date < '$to_sql') GROUP BY trans_date";
+	$result = db_query($sql);
+	while($r = db_fetch_assoc($result)) {
+			$rows[]= array('trans_date' => $r['trans_date'], 'amount' => $r['amount'] , 'type' => $type);
+		}
+
+	}
 	
 
 
@@ -78,6 +98,7 @@ class weeklyaccount
 	$transactions = array();
 		$this->get_account_transaction($from, $to, $transactions, 'transaction');
 		$this->get_account_transaction($from, $to, $transactions, 'previous', -52*7);
+		$this->get_account_budget($from, $to, $transactions, 'budget');
 
 		usort($transactions, function($a, $b) { return strcmp($a["trans_date"], $b["trans_date"]); } );
 		print_r($transactions);
@@ -90,6 +111,7 @@ class weeklyaccount
 	    //array('label' => 'Balance', 'type' => 'number'),
 	    array('label' => 'Transaction', 'type' => 'number'),
 	    array('label' => 'Previous Year', 'type' => 'number')
+	    ,array('label' => 'Budget', 'type' => 'number')
 	);
 
 	// We group all transactions by type
@@ -97,6 +119,7 @@ class weeklyaccount
 	$total = 0;
 	$transaction = 0;
 	$previous = 0;
+	$budget = 0;
 	$last_day = 0;
 	$date = $from; //add_days(Today(), -$this->weeks_past);
 	$balance_date = $date;
@@ -113,10 +136,12 @@ class weeklyaccount
 		    //$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 		    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
 		    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
+		    $temp[] = array('v' => (float) $budget, 'f' => number_format2($budget, user_price_dec()));
 		    $rows[] = array('c' => $temp);
 		    $date = add_days($date,7);
 			$transaction = 0;
 			$previous = 0;
+			$budget = 0;
 		}
 		$temp = array();
 		switch($r['type']) {
@@ -128,6 +153,10 @@ class weeklyaccount
 			$total += $r['amount'];
 			$previous = $r['amount'];
 			break;
+		case 'budget':
+			$total += $r['amount'];
+			$budget = $r['amount'];
+			break;
 		}
 	    }
 			$i+=1;
@@ -136,6 +165,7 @@ class weeklyaccount
 	//$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 	    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
 	    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
+	    $temp[] = array('v' => (float) $budget, 'f' => number_format2($budget, user_price_dec()));
 	$rows[] = array('c' => $temp);
 	$date = $balance_date;
 	$date = add_days($date,7);
