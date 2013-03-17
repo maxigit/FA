@@ -89,7 +89,7 @@ class weeklyaccount
 
 	$today = Today();
 	if (!isset($data->weeks_past))
-	    $this->weeks_past = 52;
+	    $this->weeks_past = 12;
 	if (!isset($data->weeks_future))
 	    $this->weeks_future = 4;
 	$from = add_days($today, -$this->weeks_past*7);
@@ -118,6 +118,7 @@ class weeklyaccount
 	$rows = array();
 	$total = 0;
 	$transaction = 0;
+	$smooth_transaction = 0;
 	$previous = 0;
 	$budget = 0;
 	$week_budget = 0;
@@ -137,7 +138,7 @@ class weeklyaccount
 		    //$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 		    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
 		    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
-		    $temp[] = array('v' => (float) $week_budget, 'f' => number_format2($budget, user_price_dec()));
+		    $temp[] = array('v' => (float) $week_budget, 'f' => number_format2($week_budget, user_price_dec()));
 		    $rows[] = array('c' => $temp);
 		    $date = add_days($date,7);
 			$transaction = 0;
@@ -168,7 +169,7 @@ class weeklyaccount
 	//$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 	    $temp[] = array('v' => (float) $transaction, 'f' => number_format2($transaction, user_price_dec()));
 	    $temp[] = array('v' => (float) $previous, 'f' => number_format2($previous, user_price_dec()));
-	    $temp[] = array('v' => (float) $week_budget, 'f' => number_format2($budget, user_price_dec()));
+	    $temp[] = array('v' => (float) $week_budget, 'f' => number_format2($week_budget, user_price_dec()));
 			$budget -= $week_budget;
 			$week_budget = min($budget, $week_budget);
 	$rows[] = array('c' => $temp);
@@ -207,10 +208,10 @@ class weeklyaccount
 			$js .="height: 300, ";
 		$js .= "title: '".$title."'
 			,seriesType:'bars'
-			,series: {1: {type: 'steppedArea'}
+			,series: {1: {type: 'bar'}
 				, 2: {type: 'steppedArea'}
 				, 0: {type: 'bar'}}
-			, bar: {groupWidth: 100}
+			, bar: {groupWidth: 80}
 			, isStacked: false
     };
 	var chart".$id." = new google.visualization.ComboChart(document.getElementById('widget_div_".$id."'));
