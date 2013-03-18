@@ -89,12 +89,12 @@ class TextCartManager {
 -- stock_name optionals fields |  description 
 -- fields could be :
 --   integer or +number : quantity
---   float or \$nubmer  : price
+--   float or \$number  : price
 --   number%            :discount
 --   date or ^date      :date
 -- at the beginning of a line 
 -- : start a template line
--- ! raw line (not preproceseed)
+-- ! raw line (not preprocessed)
 -- before stock name
 -- + add an item
 -- - suppress the line from the cart
