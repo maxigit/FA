@@ -36,7 +36,7 @@ class bankbalances
         $today = date2sql(Today());
         $sql = "SELECT bank_act, bank_account_name, SUM(amount) balance FROM ".TB_PREF."bank_trans bt"
               ." INNER JOIN ".TB_PREF."bank_accounts ba ON bt.bank_act = ba.id"
-              ." WHERE trans_date < '$today'"
+              ." WHERE trans_date <= '$today'"
               ." AND inactive <> 1";
         if ($this->data_filter != '')
             $sql .= ' AND '.$this->data_filter;
