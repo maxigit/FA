@@ -583,23 +583,28 @@ class ItemsTextCartManager extends TextCartManager {
 
   function stock_to_text($location) {
     $text = "";
-    $sql = "SELECT mv.stock_id , SUM(qty) AS quantity, description FROM ".TB_PREF."stock_moves mv
+    $sql = "SELECT mv.stock_id , SUM(qty) AS quantity, description, avg(material_cost) AS cost FROM ".TB_PREF."stock_moves mv
       JOIN ".TB_PREF."stock_master USING(stock_id)
      WHERE  mv.loc_code = '$location'
      GROUP BY mv.stock_id
      having quantity > 0";
 
     $result = db_query($sql, "No transactions were returned");
-    while($move=db_fetch($result)) {
-      $dec = get_unit_dec($move['stock_id']);
-      $description = $move['description'];
-      $text.= sprintf("${move['stock_id']}\t+ %.${dec}f%s\r\n"
-        , $move['quantity']
-      ,$description ? "\t| \"$description\"" : "");
+    while($row=db_fetch($result)) {
+      $dec = get_unit_dec($row['stock_id']);
+      $text.= $this->row_to_text($row, $dec);
     }
 
     return $text;
   }
+
+	function row_to_text($row, $unit_dec) {
+      $description = $row['description'];
+      return sprintf("${row['stock_id']}\t+ %.${unit_dec}f%s\r\n"
+        , $row['quantity']
+      ,$description ? "\t| \"$description\"" : "");
+	}
+
 }
 class ItemsAdjTextCartManager extends ItemsTextCartManager {
   var $cart_key = "adj_items";
@@ -647,6 +652,13 @@ class ItemsAdjTextCartManager extends ItemsTextCartManager {
         add_to_order($cart, $stock_code, -$quantity, $price);
     }
   }
+	function row_to_text($row, $unit_dec) {
+      $description = $row['description'];
+      return sprintf("${row['stock_id']}\t+ %.${unit_dec}f\t$ %f\r\n"
+        , $row['quantity'] * ($_POST['Increase']==1 ?  1 : -1)
+				,$row['cost']
+      ,$description ? "\t| \"$description\"" : "");
+	}
 
   function item_to_text($item) {
       $dec = get_unit_dec($item->stock_id);
