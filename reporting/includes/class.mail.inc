@@ -31,19 +31,23 @@
 class email
 {
     var $to = array();
-    var $cc = array('max+auto@maxandellie.com');
-    var $bcc = array('fadmin@maxandellie.com');
+    var $cc = array();
+    var $bcc = array();
     var $attachment = array();
     var $boundary = "";
     var $header = "";
     var $subject = "";
     var $body = "";
 	var $charset = 'ISO-8859-1';
+	var $add_params;
 	
     function email($name, $mail)
     {
         $this->boundary = md5(uniqid(time()));
 		$this->header = "From: $name <$mail>\n";
+		$bcc = get_company_pref('bcc_email');
+		if ($bcc)
+			$this->bcc[] = $bcc;
     }
 
     function to($mail)
@@ -154,7 +158,7 @@ class email
 		$ret = 0;
         foreach($this->to as $mail)
         {
-			if (mail($mail, $this->subject, $this->body, $this->header))
+			if (mail($mail, $this->subject, $this->body, $this->header, $this->add_params))
 				$ret++;
         }
         return $ret;

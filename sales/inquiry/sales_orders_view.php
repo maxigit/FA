@@ -260,11 +260,11 @@ $sql = get_sql_for_sales_orders_view($selected_customer, $trans_type, $_POST['Or
 if ($trans_type == ST_SALESORDER)
 	$cols = array(
 		_("Order #") => array('fun'=>'view_link'),
-		_("Ref"),
-		_("Customer"),
+		_("Ref") => array('type' => 'sorder.reference', 'ord' => '') ,
+		_("Customer") => array('type' => 'debtor.name' , 'ord' => '') ,
 		_("Branch"), 
 		_("Cust Order Ref"),
-		_("Order Date") => 'date',
+		_("Order Date") => array('type' =>  'date', 'ord' => ''),
 		_("Required By") =>array('type'=>'date', 'ord'=>''),
 		_("Delivery To"), 
 		_("Order Total") => array('type'=>'amount', 'ord'=>''),
@@ -286,17 +286,17 @@ else
 		_("Currency") => array('align'=>'center')
 	);
 if ($_POST['order_view_mode'] == 'OutstandingOnly') {
-	//array_substitute($cols, 3, 1, _("Cust Order Ref"));
+	//array_substitute($cols, 4, 1, _("Cust Order Ref"));
 	array_append($cols, array(
 		array('insert'=>true, 'fun'=>'dispatch_link'),
 		array('insert'=>true, 'fun'=>'edit_link')));
 
 } elseif ($_POST['order_view_mode'] == 'InvoiceTemplates') {
-	array_substitute($cols, 3, 1, _("Description"));
+	array_substitute($cols, 4, 1, _("Description"));
 	array_append($cols, array( array('insert'=>true, 'fun'=>'invoice_link')));
 
 } else if ($_POST['order_view_mode'] == 'DeliveryTemplates') {
-	array_substitute($cols, 3, 1, _("Description"));
+	array_substitute($cols, 4, 1, _("Description"));
 	array_append($cols, array(
 			array('insert'=>true, 'fun'=>'delivery_link'))
 	);

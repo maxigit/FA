@@ -70,7 +70,7 @@ function getTransactions($supplier_id, $from, $to)
 					AND ".TB_PREF."supp_trans.due_date < '$to') AS OverDue
     			FROM ".TB_PREF."supp_trans
     			WHERE ".TB_PREF."supp_trans.tran_date >= '$from' AND ".TB_PREF."supp_trans.tran_date <= '$to' 
-    			AND ".TB_PREF."supp_trans.supplier_id = '$supplier_id'
+    			AND ".TB_PREF."supp_trans.supplier_id = '$supplier_id' AND ".TB_PREF."supp_trans.ov_amount!=0
     				ORDER BY ".TB_PREF."supp_trans.tran_date";
 
     $TransResult = db_query($sql,"No transactions were returned");
@@ -90,12 +90,14 @@ function print_supplier_balances()
     	$currency = $_POST['PARAM_3'];
     	$no_zeros = $_POST['PARAM_4'];
     	$comments = $_POST['PARAM_5'];
-	$destination = $_POST['PARAM_6'];
+	$orientation = $_POST['PARAM_6'];
+	$destination = $_POST['PARAM_7'];
 	if ($destination)
 		include_once($path_to_root . "/reporting/includes/excel_report.inc");
 	else
 		include_once($path_to_root . "/reporting/includes/pdf_report.inc");
 
+	$orientation = ($orientation ? 'L' : 'P');
 	if ($fromsupp == ALL_TEXT)
 		$supp = _('All');
 	else
@@ -126,7 +128,9 @@ function print_supplier_balances()
     			3 => array(  'text' => _('Currency'),'from' => $currency, 'to' => ''),
 			4 => array('text' => _('Suppress Zeros'), 'from' => $nozeros, 'to' => ''));
 
-    $rep = new FrontReport(_('Supplier Balances'), "SupplierBalances", user_pagesize());
+    $rep = new FrontReport(_('Supplier Balances'), "SupplierBalances", user_pagesize(), 9, $orientation);
+    if ($orientation == 'L')
+    	recalculate_cols($cols);
 
     $rep->Font();
     $rep->Info($params, $cols, $headers, $aligns);

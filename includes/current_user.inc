@@ -22,6 +22,7 @@ class current_user
 	var $loginname;
 	var $username;
 	var $name;
+	var $email;
 	var $company; // user's company
 	var $pos;
 	var $access;
@@ -120,6 +121,7 @@ class current_user
         	    $this->username = $this->loginname;
         	    $this->prefs = new user_prefs($myrow);
         	    $this->user = @$myrow["id"];
+                $this->email = @$myrow["email"];
 		    	update_user_visitdate($this->username);
 		    	$this->logged = true;
 				$this->last_act = time();
@@ -608,6 +610,14 @@ function array_search_key($needle, $haystack, $valuekey=null)
 {
 	$keys = array_search_keys($needle, $haystack, $valuekey);
 	return @$keys[0];
+}
+
+// Recalculate report columns if orientation is landscape.
+function recalculate_cols(&$cols)
+{
+	$factor = (user_pagesize() == "A4" ? 1.4 : 1.3);
+	foreach($cols as $key => $col)
+		$cols[$key] = intval($col * $factor); 
 }
 
 function flush_dir($path, $wipe = false) 

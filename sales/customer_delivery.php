@@ -477,12 +477,12 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='stockmankobg'");
 		$has_marked = true;
-			$ln_itm->qty_dispatched = $qoh;
+			$ln_itm->qty_dispatched = max(0, min($qavailable, $qoh));
 	} else if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable)) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='limited'");
 		$has_marked = true;
-			$ln_itm->qty_dispatched = $qavailable;
+			$ln_itm->qty_dispatched = (int) $qavailable;
 	} else {
 		alt_table_row_color($k);
 	}
@@ -554,7 +554,7 @@ start_table(TABLESTYLE2);
 
 policy_list_row(_("Action For Balance"), "bo_policy", null);
 label_cell(_("Move Order to"), "class='label'");
-locations_list_cells(null, 'bo_location', 'BACK', false, true);
+locations_list_cells(null, 'bo_location', isset($_POST['bo_location']) ? $_POST['bo_location'] :  'BACK', false, true);
 
 textarea_row(_("Memo"), 'Comments', null, 50, 4);
 

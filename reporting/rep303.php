@@ -101,14 +101,16 @@ function print_stock_check()
     	$shortage = $_POST['PARAM_4'];
     	$no_zeros = $_POST['PARAM_5'];
     	$comments = $_POST['PARAM_6'];
-    	$like = $_POST['PARAM_7']; 
-      $destination = $_POST['PARAM_8'];
+    	$like = $_POST['PARAM_9']; 
+	$orientation = $_POST['PARAM_7'];
+	$destination = $_POST['PARAM_8'];
 
 	if ($destination)
 		include_once($path_to_root . "/reporting/includes/excel_report.inc");
 	else
 		include_once($path_to_root . "/reporting/includes/pdf_report.inc");
 
+	$orientation = ($orientation ? 'L' : 'P');
 	if ($category == ALL_NUMERIC)
 		$category = 0;
 	if ($category == 0)
@@ -159,7 +161,9 @@ function print_stock_check()
 	else
 		$user_comp = "";
 
-   	$rep = new FrontReport(_('Stock Check Sheets'), "StockCheckSheet", user_pagesize());
+   	$rep = new FrontReport(_('Stock Check Sheets'), "StockCheckSheet", user_pagesize(), 9, $orientation);
+    if ($orientation == 'L')
+    	recalculate_cols($cols);
 
     $rep->Font();
     $rep->Info($params, $cols, $headers, $aligns);
