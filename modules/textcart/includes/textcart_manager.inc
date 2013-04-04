@@ -84,7 +84,7 @@ class TextCartManager {
   }                                       
 
   var $cart_key = "Items"; // key of the cart in the $POST
-  var $doc_text = "-- This is a comment -- it will be skipped and not processed 
+	var $doc_text = " -- This is a comment -- it will be skipped and not processed 
 -- structure of a line (every fields are optional apart from stock_name)
 -- stock_name optionals fields |  description 
 -- fields could be :
@@ -164,6 +164,11 @@ class TextCartManager {
   function process_textcart($cart, $textcart, $default_mode) {
     $template_line = null;
     foreach (explode("\n", $textcart) as $line) {
+			# exit if we reach the --END-- line
+      preg_match('/^\s*---*\s*END\s*--.*$/', $line, $matches);
+			if ($matches) {
+				break;
+			}
       # remove comments
       $line = preg_replace('/--.*/', "", $line);
       # decide which type of line is
@@ -574,7 +579,19 @@ class POTextCartManager extends TextCartManager {
 class ItemsTextCartManager extends TextCartManager {
   function cart_to_text_v($cart) {
     if (count($cart->line_items) == 0) {
-      return $this->stock_to_text($this->get_location());
+			return "------------------- START ------------------------
+
+
+
+
+
+
+
+--------------------- END ------------------------
+-- Everyhing afert this line would be skipped
+--  please insert you textcart above it
+
+".$this->stock_to_text($this->get_location());
     } 
     else {
       return parent::cart_to_text_v($cart);
