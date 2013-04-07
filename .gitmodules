@@ -1,0 +1,3 @@
+[submodule "modules/picking"]
+	path = modules/picking
+	url = bb:elax/fa-to-mop.git

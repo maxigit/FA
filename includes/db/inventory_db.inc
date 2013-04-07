@@ -82,6 +82,15 @@ function get_quantity_booked_for_other($stock_id, $order)
     return $result+0;
 }
 
+function get_quantity_available($stock_id, $order, $location) {
+if(!isset($location)) {
+$location = $order->location;
+}
+$booked = get_quantity_booked_for_other($stock_id, $order);
+$qoh = get_qoh_on_date($stock_id, $location);
+return max(0, $qoh - $booked);
+}
+
 //--------------------------------------------------------------------------------------
 
 function get_item_edit_info($stock_id)

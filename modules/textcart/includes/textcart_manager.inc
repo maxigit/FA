@@ -84,7 +84,7 @@ class TextCartManager {
   }                                       
 
   var $cart_key = "Items"; // key of the cart in the $POST
-  var $doc_text = "-- This is a comment -- it will be skipped and not processed 
+	var $doc_text = " -- This is a comment -- it will be skipped and not processed 
 -- structure of a line (every fields are optional apart from stock_name)
 -- stock_name optionals fields |  description 
 -- fields could be :
@@ -164,6 +164,11 @@ class TextCartManager {
   function process_textcart($cart, $textcart, $default_mode) {
     $template_line = null;
     foreach (explode("\n", $textcart) as $line) {
+			# exit if we reach the --END-- line
+      preg_match('/^\s*---*\s*END\s*--.*$/', $line, $matches);
+			if ($matches) {
+				break;
+			}
       # remove comments
       $line = preg_replace('/--.*/', "", $line);
       # decide which type of line is
@@ -574,7 +579,19 @@ class POTextCartManager extends TextCartManager {
 class ItemsTextCartManager extends TextCartManager {
   function cart_to_text_v($cart) {
     if (count($cart->line_items) == 0) {
-      return $this->stock_to_text($this->get_location());
+			return "------------------- START ------------------------
+
+
+
+
+
+
+
+--------------------- END ------------------------
+-- Everyhing afert this line would be skipped
+--  please insert you textcart above it
+
+".$this->stock_to_text($this->get_location());
     } 
     else {
       return parent::cart_to_text_v($cart);
@@ -583,23 +600,28 @@ class ItemsTextCartManager extends TextCartManager {
 
   function stock_to_text($location) {
     $text = "";
-    $sql = "SELECT mv.stock_id , SUM(qty) AS quantity, description FROM ".TB_PREF."stock_moves mv
+    $sql = "SELECT mv.stock_id , SUM(qty) AS quantity, description, avg(material_cost) AS cost FROM ".TB_PREF."stock_moves mv
       JOIN ".TB_PREF."stock_master USING(stock_id)
      WHERE  mv.loc_code = '$location'
      GROUP BY mv.stock_id
      having quantity > 0";
 
     $result = db_query($sql, "No transactions were returned");
-    while($move=db_fetch($result)) {
-      $dec = get_unit_dec($move['stock_id']);
-      $description = $move['description'];
-      $text.= sprintf("${move['stock_id']}\t+ %.${dec}f%s\r\n"
-        , $move['quantity']
-      ,$description ? "\t| \"$description\"" : "");
+    while($row=db_fetch($result)) {
+      $dec = get_unit_dec($row['stock_id']);
+      $text.= $this->row_to_text($row, $dec);
     }
 
     return $text;
   }
+
+	function row_to_text($row, $unit_dec) {
+      $description = $row['description'];
+      return sprintf("${row['stock_id']}\t+ %.${unit_dec}f%s\r\n"
+        , $row['quantity']
+      ,$description ? "\t| \"$description\"" : "");
+	}
+
 }
 class ItemsAdjTextCartManager extends ItemsTextCartManager {
   var $cart_key = "adj_items";
@@ -647,6 +669,13 @@ class ItemsAdjTextCartManager extends ItemsTextCartManager {
         add_to_order($cart, $stock_code, -$quantity, $price);
     }
   }
+	function row_to_text($row, $unit_dec) {
+      $description = $row['description'];
+      return sprintf("${row['stock_id']}\t+ %.${unit_dec}f\t$ %f\r\n"
+        , $row['quantity'] * ($_POST['Increase']==1 ?  1 : -1)
+				,$row['cost']
+      ,$description ? "\t| \"$description\"" : "");
+	}
 
   function item_to_text($item) {
       $dec = get_unit_dec($item->stock_id);
