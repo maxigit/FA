@@ -1,0 +1,97 @@
+* Investigate different type of Cart
+** sales
+*** order
+    sales_order_entry : cart_class
+*** display
+Order display_order_summary in sales_order_entry
+** Items
+   items_cart for everything
+   Transfer, adjustment, work
+** Purchase
+   ???
+   purchase_order : = cart
+* different modes
+** one to clear everything first
+ button or instruction at the beginingo fthe file !clear
+** one to only apply modification
+don't touch lines which are not mentioned in the file
+
+*** different default mode ? delete, or update
+Should that be part of the preprocessing
+!upate
+!delete
+!+
+!insert
+
+part of the prceor
+:> + *!
+:<
+* predefiniend variables
+
+$@ stock_code
+$$ price
+$% discount
+$| descripiton
+$+ quantity
+$! mode
+
+ # from line
+@ from database
+* basic  preprocessing
+** Doc
+   template start with :
+   commmand with !
+   in template mode
+   @ : FA or default 
+   # : from the next line
+   in line mode
+   @ : FA or default 
+   # : from the template
+   # and @ are from the same field
+   to address another field we might to something like $!
+   [] : parenthis (we don't use () because it's easier to parse)
+
+** example
+   :ML12-AF3-# ${@+0.3} | sina # boto
+   BLK, black
+   ! hello // don't process this line
+** use case
+*** copy from an email
+*** modify price
+**** using preprocesser
+**** using excel ?
+*** PO from order
+normal
+using excl to set min order quantity
+*** Item movent
+**** transfer corresponding to an order/po
+**** every from a location to another
+*** old
+   or command start with : or !
+   template line (starting with :)
+   template can use 'database' default (ie FA computaed one)
+   :ML12-AF1-% | % 
+   :ML12-AF1-; | % 
+   :ML12-AF1-& | % 
+   :ML12-AF1-# | % 
+   :ML12-AF1-~ | % 
+   # can be used everywhere as the current one
+   @ can be used as the default (from the database)
+   
+   (%*10) : arithmetic evaluation
+   [] : string evaluation
+   
+   stuff between parenthhesis are evaluted
+
+   | ()
+*** done
+add arithmetic
+    add comment --
+    add doc as comment
+*** to do
+    fix price bug
+csv mode 
+add everytwhere (po and stock transfer)
+clean
+
+

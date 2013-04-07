@@ -24,6 +24,7 @@ include_once($path_to_root . "/sales/includes/sales_db.inc");
 include_once($path_to_root . "/sales/includes/sales_ui.inc");
 include_once($path_to_root . "/reporting/includes/reporting.inc");
 include_once($path_to_root . "/taxes/tax_calc.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_manager.inc");
 
 $js = "";
 if ($use_popup_windows) {
@@ -33,6 +34,10 @@ if ($use_date_picker) {
 	$js .= get_js_date_picker();
 }
 
+// for textcart which doesn't set FreightCharges
+if (!isset($_POST['ChargeFreightCost'])) {
+	$_POST['ChargeFreightCost'] = 0;
+}
 if (isset($_GET['ModifyDelivery'])) {
 	$_SESSION['page_title'] = sprintf(_("Modifying Delivery Note # %d."), $_GET['ModifyDelivery']);
 	$help_context = "Modifying Delivery Note";
@@ -99,6 +104,7 @@ if (isset($_GET['OrderNumber']) && $_GET['OrderNumber'] > 0) {
 	adjust_shipping_charge($ord, $_GET['OrderNumber']);
  
 	$_SESSION['Items'] = $ord;
+	$_SESSION['OriginalOrder'] = new Cart(ST_SALESORDER, $_GET['OrderNumber'],false);
 	copy_from_cart();
 
 } elseif (isset($_GET['ModifyDelivery']) && $_GET['ModifyDelivery'] > 0) {
@@ -302,11 +308,12 @@ if (isset($_POST['process_delivery']) && check_data() && check_qoh()) {
 	} else {
 		$bo_policy = 1;
 	}
+
 	$newdelivery = ($dn->trans_no == 0);
 
 	copy_to_cart();
 	if ($newdelivery) new_doc_date($dn->document_date);
-	$delivery_no = $dn->write($bo_policy);
+	$delivery_no = $dn->write($bo_policy, $_POST['bo_location']);
 	if ($delivery_no == -1)
 	{
 		display_error(_("The entered reference is already in use."));
@@ -323,10 +330,15 @@ if (isset($_POST['process_delivery']) && check_data() && check_qoh()) {
 	}	
 }
 
-if (isset($_POST['Update']) || isset($_POST['_Location_update'])) {
+if (isset($_POST['Update']) || isset($_POST['_Location_update']) || isset($_POST['qty'])) {
 	$Ajax->activate('Items');
 }
 //------------------------------------------------------------------------------
+$textcart_mgr = new DeliverySalesTextCartManager();
+$textcart_mgr->handle_post_request();
+function display_delivery_in_tab($title, $cart) {
+  display_delivery();
+}
 start_form();
 hidden('cart_id');
 
@@ -423,9 +435,13 @@ if ($row['dissallow_invoices'] == 1)
 	end_page();
 	exit();
 }	
+function display_delivery() {
+    global $SysPrefs;
+
 display_heading(_("Delivery Items"));
 div_start('Items');
 start_table(TABLESTYLE, "width=80%");
+
 
 $new = $_SESSION['Items']->trans_no==0;
 $th = array(_("Item Code"), _("Item Description"), 
@@ -440,21 +456,33 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	if ($ln_itm->quantity==$ln_itm->qty_done) {
 		continue; //this line is fully delivered
 	}
+	if(isset($_POST['_Location_update']) || isset($_POST['clear_quantity']) || isset($_POST['reset_quantity'])) {
+		// reset quantity
+		$ln_itm->qty_dispatched = $ln_itm->quantity-$ln_itm->qty_done;
+	}
 	// if it's a non-stock item (eg. service) don't show qoh
 	$show_qoh = true;
-	if ($SysPrefs->allow_negative_stock() || !has_stock_holding($ln_itm->mb_flag) ||
+	if (/*$SysPrefs->allow_negative_stock()||*/  !has_stock_holding($ln_itm->mb_flag) ||
 		$ln_itm->qty_dispatched == 0) {
 		$show_qoh = false;
 	}
 
 	if ($show_qoh) {
 		$qoh = get_qoh_on_date($ln_itm->stock_id, $_POST['Location'], $_POST['DispatchDate']);
+		$qbooked = get_quantity_booked_for_other($ln_itm->stock_id, $_SESSION['OriginalOrder']);
+		$qavailable = max(0+$qoh-$qbooked, 0);
 	}
 
 	if ($show_qoh && ($ln_itm->qty_dispatched > $qoh)) {
 		// oops, we don't have enough of one of the component items
 		start_row("class='stockmankobg'");
 		$has_marked = true;
+			$ln_itm->qty_dispatched = max(0, min($qavailable, $qoh));
+	} else if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable)) {
+		// oops, we don't have enough of one of the component items
+		start_row("class='limited'");
+		$has_marked = true;
+			$ln_itm->qty_dispatched = (int) $qavailable;
 	} else {
 		alt_table_row_color($k);
 	}
@@ -470,6 +498,10 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	label_cell($ln_itm->units);
 	qty_cell($ln_itm->qty_done, false, $dec);
 
+	if(isset($_POST['clear_quantity'])) {
+		$ln_itm->qty_dispatched = 0;
+	}
+	$_POST['Line'.$line]=$ln_itm->qty_dispatched; /// clear post so value displayed in the fiel is the 'new' quantity
 	small_qty_cells(null, 'Line'.$line, qty_format($ln_itm->qty_dispatched, $ln_itm->stock_id, $dec), null, null, $dec);
 
 	$display_discount_percent = percent_format($ln_itm->discount_percent*100) . "%";
@@ -512,18 +544,34 @@ end_table(1);
 if ($has_marked) {
 	display_note(_("Marked items have insufficient quantities in stock as on day of delivery."), 0, 1, "class='red'");
 }
+}
+
+$textcart_mgr->tab_display(""
+	,$_SESSION['Items']
+	,"display_delivery_in_tab"
+);
 start_table(TABLESTYLE2);
 
 policy_list_row(_("Action For Balance"), "bo_policy", null);
+label_cell(_("Move Order to"), "class='label'");
+locations_list_cells(null, 'bo_location', isset($_POST['bo_location']) ? $_POST['bo_location'] :  'BACK', false, true);
 
 textarea_row(_("Memo"), 'Comments', null, 50, 4);
 
 end_table(1);
 div_end();
+if($_POST['clear_quantity']) {
+	submit_center('reset_quantity', 'Reset quantity',
+		_('Refresh document page'), true);
+}
+else  {
+	submit_center('clear_quantity', 'Clear quantity',
+		_('Refresh document page'), true);
+}
 submit_center_first('Update', _("Update"),
-  _('Refresh document page'), true);
+	_('Refresh document page'), true);
 submit_center_last('process_delivery', _("Process Dispatch"),
-  _('Check entered data and save document'), 'default');
+	_('Check entered data and save document'), 'default');
 
 end_form();
 

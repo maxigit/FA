@@ -360,20 +360,6 @@ var inserts = {
 				}
 			}
 	},
-	'.date':
-		function(e) {
-			e.setAttribute('_last_val', e.value);
-			e.setAttribute('autocomplete', 'off');
-  		  	e.onblur = function() {
-				var val = this.getAttribute('_last_val');
-				if (val != this.value) {
-					this.value = fix_date(this.value, val);
-					this.setAttribute('_last_val', this.value);
-					if (e.className.match(/\bactive\b/))
-						JsHttpRequest.request('_'+this.name+'_changed', this.form);
-				}
-			}
-	},
 	'button[aspect*selector], button[aspect*abort], input[aspect*selector]': function(e) {
 		e.onclick = function() {
 			passBack(this.getAttribute('rel'));

@@ -27,12 +27,13 @@ function add_item_location($loc_code, $location_name, $delivery_address, $phone,
 
 //------------------------------------------------------------------------------------
 
-function update_item_location($loc_code, $location_name, $delivery_address, $phone, $phone2, $fax, $email, $contact)
+function update_item_location($loc_code, $location_name, $delivery_address, $phone, $phone2, $order_weight, $stock_weight, $fax, $email, $contact)
 
 {
     $sql = "UPDATE ".TB_PREF."locations SET location_name=".db_escape($location_name).",
     	delivery_address=".db_escape($delivery_address).",
     	phone=".db_escape($phone).", phone2=".db_escape($phone2).", fax=".db_escape($fax).",
+	order_weight=".db_escape($order_weight).", stock_weight=".db_escape($stock_weight).",
     	email=".db_escape($email).", contact=".db_escape($contact)."
     	WHERE loc_code = ".db_escape($loc_code);
 

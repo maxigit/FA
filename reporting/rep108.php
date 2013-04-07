@@ -41,11 +41,11 @@ function getTransactions($debtorno, $date, $show_also_allocated)
     			FROM ".TB_PREF."debtor_trans
     			WHERE ".TB_PREF."debtor_trans.tran_date <= '$date' AND ".TB_PREF."debtor_trans.debtor_no = ".db_escape($debtorno)."
     				AND ".TB_PREF."debtor_trans.type <> ".ST_CUSTDELIVERY."
-    				AND (".TB_PREF."debtor_trans.ov_amount + ".TB_PREF."debtor_trans.ov_gst + ".TB_PREF."debtor_trans.ov_freight +
-				".TB_PREF."debtor_trans.ov_freight_tax + ".TB_PREF."debtor_trans.ov_discount) != 0";
+    				AND ABS(".TB_PREF."debtor_trans.ov_amount + ".TB_PREF."debtor_trans.ov_gst + ".TB_PREF."debtor_trans.ov_freight +
+				".TB_PREF."debtor_trans.ov_freight_tax + ".TB_PREF."debtor_trans.ov_discount) > 1e-6";
 	if (!$show_also_allocated)
-		$sql .= " AND ABS(".TB_PREF."debtor_trans.ov_amount + ".TB_PREF."debtor_trans.ov_gst + ".TB_PREF."debtor_trans.ov_freight +
-				".TB_PREF."debtor_trans.ov_freight_tax + ".TB_PREF."debtor_trans.ov_discount) - alloc <> 0";
+		$sql .= " AND ABS (ABS(".TB_PREF."debtor_trans.ov_amount + ".TB_PREF."debtor_trans.ov_gst + ".TB_PREF."debtor_trans.ov_freight +
+				".TB_PREF."debtor_trans.ov_freight_tax + ".TB_PREF."debtor_trans.ov_discount) - alloc) > 1e-6";
 	$sql .= " ORDER BY ".TB_PREF."debtor_trans.tran_date";
 
     return db_query($sql,"No transactions were returned");
@@ -109,13 +109,17 @@ function print_statements()
 			$rep = new FrontReport("", "", user_pagesize(), 9, $orientation);
 			$rep->title = _('STATEMENT');
 			$rep->filename = "Statement" . $myrow['debtor_no'] . ".pdf";
-		}	
+			$rep->Info($params, $cols, null, $aligns);
+		}
+
+		$rep->filename = "MAE-ST-" . strtr($myrow['DebtorName'], " '", "__") ."--" . strtr(Today(), "/", "-") . ".pdf";
+		$contacts = array_merge(get_customer_contacts($myrow['debtor_no'], 'invoice'), get_customer_contacts($myrow['debtor_no'], 'general'));
+		// last version: 2.3.14: $contacts = get_customer_contacts($myrow['debtor_no'], 'invoice');
 		$rep->SetHeaderType('Header2');
 		$rep->currency = $cur;
 		$rep->Font();
 		$rep->Info($params, $cols, null, $aligns);
 
-		$contacts = get_customer_contacts($myrow['debtor_no'], 'invoice');
 		//= get_branch_contacts($branch['branch_code'], 'invoice', $branch['debtor_no']);
 		$rep->SetCommonData($myrow, null, null, $baccount, ST_STATEMENT, $contacts);
 		$rep->NewPage();

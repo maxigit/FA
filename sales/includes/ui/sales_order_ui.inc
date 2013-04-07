@@ -168,14 +168,64 @@ function display_order_summary($title, &$order, $editable_items=false)
 		$qoh_msg = '';
 		if (!$editable_items || $id != $line_no)
 		{
-			if (!$SysPrefs->allow_negative_stock() && is_inventory_item($stock_item->stock_id) && 
-				$order->trans_type != ST_SALESORDER && $order->trans_type!=ST_SALESQUOTE) {
-				$qoh = get_qoh_on_date($stock_item->stock_id, 
-					$_POST['Location'], $_POST['delivery_date']);
-				if (($stock_item->qty_dispatched -$stock_item->qty_done) > $qoh)
+			// Elax: Display different colors depening of stock and orders
+			if (!$SysPrefs->allow_negative_stock() && is_inventory_item($stock_item->stock_id)) {
+							$on_hand = "";
+							$on_stock = "";
+				$quantity = $stock_item->qty_dispatched - $stock_item->qty_done;
+				if($quantity)
+				{
+					$quantity_on_database = $stock_item->qty_old;
+					$qoh = get_qoh_on_date($stock_item->stock_id, 
+						$_POST['Location'], $_POST['delivery_date']);
+					$qoh_all = get_qoh_on_date($stock_item->stock_id) + get_on_porder_qty($stock_item->stock_id);
+					//$total_demand = get_demand_qty($stock_item->stock_id) - $quantity_on_database;
+					$total_demand = get_quantity_booked_for_other($stock_item->stock_id, $order);
+					//print "total $total_demand, qoh_all $qoh_all";
+
+					// begin
+					//  on hand ? 
+					if($qoh_all <= 0)
+					{
+						$on_hand = "soldout";
+					}
+					else if($quantity <= $qoh) 
+					{
+						$on_hand = "";
+					}
+					else if($quantity  <= $qoh_all)
+					{
+						$on_hand = "backorder";
+					}
+					else {
+						$on_hand = "oversold";
+					}
+
+					// on_stock
+					if(($quantity+$total_demand) > $qoh_all)
+					{
+						$on_stock= "steal";
+					}
+					else if(($quantity+$total_demand) <= $qoh || ($qoh<=0 && $qoh_all > 0))
+					{
+						$on_stock = "";
+					}
+					else if(($quantity+$total_demand) <= $qoh_all)
+					{
+						$on_stock= "borrow";
+					}
+				}
+				else {
+					$on_stock = "dispatched";
+				}
+
+
+				// end
+
+				if($on_stock || $on_hand)
 				{
 					// oops, we don't have enough of one of the component items
-					start_row("class='stockmankobg'");
+					start_row("class='stockmankobg on_stock_$on_stock on_hand_$on_hand quantity=$quantity qoh=$qoh qoh_all=$qoh_all total=$total_demand'");
 					$qoh_msg .= $stock_item->stock_id . " - " . $stock_item->item_description . ": " .
 					_("Quantity On Hand") . " = " 
 					. number_format2($qoh, get_qty_dec($stock_item->stock_id)) . '<br>';

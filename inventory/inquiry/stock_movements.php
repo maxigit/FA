@@ -57,7 +57,7 @@ end_table();
 start_table(TABLESTYLE_NOBORDER);
 start_row();
 
-locations_list_cells(_("From Location:"), 'StockLocation', null);
+locations_list_cells(_("From Location:"), 'StockLocation', null, true);
 
 date_cells(_("From:"), 'AfterDate', '', null, -30);
 date_cells(_("To:"), 'BeforeDate');

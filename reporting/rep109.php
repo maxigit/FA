@@ -64,7 +64,11 @@ function print_sales_orders()
 		if ($print_as_quote == 0)
 			$rep = new FrontReport(_("SALES ORDER"), "SalesOrderBulk", user_pagesize(), 9, $orientation);
 		else
-			$rep = new FrontReport(_("QUOTE"), "QuoteBulk", user_pagesize(), 9, $orientation);
+			$rep = new FrontReport(_("PRO-FORMA INVOICE\n This is not a VAT invoice"), "QuoteBulk", user_pagesize(), 9, $orientation);
+		$rep->SetHeaderType('Header2');
+		$rep->currency = $cur;
+		$rep->Font();
+		$rep->Info($params, $cols, null, $aligns);
 	}
     if ($orientation == 'L')
     	recalculate_cols($cols);
@@ -80,7 +84,7 @@ function print_sales_orders()
 			$rep = new FrontReport("", "", user_pagesize(), 9, $orientation);
 			if ($print_as_quote == 1)
 			{
-				$rep->title = _('QUOTE');
+				$rep->title = _('PROFORMA INVOICE');
 				$rep->filename = "Quote" . $i . ".pdf";
 			}
 			else
@@ -90,7 +94,7 @@ function print_sales_orders()
 			}
 		}
 		else
-			$rep->title = ($print_as_quote==1 ? _("QUOTE") : _("SALES ORDER"));
+			$rep->title = ($print_as_quote==1 ? _("PROFORMA INVOICE") : _("SALES ORDER"));
 		$rep->SetHeaderType('Header2');
 		$rep->currency = $cur;
 		$rep->Font();

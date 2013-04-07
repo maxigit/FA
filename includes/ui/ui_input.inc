@@ -37,7 +37,6 @@ function find_submit($prefix, $numeric=true)
     }
     return $numeric ? -1 : null;
 }
-
 //------------------------------------------------------------------------------
 //
 // Helper function for simple db table editor pages
@@ -638,7 +637,7 @@ function date_cells($label, $name, $title = null, $check=null, $inc_days=0,
 
 	echo "<td>";
 	
-	$class = $submit_on_change ? 'date active' : 'date';
+	$class = $submit_on_change ? 'class="searchbox"' : '';
 
 	$aspect = $check ? 'aspect="cdate"' : '';
 	if ($check && (get_post($name) != Today()))

@@ -335,7 +335,7 @@ function get_sales_order_details($order_no, $trans_type) {
 	FROM ".TB_PREF."sales_order_details, ".TB_PREF."stock_master
 	WHERE ".TB_PREF."sales_order_details.stk_code = ".TB_PREF."stock_master.stock_id
 	AND order_no =" . db_escape($order_no) 
-		." AND trans_type = " . db_escape($trans_type) . " ORDER BY id";
+		." AND trans_type = " . db_escape($trans_type) . " ORDER BY stk_code";
 
 	return db_query($sql, "Retreive order Line Items");
 }

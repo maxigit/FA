@@ -43,6 +43,7 @@ function print_invoices()
 	$pay_service = $_POST['PARAM_4'];
 	$comments = $_POST['PARAM_5'];
 	$orientation = $_POST['PARAM_6'];
+	$customer = $_POST['PARAM_7'];
 
 	if (!$from || !$to) return;
 
@@ -73,6 +74,10 @@ function print_invoices()
 				continue;
 			$sign = 1;
 			$myrow = get_customer_trans($i, ST_SALESINVOICE);
+
+			if($customer && $myrow['debtor_no'] != $customer) {
+				continue;
+			}
 			$baccount = get_default_bank_account($myrow['curr_code']);
 			$params['bankaccount'] = $baccount['id'];
 
@@ -83,7 +88,11 @@ function print_invoices()
 				$rep = new FrontReport("", "", user_pagesize(), 9, $orientation);
 				$rep->title = _('INVOICE');
 				$rep->filename = "Invoice" . $myrow['reference'] . ".pdf";
-			}	
+				$rep->Info($params, $cols, null, $aligns);
+			}
+			else
+				$rep->title = _('INVOICE');
+			$rep->filename = strtr("MAE-IN-" . $myrow['DebtorName'] ."-" . $i . ".pdf", " ", "_");
 			$rep->SetHeaderType('Header2');
 			$rep->currency = $cur;
 			$rep->Font();

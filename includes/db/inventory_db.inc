@@ -11,23 +11,25 @@
 ***********************************************************************/
 function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0)
 {
+        $sql = "SELECT SUM(qty) FROM ".TB_PREF."stock_moves NATURAL JOIN ".TB_PREF."locations";
+
     if ($date_ == null)
     {
-        $sql = "SELECT SUM(qty) FROM ".TB_PREF."stock_moves
-            WHERE stock_id=".db_escape($stock_id);
+	    $sql.= " WHERE stock_id=".db_escape($stock_id);
         $date_ = Today();
         $date = date2sql($date_);
     }
     else
     {
         $date = date2sql($date_);
-        $sql = "SELECT SUM(qty) FROM ".TB_PREF."stock_moves
-            WHERE stock_id=".db_escape($stock_id)."
+	$sql .= " WHERE stock_id=".db_escape($stock_id)."
             AND tran_date <= '$date'"; 
     }
         
     if ($location != null)
         $sql .= " AND loc_code = ".db_escape($location);
+    else // All location, we exclude location with 0 stock  weight
+        $sql .= " AND stock_weight > 0 ";
 
     $result = db_query($sql, "QOH calulcation failed");
 
@@ -46,6 +48,38 @@ function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0)
     }
 
     return $myrow[0];
+}
+
+/* Get quantity available for a specific order
+ * depending on its place in the order queue.
+ * It doesn't take the location into account.
+ */
+function get_quantity_booked_for_other($stock_id, $order)
+{
+	if(!isset($order)) {
+		display_error('order not set');
+
+	}
+	$reference = $order->reference;
+	$order_date = $order->document_date;
+
+	$sql = "SELECT SUM((quantity - qty_sent)*order_weight) FROM ".TB_PREF."sales_order_details
+		NATURAL JOIN ".TB_PREF."sales_orders
+		JOIN ".TB_PREF."locations ON (loc_code = from_stk_loc)
+		WHERE stk_code = '$stock_id'
+		AND (ord_date < '$order_date'
+			OR (ord_date = '$order_date' AND reference < '$reference'))";
+
+
+    $result = db_query($sql, "QOH calulcation failed");
+
+    $myrow = db_fetch_row($result);
+
+    //print $stock_id;
+    $result = $myrow[0];
+    if(!isset($result)) $result = 0;
+    //print $result;
+    return $result+0;
 }
 
 //--------------------------------------------------------------------------------------

@@ -50,7 +50,7 @@
 			break;
 
 		case ST_SALESORDER:
-			$this->title = ($print_as_quote==1 ? _("QUOTE") : _("SALES ORDER"));
+			$this->title = ($print_as_quote==1 ? _("PROFORMA INVOICE") : _("SALES ORDER"));
 			$this->formData['document_name'] =_("Order No.");
 			$this->formData['document_date'] = $this->formData['ord_date'];
 			$this->formData['document_number'] = $print_invoice_no == 0 && isset($this->formData['reference'])

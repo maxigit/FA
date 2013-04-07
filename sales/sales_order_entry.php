@@ -27,6 +27,7 @@ include_once($path_to_root . "/sales/includes/ui/sales_order_ui.inc");
 include_once($path_to_root . "/sales/includes/sales_db.inc");
 include_once($path_to_root . "/sales/includes/db/sales_types_db.inc");
 include_once($path_to_root . "/reporting/includes/reporting.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_manager.inc");
 
 set_page_security( @$_SESSION['Items']->trans_type,
 	array(	ST_SALESORDER=>'SA_SALESORDER',
@@ -660,6 +661,17 @@ function create_cart($type, $trans_no)
 
 //--------------------------------------------------------------------------------
 
+function handle_textcart($clear_cart=false, $default_mode=null) {
+  if (!isset($_POST['textcart'])) {
+    return;
+  }
+  $cart = $_SESSION['Items'];
+  $text = $_POST['textcart'];
+  if ($clear_cart) { $cart->line_items = array(); } // clear_items doesn't work, can't update the price if we are using it
+  process_textcart($cart, $text, $default_mode);
+}
+//--------------------------------------------------------------------------------
+
 if (isset($_POST['CancelOrder']))
 	handle_cancel_order();
 
@@ -709,6 +721,12 @@ if ($_SESSION['Items']->trans_type == ST_SALESINVOICE) {
 	$porder = _("Place Order");
 	$corder = _("Commit Order Changes");
 }
+$textcart_mgr = new SalesTextCartManager();
+$textcart_mgr->handle_post_request();
+function display_order_in_tab($title, $cart) {
+  display_order_summary($title, $cart, true);
+}
+
 start_form();
 
 hidden('cart_id');
@@ -718,7 +736,10 @@ $customer_error = display_order_header($_SESSION['Items'],
 if ($customer_error == "") {
 	start_table(TABLESTYLE, "width=80%", 10);
 	echo "<tr><td>";
-	display_order_summary($orderitems, $_SESSION['Items'], true);
+  $textcart_mgr->tab_display($orderitems
+    ,$_SESSION['Items']
+    ,"display_order_in_tab"
+  );
 	echo "</td></tr>";
 	echo "<tr><td>";
 	display_delivery_details($_SESSION['Items']);

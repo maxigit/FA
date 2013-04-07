@@ -20,6 +20,8 @@ include_once($path_to_root . "/includes/data_checks.inc");
 
 include_once($path_to_root . "/inventory/includes/item_adjustments_ui.inc");
 include_once($path_to_root . "/inventory/includes/inventory_db.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_manager.inc");
+
 $js = "";
 if ($use_popup_windows)
 	$js .= get_js_open_window(800, 500);
@@ -219,13 +221,19 @@ if (isset($_GET['NewAdjustment']) || !isset($_SESSION['adj_items']))
 }
 
 //-----------------------------------------------------------------------------------------------
+$textcart_mgr = new ItemsAdjTextCartManager();
+$textcart_mgr->handle_post_request();
+  function display_order_in_tab($title, $cart) {
+    display_adjustment_items($title, $cart);
+  }
+
 start_form();
 
 display_order_header($_SESSION['adj_items']);
 
 start_outer_table(TABLESTYLE, "width=70%", 10);
 
-display_adjustment_items(_("Adjustment Items"), $_SESSION['adj_items']);
+$textcart_mgr->tab_display(_("Adjustment Items"), $_SESSION['adj_items'], "display_order_in_tab");
 adjustment_options_controls();
 
 end_outer_table(1, false);

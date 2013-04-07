@@ -168,7 +168,7 @@ function print_customer_balances()
 		$init[3] = round2($bal['OutStanding'], $dec);;
 
 		$res = get_transactions($myrow['debtor_no'], $from, $to);
-		if ($no_zeros && db_num_rows($res) == 0) continue;
+		if ($no_zeros && abs(db_num_rows($res)) <= 1e-6)  continue;
 
  		$num_lines++;
 		$rep->fontSize += 2;

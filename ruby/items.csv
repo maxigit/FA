@@ -1,0 +1,5 @@
+type,item_code,stock_id,description,category,units,dummy,mb_flag,price,dimension,
+ITEM,MLB1-AF1-BLACK,MLB1-AF1-BLACK,WH-9,Fascinators,ea.,,B,,Max & Ellie Winter 2011,
+ITEM,MLB1-AF2-BLACK,MLB1-AF2-BLACK,WH-10,Fascinators,ea.,,B,,,
+ITEM,MLB1-AF3-BLACK,MLB1-AF3-BLACK,WH-11,Fascinators,ea.,,B,,Max & Ellie Winter 2011,
+ITEM,MLB1-AX1-BLACK,MLB1-AX1-BLACK,AZ,Hand-bags (ML),ea.,,B,,Max & Ellie Winter 2011,

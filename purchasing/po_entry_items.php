@@ -16,6 +16,7 @@ include_once($path_to_root . "/includes/session.inc");
 include_once($path_to_root . "/purchasing/includes/purchasing_ui.inc");
 include_once($path_to_root . "/purchasing/includes/db/suppliers_db.inc");
 include_once($path_to_root . "/reporting/includes/reporting.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_manager.inc");
 
 set_page_security( @$_SESSION['PO']->trans_type,
 	array(	ST_PURCHORDER => 'SA_PURCHASEORDER',
@@ -141,7 +142,6 @@ if (isset($_GET['AddedID']))
 	display_footer_exit();	
 }
 //--------------------------------------------------------------------------------------------------
-
 function line_start_focus() {
   global 	$Ajax;
 
@@ -511,13 +511,19 @@ if (isset($_POST['CancelUpdate']) || isset($_POST['UpdateLine'])) {
 }
 
 //---------------------------------------------------------------------------------------------------
+$textcart_mgr = new POTextCartManager();
+$textcart_mgr->handle_post_request();
+
+function display_order_in_tab ($title, $cart) {
+  display_po_items($cart);
+}
 
 start_form();
 
 display_po_header($_SESSION['PO']);
 echo "<br>";
 
-display_po_items($_SESSION['PO']);
+$textcart_mgr->tab_display('', &$_SESSION['PO'], "display_order_in_tab");
 
 start_table(TABLESTYLE2);
 textarea_row(_("Memo:"), 'Comments', null, 70, 4);

@@ -1,0 +1,5 @@
+type,stock_id,dummy,supplier_description,supplier,suppliers_uom,conversion_factor,dummy1,GBP,price,
+BUY,MLB1-AF1-BLACK,,WH-9 Black,MD Hats Accessory Ltd.,,1,,GBP,5.71,
+BUY,MLB1-AF2-BLACK,,WH-10,MD Hats Accessory Ltd.,,1,,GBP,4.53,
+BUY,MLB1-AF3-BLACK,,WH-11,MD Hats Accessory Ltd.,,1,,GBP,3.16,
+BUY,MLB1-AX1-BLACK,,AZ7484,MD Hats Accessory Ltd.,,1,,GBP,4.88,

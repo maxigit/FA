@@ -97,6 +97,10 @@ function display_trial_balance($type, $typename)
 			$printtitle = 1;		
 		}	
 	
+		# FA doesn't really clear the closed year, therefore the brought forward balance includes all the transaction from the past, even thought the balance is null.
+		# We want to remove the balanced part the previous year.
+		# For this, we substract the openning balance to the prev and tot figures.
+		$open = get_balance($account["account_code"], $_POST['Dimension'], $_POST['Dimension2'], $begin,  $begin, false, true);
 		$prev = get_balance($account["account_code"], $_POST['Dimension'], $_POST['Dimension2'], $begin, $_POST['TransFromDate'], false, false);
 		$curr = get_balance($account["account_code"], $_POST['Dimension'], $_POST['Dimension2'], $_POST['TransFromDate'], $_POST['TransToDate'], true, true);
 		$tot = get_balance($account["account_code"], $_POST['Dimension'], $_POST['Dimension2'], $begin, $_POST['TransToDate'], false, true);
@@ -117,12 +121,13 @@ function display_trial_balance($type, $typename)
 		}
 		else
 		{
-			amount_cell($prev['debit']);
-			amount_cell($prev['credit']);
+			$offset = min($open['debit'], $open['credit']);
+			amount_cell($prev['debit']-$offset);
+			amount_cell($prev['credit']-$offset);
 			amount_cell($curr['debit']);
 			amount_cell($curr['credit']);
-			amount_cell($tot['debit']);
-			amount_cell($tot['credit']);
+			amount_cell($tot['debit']-$offset);
+			amount_cell($tot['credit']-$offset);
 			$pdeb += $prev['debit'];
 			$pcre += $prev['credit'];
 			$cdeb += $curr['debit'];

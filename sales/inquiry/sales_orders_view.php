@@ -229,7 +229,7 @@ if ($show_dates)
   	date_cells(_("from:"), 'OrdersAfterDate', '', null, -30);
   	date_cells(_("to:"), 'OrdersToDate', '', null, 1);
 }
-locations_list_cells(_("Location:"), 'StockLocation', null, true);
+locations_list_cells(_("Location:"), 'StockLocation', null, true, true);
 
 if($show_dates) {
 	end_row();
@@ -260,11 +260,11 @@ $sql = get_sql_for_sales_orders_view($selected_customer, $trans_type, $_POST['Or
 if ($trans_type == ST_SALESORDER)
 	$cols = array(
 		_("Order #") => array('fun'=>'view_link'),
-		_("Ref"),
-		_("Customer"),
+		_("Ref") => array('type' => 'sorder.reference', 'ord' => '') ,
+		_("Customer") => array('type' => 'debtor.name' , 'ord' => '') ,
 		_("Branch"), 
 		_("Cust Order Ref"),
-		_("Order Date") => 'date',
+		_("Order Date") => array('type' =>  'date', 'ord' => ''),
 		_("Required By") =>array('type'=>'date', 'ord'=>''),
 		_("Delivery To"), 
 		_("Order Total") => array('type'=>'amount', 'ord'=>''),

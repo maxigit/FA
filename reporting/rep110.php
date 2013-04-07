@@ -70,6 +70,10 @@ function print_deliveries()
 			$rep = new FrontReport(_('DELIVERY'), "DeliveryNoteBulk", user_pagesize(), 9, $orientation);
 		else
 			$rep = new FrontReport(_('PACKING SLIP'), "PackingSlipBulk", user_pagesize(), 9, $orientation);
+		$rep->SetHeaderType('Header22');
+		$rep->currency = $cur;
+		$rep->Font();
+		$rep->Info($params, $cols, null, $aligns);
 	}
     if ($orientation == 'L')
     	recalculate_cols($cols);

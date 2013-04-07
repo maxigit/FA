@@ -440,6 +440,25 @@ class FrontReport extends Cpdf
 		$this->row = $temp;
 	}
 
+	function Header22()
+	{
+		global $path_to_root, $print_as_quote,
+			$print_invoice_no, $packing_slip, $dflt_lang; // FIXME should be passed as params
+
+		$doctype = $this->formData['doctype'];
+		$header2type = true;
+
+		$this->SetLang(@$this->formData['rep_lang'] ? $this->formData['rep_lang']
+ 			: ($_SESSION["wa_current_user"]->prefs->language ? $_SESSION["wa_current_user"]->prefs->language : $dflt_lang));
+
+ 		 // leave layout files names without path to enable including
+ 		 // modified versions from company/x/reporting directory
+		include("includes/doctext.inc");
+		include("includes/header3.inc");
+
+		$this->row = $temp;
+	}
+
 	// Alternate header style which also supports a simple footer
 	function Header3()
 	{
@@ -968,8 +987,9 @@ class FrontReport extends Cpdf
 			}
 			// do not use standard filenames or your sensitive company data 
 			// are world readable
-			if ($email == 1)
-				$fname = $dir.'/'.$this->filename;
+			//if ($email == 1 )
+			if (1 == 1 )
+				$fname = $dir.'/'.preg_replace('/&[^;]*;/', '_', $this->filename);
 			else	
 				$fname = $dir.'/'.uniqid('').'.pdf';
 			$this->Output($fname, 'F');
@@ -1003,8 +1023,9 @@ class FrontReport extends Cpdf
 
 	    				$to = str_replace(",", "", $contact['name'].' '.$contact['name2'])
 	    					." <" . $contact['email'] . ">";
-    					$msg = _("Dear") . " " . $contact['name2'] . ",\n\n" 
-    						. _("Attached you will find ") . " " . $subject ."\n\n";
+						// We use the first name as we are cool ;
+    					$msg = "\n\n". _("Dear") . " " . $contact['name'] . ",\n\n" 
+    						. _("Please find attached your") . " " . $subject .".\n\n";
 
 						if (isset($this->formData['payment_service']))
 						{
