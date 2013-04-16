@@ -988,8 +988,10 @@ class FrontReport extends Cpdf
 			// do not use standard filenames or your sensitive company data 
 			// are world readable
 			//if ($email == 1 )
-			if (1 == 1 )
+			if (1 == 1 ) {
 				$fname = $dir.'/'.preg_replace('/&[^;]*;/', '_', $this->filename);
+				$fname = $dir.'/'.preg_replace('/\//', '-', $fname);
+}
 			else	
 				$fname = $dir.'/'.uniqid('').'.pdf';
 			$this->Output($fname, 'F');
