@@ -132,7 +132,7 @@ class items
         $_POST['ss_length'] = $this->ss_length;
         $_POST['data_filter'] = $this->data_filter;
         text_row_ex(_("Number of items:"), 'top', 2);
-        text_row_ex(_("Filter:"), 'data_filter', 50);
+        text_row_ex(_("Filter:"), 'data_filter', 250);
         text_row_ex(_("Substring start"), 'ss_start', 2);
         text_row_ex(_("Substring end"), 'ss_length', 2);
         select_row(_("Graph Type"), "graph_type", null, $graph_types, null);
