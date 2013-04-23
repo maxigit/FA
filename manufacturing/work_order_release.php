@@ -52,9 +52,10 @@ function can_process($myrow)
 	}
 
 	// make sure item has components
-	// We don't need to stop the user to release it if it's and advanced order.
-	// The user know what he is doing.
-	if (!has_bom($myrow['stock_id']) && $myrow['type'] != WO_ADVANCED)
+    // We don't need to stop the user to release it if it's and advanced order.
+    // The user know what he is doing.
+
+    if (!has_bom($myrow['stock_id']) && $myrow['type'] != WO_ADVANCED)
 	{
 		display_error(_("This Work Order cannot be released. The selected item to manufacture does not have a bom."));
 		set_focus('stock_id');
