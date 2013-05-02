@@ -6,7 +6,11 @@
 	FA extension system documentation.
 */
 
+<<<<<<< HEAD
 $next_extension_id = 32; // unique id for next installed extension
+=======
+$next_extension_id = 31; // unique id for next installed extension
+>>>>>>> 4c38b37... Change company specific files
 
 $installed_extensions = array (
   0 => 
@@ -183,6 +187,7 @@ $installed_extensions = array (
     'path' => 'modules/picking',
     'active' => false,
   ),
+<<<<<<< HEAD
   31 => 
   array (
     'package' => 'order_line_extra',
@@ -193,5 +198,7 @@ $installed_extensions = array (
     'path' => 'modules/order_line_extra',
     'active' => false,
   ),
+=======
+>>>>>>> 4c38b37... Change company specific files
 );
 ?>
