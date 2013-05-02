@@ -440,8 +440,9 @@ var inserts = {
 					ev.returnValue = false;
 					return false;
 				}
-				if (!_hotkeys.alt)	// ommit chrome Chrome accesskeys 
-	 				window.location = e.href;
+				if (_hotkeys.alt)	// ommit Chrome accesskeys 
+					return false;
+ 				window.location = e.href;
 			}
 	},
 	'ul.ajaxtabs':	function(ul) {
@@ -452,7 +453,7 @@ var inserts = {
 // ?  var modifiedurl=ulistlink.getAttribute("href").replace(/^http:\/\/[^\/]+\//i, "http://"+window.location.hostname+"/")
 		    var url = tab.form.action
 		    tab.onclick=function(){
-		    if (!_hotkeys.alt)
+		    if (!_hotkeys.alt && !tab.disabled)
 				_expand(this);
 			return false;
 		    }
