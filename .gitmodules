@@ -7,3 +7,6 @@
 [submodule "modules/order_line_extra"]
 	path = modules/order_line_extra
 	url = git@bb:elax/fa-order_line_extra.git
+[submodule "modules/stock_audit"]
+	path = modules/stock_audit
+	url = git@bb:elax/fa-stock_audit.git

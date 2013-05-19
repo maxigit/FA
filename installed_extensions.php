@@ -6,7 +6,7 @@
 	FA extension system documentation.
 */
 
-$next_extension_id = 32; // unique id for next installed extension
+$next_extension_id = 33; // unique id for next installed extension
 
 $installed_extensions = array (
   0 => 
@@ -191,6 +191,16 @@ $installed_extensions = array (
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/order_line_extra',
+    'active' => false,
+  ),
+  32 => 
+  array (
+    'package' => 'stock_audit',
+    'name' => 'stock_audit',
+    'version' => '-',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/stock_audit',
     'active' => false,
   ),
 );
