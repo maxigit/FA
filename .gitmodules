@@ -4,3 +4,6 @@
 [submodule "modules/textcart"]
 	path = modules/textcart
 	url = /home/max/test/fa/modules/textcart
+[submodule "modules/order_line_extra"]
+	path = modules/order_line_extra
+	url = git@bb:elax/fa-order_line_extra.git
