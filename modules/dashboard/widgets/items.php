@@ -64,7 +64,9 @@ class items
             $sql .= "AND s.mb_flag='M' ";
         if ($this->data_filter != '')
             $sql .= ' AND '.$this->data_filter;
-        $sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1' GROUP by stock_id ORDER BY total DESC, s.stock_id "
+				else
+					$sql .= "AND d.tran_date >= '$begin1' AND d.tran_date <= '$today1'";
+				$sql .= " GROUP by stock_id ORDER BY total DESC, s.stock_id "
               ." LIMIT ".$this->top;
         $result = db_query($sql);
 

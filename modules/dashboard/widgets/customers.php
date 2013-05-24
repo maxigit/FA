@@ -54,9 +54,11 @@ class customers
 	$sql_total = "SELECT SUM((ov_amount + ov_discount) * rate*IF(trans.type = ".ST_CUSTCREDIT.", -1, 1)) AS total, COUNT(DISTINCT trans.debtor_no) AS customer_number  FROM
 		".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d WHERE trans.debtor_no=d.debtor_no
 		AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")
-		AND tran_date >= '$begin1' AND tran_date <= '$today1'";
+		AND tran_date <= '$today1'";
         if ($this->data_filter != '')
             $sql_total .= ' AND '.$this->data_filter;
+				else
+					$sql_total .= " AND tran_date >= '$begin1'";
 	$result = db_query($sql_total);
 	$my_row = db_fetch($result);
 	$total = $my_row['total'];
@@ -69,9 +71,11 @@ class customers
             ." FROM ".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d"
             ." WHERE trans.debtor_no=d.debtor_no"
             ." AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")"
-            ." AND tran_date >= '$begin1' AND tran_date <= '$today1'";
+            ." AND tran_date <= '$today1'";
         if ($this->data_filter != '')
             $sql .= ' AND '.$this->data_filter;
+				else
+					$sql .= " AND tran_date >= '$begin1'";
         $sql .= " GROUP by d.debtor_no ORDER BY total DESC, d.debtor_no "
             ." LIMIT ".$this->top;
         $result = db_query($sql);
