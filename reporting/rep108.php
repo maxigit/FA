@@ -37,11 +37,11 @@ function getTransactions($debtorno, $date, $show_also_allocated)
 				".TB_PREF."debtor_trans.ov_freight_tax + ".TB_PREF."debtor_trans.ov_discount)
 				AS TotalAmount, ".TB_PREF."debtor_trans.alloc AS Allocated,
 				((".TB_PREF."debtor_trans.type = ".ST_SALESINVOICE.")
-					AND ".TB_PREF."debtor_trans.due_date < '$date') AS OverDue
-    			FROM ".TB_PREF."debtor_trans
-    			WHERE ".TB_PREF."debtor_trans.tran_date <= '$date' AND ".TB_PREF."debtor_trans.debtor_no = ".db_escape($debtorno)."
+				AND ".TB_PREF."debtor_trans.due_date < '$date') AS OverDue
+				FROM ".TB_PREF."debtor_trans
+				WHERE ".TB_PREF."debtor_trans.tran_date <= '$date' AND ".TB_PREF."debtor_trans.debtor_no = ".db_escape($debtorno)."
     				AND ".TB_PREF."debtor_trans.type <> ".ST_CUSTDELIVERY."
-    				AND ABS(".TB_PREF."debtor_trans.ov_amount + ".TB_PREF."debtor_trans.ov_gst + ".TB_PREF."debtor_trans.ov_freight +
+					AND ABS(".TB_PREF."debtor_trans.ov_amount + ".TB_PREF."debtor_trans.ov_gst + ".TB_PREF."debtor_trans.ov_freight +
 				".TB_PREF."debtor_trans.ov_freight_tax + ".TB_PREF."debtor_trans.ov_discount) > 1e-6";
 	if (!$show_also_allocated)
 		$sql .= " AND ABS (ABS(".TB_PREF."debtor_trans.ov_amount + ".TB_PREF."debtor_trans.ov_gst + ".TB_PREF."debtor_trans.ov_freight +
@@ -113,8 +113,7 @@ function print_statements()
 		}
 
 		$rep->filename = "MAE-ST-" . strtr($myrow['DebtorName'], " '", "__") ."--" . strtr(Today(), "/", "-") . ".pdf";
-		$contacts = array_merge(get_customer_contacts($myrow['debtor_no'], 'invoice'), get_customer_contacts($myrow['debtor_no'], 'general'));
-		// last version: 2.3.14: $contacts = get_customer_contacts($myrow['debtor_no'], 'invoice');
+		$contacts = get_customer_contacts($myrow['debtor_no'], 'invoice');
 		$rep->SetHeaderType('Header2');
 		$rep->currency = $cur;
 		$rep->Font();
