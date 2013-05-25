@@ -1,1 +1,0 @@
-see install section in README.md
