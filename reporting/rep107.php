@@ -42,8 +42,8 @@ function print_invoices()
 	$email = $_POST['PARAM_3'];
 	$pay_service = $_POST['PARAM_4'];
 	$comments = $_POST['PARAM_5'];
-	$orientation = $_POST['PARAM_6'];
-	$customer = $_POST['PARAM_7'];
+	$customer = $_POST['PARAM_6'];
+	$orientation = $_POST['PARAM_7'];
 
 	if (!$from || !$to) return;
 

@@ -99,8 +99,8 @@ $reports->addReport(RC_CUSTOMER, 107, _('Print &Invoices'),
 			_('email Customers') => 'YES_NO',
 			_('Payment Link') => 'PAYMENT_LINK',
 			_('Comments') => 'TEXTBOX',
-			_('Orientation') => 'ORIENTATION',
-			_('Customer') => 'CUSTOMERS_NO_FILTER'
+			_('Customer') => 'CUSTOMERS_NO_FILTER',
+			_('Orientation') => 'ORIENTATION'
 ));
 $reports->addReport(RC_CUSTOMER, 113, _('Print &Credit Notes'),
 	array(	_('From') => 'CREDIT',
@@ -225,6 +225,7 @@ $reports->addReport(RC_INVENTORY, 303, _('Stock &Check Sheets'),
 			_('Inventory Column') => 'YES_NO',
 			_('Show Shortage') => 'YES_NO',
 			_('Suppress Zeros') => 'YES_NO',
+			_('Item Like') => 'TEXT',
 			_('Comments') => 'TEXTBOX',
 			_('Orientation') => 'ORIENTATION',
 			_('Destination') => 'DESTINATION',

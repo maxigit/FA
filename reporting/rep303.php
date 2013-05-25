@@ -73,7 +73,7 @@ function getTransactions($category, $location, $item_like)
   {
     $regexp = null;
 
-    if(sscanf($item_like, "/%s", &$regexp)==1)
+    if(sscanf($item_like, "/%s", $regexp)==1)
       $sql .= " AND ".TB_PREF."stock_master.stock_id RLIKE ".db_escape($regexp);
     else
       $sql .= " AND ".TB_PREF."stock_master.stock_id LIKE ".db_escape($item_like);
@@ -100,10 +100,10 @@ function print_stock_check()
     	$check    = $_POST['PARAM_3'];
     	$shortage = $_POST['PARAM_4'];
     	$no_zeros = $_POST['PARAM_5'];
-    	$comments = $_POST['PARAM_6'];
-    	$like = $_POST['PARAM_9']; 
-	$orientation = $_POST['PARAM_7'];
-	$destination = $_POST['PARAM_8'];
+    	$like     = $_POST['PARAM_6']; 
+    	$comments = $_POST['PARAM_7'];
+	$orientation = $_POST['PARAM_8'];
+	$destination = $_POST['PARAM_9'];
 
 	if ($destination)
 		include_once($path_to_root . "/reporting/includes/excel_report.inc");
