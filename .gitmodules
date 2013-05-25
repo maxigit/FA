@@ -1,3 +1,6 @@
 [submodule "modules/picking"]
 	path = modules/picking
 	url = bb:elax/fa-to-mop.git
+[submodule "modules/textcart"]
+	path = modules/textcart
+	url = git@bb:elax/fa-textcart.git
