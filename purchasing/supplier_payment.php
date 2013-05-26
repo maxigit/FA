@@ -228,7 +228,7 @@ function handle_add_payment()
 	else
 	{
 		$rate = input_num('_ex_rate');
-		$supplier_amount = input_num('_supp_amount'); 
+		$supplier_amount = input_num('allocated_amount'); 
 			if($supplier_amount) $rate = input_num('amount')/$supplier_amount;
 	}
 
@@ -301,9 +301,7 @@ start_form();
 	$bank_currency = get_bank_account_currency($_POST['bank_account']);
 	if ($bank_currency != $supplier_currency) 
 	{
-		//exchange_rate_display($bank_currency, $supplier_currency, $_POST['DatePaid'], true);
-		// my version
-		text_row("Supplier Amount:", '_supp_amount', 0, 8, 8, null, "", $supplier_currency );
+		amount_row("Supplier Amount:", 'allocated_amount', null, '', $supplier_currency, 2);
 	}
 
 	amount_row(_("Bank Charge:"), 'charge');

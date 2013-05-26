@@ -570,6 +570,12 @@ else  {
 }
 submit_center_first('Update', _("Update"),
 	_('Refresh document page'), true);
+if(isset($_POST['clear_quantity'])) {
+	submit('reset_quantity', _('Reset quantity'), true, _('Refresh document page'));
+}
+else  {
+	submit('clear_quantity', _('Clear quantity'), true, _('Refresh document page'));
+}
 submit_center_last('process_delivery', _("Process Dispatch"),
 	_('Check entered data and save document'), 'default');
 

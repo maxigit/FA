@@ -238,9 +238,9 @@ if($show_dates) {
 	start_table(TABLESTYLE_NOBORDER);
 	start_row();
 }
-stock_items_list_cells(_("Item:"), 'SelectStockFromList', null, true);
+stock_items_list_cells(_("Item:"), 'SelectStockFromList', null, true, true);
 if (!@$_GET['popup'])
-	customer_list_cells(_("Select a customer: "), 'customer_id', null, true);
+	customer_list_cells(_("Select a customer: "), 'customer_id', null, true, true);
 if ($trans_type == ST_SALESQUOTE)
 	check_cells(_("Show All:"), 'show_all');
 
