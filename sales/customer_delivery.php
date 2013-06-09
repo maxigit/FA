@@ -469,7 +469,7 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 
 	if ($show_qoh) {
 		$qoh = get_qoh_on_date($ln_itm->stock_id, $_POST['Location'], $_POST['DispatchDate']);
-		$qavailable = hook_get_allowed_quantity($ln_itm->id, $_POST['Location'], $_POST['DispatchDate'], $qoh);
+		list($qavailable, $qclass) = hook_get_allowed_quantity($ln_itm->id, $_POST['Location'], $_POST['DispatchDate'], $qoh);
 	}
 
 	if ($show_qoh && ($ln_itm->qty_dispatched > $qoh)) {
@@ -479,7 +479,7 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 			$ln_itm->qty_dispatched = max(0, min($qavailable, $qoh));
 	} else if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable)) {
 		// we don't have enough on hand but their are not available
-		start_row($qavailable ? "class='partial'" : "class='limited'");
+		start_row($qavailable ? "class='partial $qclass'" : "class='limited $qclass'");
 		$has_marked = true;
 			$ln_itm->qty_dispatched = (int) $qavailable;
 	} else {

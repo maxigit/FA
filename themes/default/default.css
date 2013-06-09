@@ -391,6 +391,10 @@ div.tabs a:hover {
 	background: yellow;
 }
 
+.early {
+	background: #cdf;
+}
+
 table.tablestyle {
 	border-collapse: collapse;
 	border: 1px solid #8cacbb;
