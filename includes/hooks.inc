@@ -193,6 +193,7 @@ class hooks {
 
 	/*
 	 * Returns the quantity allowed to be dispatched for a particular item 
+	 * and a status (which can be used to style the row).
 	 * This quantity would be the default value on the delivery note.
 	 * The usual use case for this is when a item is in stock,
 	 * but has been reserved by someone else.
@@ -205,7 +206,7 @@ class hooks {
 		$date =array_shift($opts);
 		$qoh =array_shift($opts);
 		
-		return $qoh;
+		return array($qoh, '');
 	}
 }
 
