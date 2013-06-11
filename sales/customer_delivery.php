@@ -559,7 +559,7 @@ textarea_row(_("Memo"), 'Comments', null, 50, 4);
 
 end_table(1);
 div_end();
-if($_POST['clear_quantity']) {
+if(@$_POST['clear_quantity']) {
 	submit_center('reset_quantity', 'Reset quantity',
 		_('Refresh document page'), true);
 }
