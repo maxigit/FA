@@ -201,7 +201,7 @@ class hooks {
 	 * This function is by detail_id and not item in case the item is present
 	 * more than one in  the cart.
 	 */
-	function  get_allowed_quantity($detail_id, $opts) {
+	static function  default_get_allowed_quantity($detail_id, $opts) {
 		$location=array_shift($opts);
 		$date =array_shift($opts);
 		$qoh =array_shift($opts);
@@ -444,5 +444,6 @@ function hook_authenticate($login, $password)
 	 * more than one in  the cart.
 	 */
 function hook_get_allowed_quantity($item_id, $location, $date, $qoh) {
-		return hook_invoke_first('get_allowed_quantity', $item_id, array($location, $date, $qoh));
+		$result =  hook_invoke_first('get_allowed_quantity', $item_id, array($location, $date, $qoh));
+		return $result !== null ? $result : Hook::default_get_allowed_quantity($item_id, $location, $date, $qoh);
 }
