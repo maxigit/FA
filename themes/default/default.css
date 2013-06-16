@@ -383,6 +383,17 @@ div.tabs a:hover {
 }
 
 
+.limited {
+	background: orange;
+}
+
+.partial {
+	background: yellow;
+}
+
+.early {
+	background: #cdf;
+}
 
 table.tablestyle {
 	border-collapse: collapse;
