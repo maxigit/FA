@@ -470,18 +470,20 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	if ($show_qoh) {
 		$qoh = get_qoh_on_date($ln_itm->stock_id, $_POST['Location'], $_POST['DispatchDate']);
 		list($qavailable, $qclass) = hook_get_allowed_quantity($ln_itm->id, $_POST['Location'], $_POST['DispatchDate'], $qoh);
+		$qavailable = min($qoh, $qavailable);
 	}
 
-	if ($show_qoh && ($ln_itm->qty_dispatched > $qoh)) {
-		// oops, we don't have enough of one of the component items
-		start_row("class='stockmankobg'");
-		$has_marked = true;
-			$ln_itm->qty_dispatched = max(0, min($qavailable, $qoh));
-	} else if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable)) {
+	if ($show_qoh && ($ln_itm->qty_dispatched > $qavailable && $qavailable > 0)) {
 		// we don't have enough on hand but their are not available
 		start_row($qavailable ? "class='partial $qclass'" : "class='limited $qclass'");
 		$has_marked = true;
 			$ln_itm->qty_dispatched = (int) $qavailable;
+	}
+	else if ($show_qoh && ($ln_itm->qty_dispatched > $qoh)) {
+		// oops, we don't have enough of one of the component items
+		start_row("class='stockmankobg'");
+		$has_marked = true;
+			$ln_itm->qty_dispatched = max(0, min($qavailable, $qoh));
 	} else {
 		alt_table_row_color($k);
 	}
