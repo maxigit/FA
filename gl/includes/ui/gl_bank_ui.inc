@@ -149,13 +149,13 @@ function display_gl_items($title, &$order)
 
 	if ($dim == 2)
 		$th = array(_("Account Code"), _("Account Description"), _("Dimension")." 1",
-			_("Dimension")." 2", _("Amount"), _("Memo"), "");
+			_("Dimension")." 2", _("Amount"), _("Tax Input/Output"), _("Memo"), "");
 	else if ($dim == 1)
 		$th = array(_("Account Code"), _("Account Description"), _("Dimension"),
-			_("Amount"), _("Memo"), "");
+			_("Amount"), _("Tax Input/Output"),  _("Memo"), "");
 	else
 		$th = array(_("Account Code"), _("Account Description"),
-			_("Amount"), _("Memo"), "");
+			_("Amount"), _("Tax Input/Output"),  _("Memo"), "");
 
 	if (count($order->gl_items)) $th[] = '';
 
@@ -163,6 +163,8 @@ function display_gl_items($title, &$order)
 	$k = 0;  //row colour counter
 
 	$id = find_submit('Edit');
+	$net_amount = 0;
+	$has_tax = false;
 	foreach ($order->gl_items as $line => $item)
 	{
 		if ($id != $line)
@@ -180,6 +182,15 @@ function display_gl_items($title, &$order)
 				amount_cell(-$item->amount);
 			else		
 				amount_cell($item->amount);
+			if(is_tax_account($item->code_id)) {
+				amount_cell(abs($item->tax_net_amount));
+				$net_amount -= $item->tax_net_amount;
+				$has_tax = true;
+			}
+			else {
+				$net_amount += $item->amount;
+				label_cell('');
+			}
 			label_cell($item->reference);
 
 			edit_button_cell("Edit$line", _("Edit"),
@@ -190,26 +201,46 @@ function display_gl_items($title, &$order)
 		}
 		else
 		{
-			gl_edit_item_controls($order, $dim, $line);
+			gl_edit_item_controls($order, $dim, $line, $net_amount);
 		}
 	}
 
 	if ($id == -1)
-		gl_edit_item_controls($order, $dim);
+		gl_edit_item_controls($order, $dim, null, $net_amount);
 
-	if ($order->count_gl_items())
+	if ($order->count_gl_items()) {
+		if($has_tax) {
+				label_cells(_("Net"), number_format2(abs($order->gl_items_total()-$order->gl_items_total_tax()), user_price_dec()),"colspan=" . $colspan . " align=right", "align=right",3);
+				amount_cell(number_format2(abs($order->gl_items_total_net()), user_price_dec()));
+		}
 		label_row(_("Total"), number_format2(abs($order->gl_items_total()), user_price_dec()),"colspan=" . $colspan . " align=right", "align=right",3);
+	}
 
     end_table();
 	div_end();
+
+	// Hack: Add tax item info in javascript as global variable
+	echo " <script type='text/javascript'> window.taxType = {";
+        $tax_types = get_all_tax_types_simple();
+        while ($row = db_fetch($tax_types)) 
+        {
+					if($row['inactive']==1) next;
+					$account = $row['sales_gl_code'];
+					$rate = $row['rate'];
+					if(!$account) $account = $row['purchase_gl_code'];
+					echo "$account: $rate,";
+        }  
+	echo " } </script>";
 }
 
 //---------------------------------------------------------------------------------
 
-function gl_edit_item_controls(&$order, $dim, $Index=null)
+function gl_edit_item_controls(&$order, $dim, $Index=null, $net_amount)
 {
 	global $Ajax;
 	$payment = $order->trans_type == ST_BANKPAYMENT;
+	$display = 'none';
+	$net_amount = abs($net_amount);
 
 	start_row();
 	$id = find_submit('Edit');
@@ -220,8 +251,13 @@ function gl_edit_item_controls(&$order, $dim, $Index=null)
 		$_POST['dimension_id'] = $item->dimension_id;
 		$_POST['dimension2_id'] = $item->dimension2_id;
 		$_POST['amount'] = price_format(abs($item->amount));
+		$_POST['tax_net_amount'] = price_format(abs($item->tax_net_amount));
 		$_POST['description'] = $item->description;
 		$_POST['LineMemo'] = $item->reference;
+
+		if(is_tax_account($item->code_id)) {
+			$display= 'inline';
+		}
 
 		hidden('Index', $id);
 		echo gl_all_accounts_list('code_id', null, true, true);
@@ -234,6 +270,7 @@ function gl_edit_item_controls(&$order, $dim, $Index=null)
 	else
 	{
 		$_POST['amount'] = price_format(0);
+		$_POST['tax_net_amount'] = price_format(0);
 		$_POST['dimension_id'] = 0;
 		$_POST['dimension2_id'] = 0;
 		//$_POST['LineMemo'] = ""; // let memo go to next line Joe Hunt 2010-05-30
@@ -269,6 +306,7 @@ function gl_edit_item_controls(&$order, $dim, $Index=null)
 		hidden('dimension2_id', 0);
 
 	amount_cells(null, 'amount');
+	echo "<td><input class='amount' name='tax_net_amount' style='display:$display;' size=\"15\" type=\"text\" value=\"$net_amount\"></td>";
 	text_cells_ex(null, 'LineMemo', 35, 255);
 
 	if ($id != -1)
