@@ -437,6 +437,10 @@ hr {
 	background-color: #c00;
 }
 
+.early {
+		background: #def;
+		color: blue;
+}
 
 
 table.tablestyle {
