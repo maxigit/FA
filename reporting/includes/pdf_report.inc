@@ -68,6 +68,7 @@ class FrontReport extends Cpdf
 	var $contactData; // contact data for sending emials/reportlanguage selection
 	
 	var $dest;	// destination: email or printer
+	var $email_body; // custom mail body set by the report it self.
 	
 	function FrontReport($title, $filename, $size = 'A4', $fontsize = 9, $orientation = 'P', $margins = NULL, $excelColWidthFactor = NULL)
 	{
@@ -1026,8 +1027,13 @@ class FrontReport extends Cpdf
 	    				$to = str_replace(",", "", $contact['name'].' '.$contact['name2'])
 	    					." <" . $contact['email'] . ">";
 						// We use the first name as we are cool ;
+						 if($this->email_body) {
+								$msg = str_replace("[contact]", $contact['name'], $this->email_body);
+							}
+							else {
     					$msg = "\n\n". _("Dear") . " " . $contact['name'] . ",\n\n" 
     						. _("Please find attached your") . " " . $subject .".\n\n";
+							}
 
 						if (isset($this->formData['payment_service']))
 						{

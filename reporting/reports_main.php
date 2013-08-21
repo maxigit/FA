@@ -98,6 +98,7 @@ $reports->addReport(RC_CUSTOMER, 107, _('Print &Invoices'),
 			_('Currency Filter') => 'CURRENCY',
 			_('email Customers') => 'YES_NO',
 			_('Payment Link') => 'PAYMENT_LINK',
+			_('Proforma Invoice') => 'YES_NO',
 			_('Comments') => 'TEXTBOX',
 			_('Customer') => 'CUSTOMERS_NO_FILTER',
 			_('Orientation') => 'ORIENTATION'

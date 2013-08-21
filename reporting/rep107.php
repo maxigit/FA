@@ -29,10 +29,11 @@ include_once($path_to_root . "/sales/includes/sales_db.inc");
 print_invoices();
 
 //----------------------------------------------------------------------------------------------------
+$print_as_quote = 0;
 
 function print_invoices()
 {
-	global $path_to_root, $alternative_tax_include_on_docs, $suppress_tax_rates, $no_zero_lines_amount;
+	global $path_to_root, $alternative_tax_include_on_docs, $suppress_tax_rates, $no_zero_lines_amount, $print_as_quote;
 	
 	include_once($path_to_root . "/reporting/includes/pdf_report.inc");
 
@@ -41,9 +42,10 @@ function print_invoices()
 	$currency = $_POST['PARAM_2'];
 	$email = $_POST['PARAM_3'];
 	$pay_service = $_POST['PARAM_4'];
-	$comments = $_POST['PARAM_5'];
-	$customer = $_POST['PARAM_6'];
-	$orientation = $_POST['PARAM_7'];
+	$print_as_quote = $_POST['PARAM_5'];
+	$comments = $_POST['PARAM_6'];
+	$customer = $_POST['PARAM_7'];
+	$orientation = $_POST['PARAM_8'];
 
 	if (!$from || !$to) return;
 
@@ -210,6 +212,33 @@ function print_invoices()
 			$rep->Font();
 			if ($email == 1)
 			{
+				if($print_as_quote)  {
+					$rep->email_body =  <<<EOT
+
+Hi [contact],
+
+Your order is picked, packed and ready to be dispatched.
+The total amount due is $DisplayTotal $cur (including delivery).
+Could you please arrange the payment ASAP and we will send your order upon receipt.
+
+
+Payments can be made by bank transfer to our bank , details are :
+
+Max & Ellie Ltd
+sort code : 40-25-59
+account number : 40093653
+IBAN : GB18MIDL40255940093653
+HSBC
+
+or alternatively by cheque payable to Max & Ellie Ltd and post to the address below.
+
+Max & Ellie Ltd
+Unit 6 Salvesen way
+Hull
+East riding of Yorkshire
+HU3 4UQ
+EOT;
+				}
 				$rep->End($email);
 			}
 	}

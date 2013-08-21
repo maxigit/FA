@@ -102,8 +102,14 @@
 			break;
 
 		case ST_SALESINVOICE:
-			$this->title = _("INVOICE");
-			$this->formData['document_name'] =_("Invoice No.");
+			if($print_as_quote) {
+				$this->title =  _("PROFORMA INVOICE");
+				$this->formData['document_name'] =_("Proforma No.");
+			}
+			else {
+				$this->title =  _("INVOICE");
+				$this->formData['document_name'] =_("Invoice No.");
+			}
 			$this->formData['domicile'] = $this->company['domicile'];
 			$Footer[0] = _("Please quote Invoice no. when paying. All amounts stated in"). " - " . $this->formData['curr_code'];
 
