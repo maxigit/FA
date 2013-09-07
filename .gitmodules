@@ -10,3 +10,6 @@
 [submodule "modules/stock_audit"]
 	path = modules/stock_audit
 	url = git@bb:elax/fa-stock_audit.git
+[submodule "modules/rep_customer_statement_account"]
+	path = modules/rep_customer_statement_account
+	url = git@bb:elax/fa-customer-account-statement-rep.git
