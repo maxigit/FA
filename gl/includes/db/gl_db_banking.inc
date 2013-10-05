@@ -35,7 +35,7 @@ function add_exchange_variation($trans_no, $date_, $acc_id, $account,
 	}	
 	$amount = get_gl_trans_from_to("", $date_, $account);
 	$diff = $amount - $for_amount;
-	if ($diff != 0)
+	if (floatcmp($diff,0))
 	{
 		if ($trans_no == null)
 			$trans_no = get_next_trans_no(ST_JOURNAL);
@@ -45,8 +45,9 @@ function add_exchange_variation($trans_no, $date_, $acc_id, $account,
     		-$diff, null, $person_type_id, $person_id);
     	add_gl_trans(ST_JOURNAL, $trans_no, $date_, get_company_pref('exchange_diff_act'), 0, 0, 
     		_("Exchange Variance"),	$diff, null, $person_type_id, $person_id);
+		return true;
 	}
-	return ($diff != 0);
+	return false;
 }
 
 //------------- New helper functions for revaluation of customer/supplier currencies 2011-05-08 Joe Hunt.
@@ -283,10 +284,11 @@ function add_bank_transfer($from_account, $to_account, $date_,
 //	Add bank payment or deposit to database.
 //
 //	$from_account - bank account id
-//  $item - transaction cart (line item's amounts in bank account's currency)
+//  $items - transaction cart (line amounts in bank account's currency); negative for deposit
 //  $person_type_id - defines type of $person_id identifiers
 //  $person_id	- supplier/customer/other id
-// $person_detail_id - customer branch id or not used
+//  $person_detail_id - customer branch id or not used
+//  $settled_amount - settled amount in AR/AP (if applicable) in customer/supplier currency (always non-negative number)
 //
 // returns an array of (inserted trans type, trans no)
 //
@@ -327,14 +329,14 @@ function write_bank_transaction($trans_type, $trans_no, $from_account, $items, $
     if ($person_type_id == PT_CUSTOMER)
     {
     	// we need to add a customer transaction record
-
 		// convert to customer currency
 		if (!isset($settled_amount)) // leaved for backward/ext compatibility 
-			$cust_amount = exchange_from_to($total_amount, $currency, get_customer_currency($person_id), $date_);
+			$cust_amount = exchange_from_to(abs($total_amount), $currency, get_customer_currency($person_id), $date_);
 		else
 			$cust_amount = $settled_amount;
-		// we need to negate it too
-		$cust_amount = -$cust_amount;
+
+		if ($trans_type == ST_BANKPAYMENT)
+			$cust_amount = -$cust_amount;
 
 		$trans_no = write_customer_trans($trans_type, 0, $person_id, $person_detail_id, $date_,
         	$ref, $cust_amount);
@@ -345,12 +347,12 @@ function write_bank_transaction($trans_type, $trans_no, $from_account, $items, $
     	// we need to add a supplier transaction record
 		// convert to supp currency
 		if (!isset($settled_amount)) // leaved for for backward/ext compatibility 
-			$supp_amount = exchange_from_to($total_amount, $currency, get_supplier_currency($person_id), $date_);
+			$supp_amount = exchange_from_to(abs($total_amount), $currency, get_supplier_currency($person_id), $date_);
 		else
 			$supp_amount = $settled_amount;
 
-		// we need to negate it too
-		$supp_amount = -$supp_amount;
+		if ($trans_type == ST_BANKPAYMENT)
+			$supp_amount = -$supp_amount;
 
 		$trans_no = write_supp_trans($trans_type, 0, $person_id, $date_, '',
 			$ref, "", $supp_amount, 0, 0);
