@@ -6,7 +6,7 @@
 	FA extension system documentation.
 */
 
-$next_extension_id = 33; // unique id for next installed extension
+$next_extension_id = 36; // unique id for next installed extension
 
 $installed_extensions = array (
   0 => 
@@ -201,6 +201,26 @@ $installed_extensions = array (
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/stock_audit',
+    'active' => false,
+  ),
+  34 => 
+  array (
+    'package' => 'rep_tax',
+    'name' => 'rep_tax',
+    'version' => '-',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/rep_tax',
+    'active' => false,
+  ),
+  35 => 
+  array (
+    'package' => 'rep_customer_statement_account',
+    'name' => 'rep_customer_statement_account',
+    'version' => '-',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/rep_customer_statement_account',
     'active' => false,
   ),
 );
