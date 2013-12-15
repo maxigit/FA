@@ -468,7 +468,7 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 		// (if there is not enough in hand), check at other location or other order people etc ...
 		// This hook also returns a 'reason' (css classes) which can be used to theme the row.
 
-		$qoh = get_qoh_on_date($ln_itm->stock_id, $_POST['Location'], $_POST['DispatchDate']);
+		$qoh = get_qoh_on_date($ln_itm->stock_id, $_POST['Location'], $_POST['DispatchDate'], 0, true);
 		$q_class =  hook_get_dispatchable_quantity($ln_itm, $_POST['Location'], $_POST['DispatchDate'], $qoh);
 		// Skip line if needed
 		if($q_class === 'skip')  continue;

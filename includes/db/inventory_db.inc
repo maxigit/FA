@@ -9,7 +9,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
     See the License here <http://www.gnu.org/licenses/gpl-3.0.html>.
 ***********************************************************************/
-function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0)
+function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0, $use_weight=false)
 {
         $sql = "SELECT SUM(qty) FROM ".TB_PREF."stock_moves NATURAL JOIN ".TB_PREF."locations";
 
@@ -28,7 +28,7 @@ function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0)
         
     if ($location != null)
         $sql .= " AND loc_code = ".db_escape($location);
-    else // All location, we exclude location with 0 stock  weight
+    else if ($use_weight) // All location, we exclude location with 0 stock  weight
         $sql .= " AND stock_weight > 0 ";
 
     $result = db_query($sql, "QOH calulcation failed");
@@ -88,7 +88,7 @@ if(!isset($location)) {
 $location = $order->location;
 }
 $booked = get_quantity_booked_for_other($stock_id, $order);
-$qoh = get_qoh_on_date($stock_id, $location);
+$qoh = get_qoh_on_date($stock_id, $location, null, 0, true);
 return max(0, $qoh - $booked);
 }
 
