@@ -239,7 +239,9 @@ function get_gl_trans_from_to($from_date, $to_date, $account, $dimension=0, $dim
 
 function filter_item_condition($item_filter) {
 	if($item_filter) {
-		if(sscanf($item_filter, "/%s", $regexp)==1)
+		if($item_filter == 'NULL')
+			return " AND stock_id IS NULL";
+		else if(sscanf($item_filter, "/%s", $regexp)==1)
 			return " AND stock_id rlike '"._($regexp)."'";
 		else
 			return " AND stock_id like '"._($item_filter)."'";
