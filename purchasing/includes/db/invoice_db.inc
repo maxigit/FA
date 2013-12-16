@@ -161,8 +161,8 @@ function add_supp_invoice($supp_trans, $invoice_no=0) // do not receive as ref b
 		$supp_trans->reference, $supp_trans->supp_reference,
 		$invoice_items_total, $item_added_tax, $supp_trans->ov_discount, "", 0, $supp_trans->tax_included);
 
-	$total = 0;
-	$total_paid=0; // send to payable account
+	$total = 0; // in home currency
+	$total_paid = 0; // send to payable account, in supplier currency
 
     /* Now the TAX account */
     $taxes = $supp_trans->get_taxes($supp_trans->tax_group_id, 0, false);
@@ -247,12 +247,12 @@ function add_supp_invoice($supp_trans, $invoice_no=0) // do not receive as ref b
 		$dim = $supplier['dimension_id'] ? $supplier['dimension_id'] : $stock_gl_code['dimension_id'];
 		$dim2 = $supplier['dimension2_id'] ? $supplier['dimension2_id'] : $stock_gl_code['dimension2_id'];
 			/* Now the AP account */
-			$invoiced = add_gl_trans_supplier($trans_type, $invoice_id, $date_, $supplier["payable_account"], 0, 0,
-			-$taxfree_line,
+			$to_invoice = -$taxfree_line; // in supplier currency
+			$total += add_gl_trans_supplier($trans_type, $invoice_id, $date_, $supplier["payable_account"], 0, 0,
+			$to_invoice,
 			$supp_trans->supplier_id,
 			"The general ledger transaction for the control total could not be added", 0, "", $XXX_id);
-			$total += $invoiced;
-			$total_paid += $invoiced; // less to post in the final total
+			$total_paid += $to_invoice; // less to post in the final total
 			// In theory invoice_items_total should be null once all items processed, but we never know.
     	if ($trans_type == ST_SUPPCREDIT)
 		{

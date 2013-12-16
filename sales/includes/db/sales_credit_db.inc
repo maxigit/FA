@@ -130,19 +130,19 @@ function write_credit_note(&$credit_note, $write_off_acc)
 		    $credit_date, $credit_type, $write_off_acc, $branch_data);
 		// post separate receivable account post for each items. 
 		$XXX_id = $credit_line->stock_id;
-		$payable = add_gl_trans_customer(ST_CUSTCREDIT, $credit_no, $credit_date, $branch_data["receivables_account"], 0, 0,
-			-$line_taxfree_price*(1-$credit_line->discount_percent),
+		$to_pay = -$line_taxfree_price*(1-$credit_line->discount_percent)*$credit_line->qty_dispatched; // in customer currency
+		$total += add_gl_trans_customer(ST_CUSTCREDIT, $credit_no, $credit_date, $branch_data["receivables_account"], 0, 0,
+			$to_pay,
 			$credit_note->customer_id,
 			"The total debtor GL posting for the credit note could not be inserted", 0, $XXX_id);
 
-		$total += $payable;
-		$total_paid += -$payable;
+		$total_paid += $to_pay;
 	} /*end of credit_line loop */
 
 	/*Post credit note transaction to GL credit debtors,
 	debit freight re-charged and debit sales */
 
-	$receivable = $credit_note_total - $total_paid + $credit_note->freight_cost + $items_added_tax + $freight_added_tax;
+	$receivable = $credit_note_total + $total_paid + $credit_note->freight_cost + $items_added_tax + $freight_added_tax;
 	if (true  || $receivable != 0) {
 
 		$total += add_gl_trans_customer(ST_CUSTCREDIT, $credit_no, $credit_date, $branch_data["receivables_account"], 0, 0,

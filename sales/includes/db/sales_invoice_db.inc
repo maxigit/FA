@@ -79,7 +79,7 @@ function write_sales_invoice(&$invoice)
 		$invoice->trans_no = array($invoice_no=>0);
 	}
 	$total = 0;
-	$total_received = 0; // send to account receivable
+	$total_received = 0; // send to account receivable in customer currency
 	foreach ($invoice->line_items as $line_no => $invoice_line) {
 		$qty = $invoice_line->qty_dispatched;
 		$line_taxfree_price = get_tax_free_price_for_item($invoice_line->stock_id,
@@ -127,11 +127,11 @@ function write_sales_invoice(&$invoice)
 						($line_taxfree_price * $invoice_line->discount_percent),
 						$invoice->customer_id, "The sales discount GL posting could not be inserted", 0, $XXX_id);
 				} /*end of if discount !=0 */
-				$received = add_gl_trans_customer(ST_SALESINVOICE, $invoice_no, $date_, $branch_data["receivables_account"], 0, 0,
-						$line_taxfree_price*(1-$invoice_line->discount_percent),
+				$to_receive = $line_taxfree_price*(1-$invoice_line->discount_percent);
+				$total += add_gl_trans_customer(ST_SALESINVOICE, $invoice_no, $date_, $branch_data["receivables_account"], 0, 0,
+						$to_receive,
 					$invoice->customer_id, "The total debtor GL posting could not be inserted", 0, $XXX_id);
-				$total += $received;
-				$total_received += $received;
+				$total_received += $to_receive;
 			}
 		} /*quantity dispatched is more than 0 */
 	} /*end of delivery_line loop */
