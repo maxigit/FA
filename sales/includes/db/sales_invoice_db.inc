@@ -79,6 +79,7 @@ function write_sales_invoice(&$invoice)
 		$invoice->trans_no = array($invoice_no=>0);
 	}
 	$total = 0;
+	$total_received = 0; // send to account receivable in customer currency
 	foreach ($invoice->line_items as $line_no => $invoice_line) {
 		$qty = $invoice_line->qty_dispatched;
 		$line_taxfree_price = get_tax_free_price_for_item($invoice_line->stock_id,
@@ -101,6 +102,7 @@ function write_sales_invoice(&$invoice)
 
 		if ($invoice_line->qty_dispatched != 0) {
 			$stock_gl_code = get_stock_gl_code($invoice_line->stock_id);
+			$XXX_id = $invoice_line->stock_id;
 
 			if ($invoice_line->line_price() != 0) {
 				//Post sales transaction to GL credit sales
@@ -116,22 +118,28 @@ function write_sales_invoice(&$invoice)
 					($customer['dimension2_id'] != 0 ? $customer["dimension2_id"] : $stock_gl_code["dimension2_id"]));
 				$total += add_gl_trans_customer(ST_SALESINVOICE, $invoice_no, $date_, $sales_account, $dim, $dim2,
 					-$line_taxfree_price ,
-					$invoice->customer_id, "The sales price GL posting could not be inserted");
+					$invoice->customer_id, "The sales price GL posting could not be inserted", 0, $XXX_id);
 
 				if ($invoice_line->discount_percent != 0) {
 
 					$total += add_gl_trans_customer(ST_SALESINVOICE, $invoice_no, $date_,
 						$branch_data["sales_discount_account"], $dim, $dim2,
 						($line_taxfree_price * $invoice_line->discount_percent),
-						$invoice->customer_id, "The sales discount GL posting could not be inserted");
+						$invoice->customer_id, "The sales discount GL posting could not be inserted", 0, $XXX_id);
 				} /*end of if discount !=0 */
+				$to_receive = $line_taxfree_price*(1-$invoice_line->discount_percent);
+				$total += add_gl_trans_customer(ST_SALESINVOICE, $invoice_no, $date_, $branch_data["receivables_account"], 0, 0,
+						$to_receive,
+					$invoice->customer_id, "The total debtor GL posting could not be inserted", 0, $XXX_id);
+				$total_received += $to_receive;
 			}
 		} /*quantity dispatched is more than 0 */
 	} /*end of delivery_line loop */
 
-	if (($items_total + $charge_shipping) != 0) {
+	$receivable_amount_left = $items_total - $total_received + $charge_shipping + $items_added_tax + $freight_added_tax;
+	if ($receivable_amount_left != 0) {
 		$total += add_gl_trans_customer(ST_SALESINVOICE, $invoice_no, $date_, $branch_data["receivables_account"], 0, 0,
-			($items_total + $charge_shipping + $items_added_tax + $freight_added_tax),
+			$receivable_amount_left,
 			$invoice->customer_id, "The total debtor GL posting could not be inserted");
 	}
 

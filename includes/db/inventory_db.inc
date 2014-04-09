@@ -9,7 +9,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
     See the License here <http://www.gnu.org/licenses/gpl-3.0.html>.
 ***********************************************************************/
-function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0)
+function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0, $use_weight=false)
 {
         $sql = "SELECT SUM(qty) FROM ".TB_PREF."stock_moves NATURAL JOIN ".TB_PREF."locations";
 
@@ -28,7 +28,7 @@ function get_qoh_on_date($stock_id, $location=null, $date_=null, $exclude=0)
         
     if ($location != null)
         $sql .= " AND loc_code = ".db_escape($location);
-    else // All location, we exclude location with 0 stock  weight
+    else if ($use_weight) // All location, we exclude location with 0 stock  weight
         $sql .= " AND stock_weight > 0 ";
 
     $result = db_query($sql, "QOH calulcation failed");
@@ -88,7 +88,7 @@ if(!isset($location)) {
 $location = $order->location;
 }
 $booked = get_quantity_booked_for_other($stock_id, $order);
-$qoh = get_qoh_on_date($stock_id, $location);
+$qoh = get_qoh_on_date($stock_id, $location, null, 0, true);
 return max(0, $qoh - $booked);
 }
 
@@ -256,6 +256,7 @@ function adjust_deliveries($stock_id, $material_cost, $to)
 {
 	if (!is_inventory_item($stock_id))
 		return;
+	$XXX_id = $stock_id;
 	
 	$from = last_negative_stock_trans_id($stock_id, $to);
 	if ($from == false || $from == -1)
@@ -296,10 +297,10 @@ function adjust_deliveries($stock_id, $material_cost, $to)
 		$memo_ = sprintf(_("Cost was %s changed to %s x quantity on hand for item '%s'"),
 			number_format2($old_cost, 2), number_format2($new_cost, 2), $stock_id);
 		add_gl_trans_std_cost(ST_COSTUPDATE, $update_no, $to, $stock_gl_code["cogs_account"], 
-			$stock_gl_code["dimension_id"], $stock_gl_code["dimension2_id"], $memo_, $diff);	   
+			$stock_gl_code["dimension_id"], $stock_gl_code["dimension2_id"], $memo_, $diff, null, null, "", $XXX_id);	   
 
 		add_gl_trans_std_cost(ST_COSTUPDATE, $update_no, $to, $stock_gl_code["inventory_account"], 0, 0, $memo_, 
-			-$diff);
+			-$diff, null, null, "", $XXX_id);
 		add_audit_trail(ST_COSTUPDATE, $update_no, $to);
    	}
 }
@@ -322,6 +323,7 @@ function handle_negative_inventory($stock_id, $quantity, $standard_cost, $date_)
 	//If negative adjustment result in negative or zero inventory
 	//then difference should be adjusted
 	$qoh = get_qoh_on_date($stock_id);
+	$XXX_id = $stock_id;
 
 	if ($qoh + $quantity <= 0 && $qoh > 0) //Positive inventory turning zero/negative
 	{
@@ -339,12 +341,12 @@ function handle_negative_inventory($stock_id, $quantity, $standard_cost, $date_)
 			add_gl_trans_std_cost(ST_JOURNAL, $id, $date_, 
 				$stock_gl_code["inventory_account"],
 				$stock_gl_code['dimension_id'], $stock_gl_code['dimension2_id'], $memo, 
-				-$diff);
+				-$diff, null, null, "", $XXX_id);
 			//GL Posting to inventory adjustment account
 			add_gl_trans_std_cost(ST_JOURNAL, $id, $date_, 
 				$stock_gl_code["adjustment_account"],
 				$stock_gl_code['dimension_id'], $stock_gl_code['dimension2_id'], $memo,
-				$diff);
+				$diff, null, null, "", $XXX_id);
 
 			add_audit_trail(ST_JOURNAL, $id, $date_);
 			add_comments(ST_JOURNAL, $id, $date_, $memo);

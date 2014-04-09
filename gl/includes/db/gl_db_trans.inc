@@ -17,7 +17,7 @@
 // if $currency is not set, then defaults to no conversion
 
 function add_gl_trans($type, $trans_id, $date_, $account, $dimension, $dimension2, $memo_,
-	$amount, $currency=null, $person_type_id=null, $person_id=null,	$err_msg="", $rate=0)
+	$amount, $currency=null, $person_type_id=null, $person_id=null,	$err_msg="", $rate=0, $XXX_id=null)
 {
 	global $use_audit_trail;
 
@@ -48,6 +48,10 @@ function add_gl_trans($type, $trans_id, $date_, $account, $dimension, $dimension
 	if ($person_type_id != null)
 		$sql .= ", person_type_id, person_id";
 
+	if ($XXX_id !==null)
+		$sql .= ", stock_id";
+
+
 	$sql .= ") ";
 
 	$sql .= "VALUES (".db_escape($type).", ".db_escape($trans_id).", '$date',
@@ -57,6 +61,9 @@ function add_gl_trans($type, $trans_id, $date_, $account, $dimension, $dimension
 
 	if ($person_type_id != null)
 		$sql .= ", ".db_escape($person_type_id).", ". db_escape($person_id);
+
+	if($XXX_id !== null)
+		$sql .= ", ".db_escape($XXX_id);
 
 	$sql .= ") ";
 
@@ -74,17 +81,17 @@ function add_gl_trans($type, $trans_id, $date_, $account, $dimension, $dimension
 // $amount is in HOME currency
 
 function add_gl_trans_std_cost($type, $trans_id, $date_, $account, $dimension, $dimension2,
-	$memo_,	$amount, $person_type_id=null, $person_id=null, $err_msg="")
+	$memo_,	$amount, $person_type_id=null, $person_id=null, $err_msg="", $XXX_id=null)
 {
 	if ($amount != 0)
 		return add_gl_trans($type, $trans_id, $date_, $account, $dimension, $dimension2, $memo_,
-			$amount, null, $person_type_id, $person_id, $err_msg);
+			$amount, null, $person_type_id, $person_id, $err_msg, 0, $XXX_id);
 	else
 		return 0;
 }
 
 // Function for even out rounding problems
-function add_gl_balance($type, $trans_id, $date_, $amount, $person_type_id=null, $person_id=null)
+function add_gl_balance($type, $trans_id, $date_, $amount, $person_type_id=null, $person_id=null, $XXX_id=null)
 {
 	$amount = round2($amount, user_price_dec());
 
@@ -92,7 +99,7 @@ function add_gl_balance($type, $trans_id, $date_, $amount, $person_type_id=null,
 	{
 		error_log(sprintf( _("Rounding error %s encountered for trans_type:%s,trans_no:%s"), $amount, $type, $trans_id));
 		return add_gl_trans($type, $trans_id, $date_, get_company_pref('exchange_diff_act'), 0, 0, "",
-			$amount, null, $person_type_id, $person_id, "The balanced GL transaction could not be inserted");
+			$amount, null, $person_type_id, $person_id, "The balanced GL transaction could not be inserted", 0, $XXX_id);
 	} else
 		return 0;
 }
@@ -101,7 +108,7 @@ function add_gl_balance($type, $trans_id, $date_, $amount, $person_type_id=null,
 
 function get_gl_transactions($from_date, $to_date, $trans_no=0,
 	$account=null, $dimension=0, $dimension2=0, $filter_type=null,
-	$amount_min=null, $amount_max=null)
+	$amount_min=null, $amount_max=null, $item_filter)
 {
 	global $show_voided_gl_trans;
 	
@@ -141,6 +148,8 @@ function get_gl_transactions($from_date, $to_date, $trans_no=0,
 	if ($amount_max != null)
 		$sql .= " AND ABS(".TB_PREF."gl_trans.amount) <= ABS(".db_escape($amount_max).")";
 
+	$sql .= filter_item_condition($item_filter);
+
 	$sql .= " ORDER BY tran_date, counter";
 
 	return db_query($sql, "The transactions for could not be retrieved");
@@ -179,7 +188,7 @@ function get_gl_wo_cost_trans($trans_id, $person_id=-1)
 	return db_query($sql, "The gl transactions could not be retrieved");
 }
 
-function get_gl_balance_from_to($from_date, $to_date, $account, $dimension=0, $dimension2=0)
+function get_gl_balance_from_to($from_date, $to_date, $account, $dimension=0, $dimension2=0, $item_filter)
 {
 	$from = date2sql($from_date);
 	$to = date2sql($to_date);
@@ -195,6 +204,8 @@ function get_gl_balance_from_to($from_date, $to_date, $account, $dimension=0, $d
 	if ($dimension2 != 0)
   		$sql .= " AND dimension2_id = ".($dimension2<0?0:db_escape($dimension2));
 
+	$sql .= filter_item_condition($item_filter);
+
 	$result = db_query($sql, "The starting balance for account $account could not be calculated");
 
 	$row = db_fetch_row($result);
@@ -203,7 +214,7 @@ function get_gl_balance_from_to($from_date, $to_date, $account, $dimension=0, $d
 
 //--------------------------------------------------------------------------------
 
-function get_gl_trans_from_to($from_date, $to_date, $account, $dimension=0, $dimension2=0)
+function get_gl_trans_from_to($from_date, $to_date, $account, $dimension=0, $dimension2=0, $item_filter)
 {
 	$from = date2sql($from_date);
 	$to = date2sql($to_date);
@@ -218,6 +229,7 @@ function get_gl_trans_from_to($from_date, $to_date, $account, $dimension=0, $dim
   		$sql .= " AND dimension_id = ".($dimension<0?0:db_escape($dimension));
 	if ($dimension2 != 0)
   		$sql .= " AND dimension2_id = ".($dimension2<0?0:db_escape($dimension2));
+	$sql .= filter_item_condition($item_filter);
 
 	$result = db_query($sql, "Transactions for account $account could not be calculated");
 
@@ -225,8 +237,29 @@ function get_gl_trans_from_to($from_date, $to_date, $account, $dimension=0, $dim
 	return (float)$row[0];
 }
 
+function filter_item_condition($item_filter) {
+	if($item_filter) {
+		if($item_filter == 'NULL')
+			return " AND stock_id IS NULL";
+		else if(sscanf($item_filter, "supp:%s", $regexp)==1) {
+			$regexp = intval($regexp);
+			if($regexp < 0)
+				return " AND (person_type_id != ".PT_SUPPLIER." OR person_type_id IS NULL OR (person_type_id = ".PT_SUPPLIER." AND person_id != "._(-$regexp)."))";
+			else
+				return " AND person_type_id = ".PT_SUPPLIER." AND person_id = "._($regexp);
+				}
+			
+		else if(sscanf($item_filter, "/%s", $regexp)==1)
+			return " AND stock_id rlike '"._($regexp)."'";
+		else
+			return " AND stock_id like '"._($item_filter)."'";
+	} else {
+		return "";
+	}
+}
+
 //----------------------------------------------------------------------------------------------------
-function get_balance($account, $dimension, $dimension2, $from, $to, $from_incl=true, $to_incl=true) 
+function get_balance($account, $dimension, $dimension2, $from, $to, $from_incl=true, $to_incl=true, $item_filter=null) 
 {
 	$sql = "SELECT SUM(IF(amount >= 0, amount, 0)) as debit, 
 		SUM(IF(amount < 0, -amount, 0)) as credit, SUM(amount) as balance 
@@ -253,6 +286,8 @@ function get_balance($account, $dimension, $dimension2, $from, $to, $from_incl=t
 	else
 		$sql .= " tran_date < '$to_date' ";
 
+	$sql .= filter_item_condition($item_filter);
+
 	$result = db_query($sql,"No general ledger accounts were returned");
 
 	return db_fetch($result);
@@ -260,7 +295,7 @@ function get_balance($account, $dimension, $dimension2, $from, $to, $from_incl=t
 
 //--------------------------------------------------------------------------------
 
-function get_budget_trans_from_to($from_date, $to_date, $account, $dimension=0, $dimension2=0)
+function get_budget_trans_from_to($from_date, $to_date, $account, $dimension=0, $dimension2=0, $item_fiter=null)
 {
 
 	$from = date2sql($from_date);
@@ -276,6 +311,7 @@ function get_budget_trans_from_to($from_date, $to_date, $account, $dimension=0, 
   		$sql .= " AND dimension_id = ".($dimension<0?0:db_escape($dimension));
 	if ($dimension2 != 0)
   		$sql .= " AND dimension2_id = ".($dimension2<0?0:db_escape($dimension2));
+	//$sql .= filter_item_condition($item_fiter);
 	$result = db_query($sql,"No budget accounts were returned");
 
 	$row = db_fetch_row($result);

@@ -231,14 +231,14 @@ display_heading($act['bank_account_name']." - ".$act['bank_curr_code']);
 	$cols =
 	array(
 		_("Type") => array('fun'=>'systype_name', 'ord'=>''),
+		array('insert'=>true, 'fun'=>'gl_view'),
 		_("#") => array('fun'=>'trans_view', 'ord'=>''),
 		_("Reference"), 
 		_("Date") => 'date',
-		_("Debit") => array('align'=>'right', 'fun'=>'fmt_debit'), 
-		_("Credit") => array('align'=>'right','insert'=>true, 'fun'=>'fmt_credit'), 
 	    _("Person/Item") => array('fun'=>'fmt_person'), 
-		array('insert'=>true, 'fun'=>'gl_view'),
-		"X"=>array('insert'=>true, 'fun'=>'rec_checkbox')
+		_("Paid out") => array('align'=>'right','insert'=>true, 'fun'=>'fmt_credit'), 
+		_("Paid in") => array('align'=>'right', 'fun'=>'fmt_debit'), 
+		"X"=>array('insert'=>true, 'fun'=>'rec_checkbox'),
 	   );
 	$table =& new_db_pager('trans_tbl', $sql, $cols);
 

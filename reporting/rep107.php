@@ -237,6 +237,9 @@ Unit 6 Salvesen way
 Hull
 East riding of Yorkshire
 HU3 4UQ
+
+International Payment: Please note that we are not liable for any bank charges. Make sure 
+all payment costs are covered from your side.
 EOT;
 				}
 				$rep->End($email);
