@@ -91,13 +91,16 @@ function clear_supp_alloctions($type, $type_no, $date="")
 		$sql = "UPDATE ".TB_PREF."supp_trans SET alloc=alloc - " . $row['amt'] . "
 			WHERE (type= " . $row['trans_type_from'] . " AND trans_no=" . $row['trans_no_from'] . ")
 			OR (type=" . $row['trans_type_to'] . " AND trans_no=" . $row['trans_no_to'] . ")";
-		//$sql = "UPDATE ".TB_PREF."supp_trans SET alloc=alloc - " . $row['amt'] . "
-		//	WHERE type=" . $row['trans_type_to'] . " AND trans_no=" . $row['trans_no_to'];
 		db_query($sql, "could not clear allocation");
+
 		// 2008-09-20 Joe Hunt
 		if ($date != "")
 			exchange_variation($type, $type_no, $row['trans_type_to'], $row['trans_no_to'], $date,
 				$row['amt'], PT_SUPPLIER, true);
+		// 2014-01-16 Joe Hunt. Fix for voiding allocated currency supp_invoices.		
+		elseif ($type == ST_SUPPINVOICE && $row['trans_type_to'] == $type && $row['trans_no_to'] == $type_no)		
+			exchange_variation($row['trans_type_from'], $row['trans_no_from'], $row['trans_type_to'], $row['trans_no_to'], 
+				sql2date($row['date_alloc']), $row['amt'], PT_SUPPLIER, true);
 		//////////////////////
 	}
 
@@ -179,7 +182,7 @@ function get_allocatable_to_supp_transactions($supplier_id, $trans_no=null, $typ
 	else
 	{
 		$sql = get_alloc_supp_sql(null, "round(ABS(ov_amount+ov_gst+ov_discount)-alloc,6) > 0
-			AND trans.type NOT IN (".implode(',',array(ST_SUPPAYMENT, ST_BANKPAYMENT)).")
+			AND trans.type NOT IN (".implode(',',array(ST_SUPPAYMENT, ST_BANKPAYMENT, ST_SUPPCREDIT)).")
 			AND trans.supplier_id=".db_escape($supplier_id));
 	}
 
