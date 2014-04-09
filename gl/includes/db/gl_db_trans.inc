@@ -241,8 +241,14 @@ function filter_item_condition($item_filter) {
 	if($item_filter) {
 		if($item_filter == 'NULL')
 			return " AND stock_id IS NULL";
-		else if(sscanf($item_filter, "supp:%s", $regexp)==1)
-			return " AND person_type_id = ".PT_SUPPLIER." AND person_id = "._($regexp);
+		else if(sscanf($item_filter, "supp:%s", $regexp)==1) {
+			$regexp = intval($regexp);
+			if($regexp < 0)
+				return " AND (person_type_id != ".PT_SUPPLIER." OR person_type_id IS NULL OR (person_type_id = ".PT_SUPPLIER." AND person_id != "._(-$regexp)."))";
+			else
+				return " AND person_type_id = ".PT_SUPPLIER." AND person_id = "._($regexp);
+				}
+			
 		else if(sscanf($item_filter, "/%s", $regexp)==1)
 			return " AND stock_id rlike '"._($regexp)."'";
 		else
