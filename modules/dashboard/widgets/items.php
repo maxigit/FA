@@ -56,7 +56,7 @@ class items
 		if(isset($this->ss_length))
 			$sql .= ", ".$this->ss_length;
 		$sql .= ") stock_id , s.description,
-            SUM(trans.quantity) AS qty FROM
+            SUM(trans.quantity*if(d.type = ".ST_SALESINVOICE.",1, -1)) AS qty FROM
             ".TB_PREF."debtor_trans_details AS trans, ".TB_PREF."stock_master AS s, ".TB_PREF."debtor_trans AS d
             WHERE trans.stock_id=s.stock_id AND trans.debtor_trans_type=d.type AND trans.debtor_trans_no=d.trans_no
             AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") ";
