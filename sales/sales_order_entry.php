@@ -141,6 +141,9 @@ if (isset($_GET['AddedID'])) {
 	submenu_option(_("Select A Different &Order"),
 		"/sales/inquiry/sales_orders_view.php?OutstandingOnly=1");
 
+	submenu_option(_("Order &Xtra"),
+		"/modules/order_line_extra/order_lines_view.php?order_id=$order_no");
+
 	display_footer_exit();
 
 } elseif (isset($_GET['AddedQU'])) {
