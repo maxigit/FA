@@ -122,6 +122,9 @@ if (isset($_GET['AddedID'])) {
 
 	submenu_option(_("Enter a &New Order"),	"/sales/sales_order_entry.php?NewOrder=0");
 
+	submenu_option(_("Order &Xtra"),
+		"/modules/order_line_extra/order_lines_view.php?order_id=$order_no");
+
 	display_footer_exit();
 
 } elseif (isset($_GET['UpdatedID'])) {
