@@ -181,7 +181,7 @@ function copy_from_cart()
 {
 	$cart = &$_SESSION['Items'];
 	$_POST['ShipperID'] = $cart->ship_via;
-	$_POST['ChargeFreightCost'] = price_format($cart->freight_cost);
+	$_POST['ChargeFreightCost'] = 0; // to avoid refunding it when not needed. price_format($cart->freight_cost);
 	$_POST['CreditDate']= $cart->document_date;
 	$_POST['Location']= $cart->Location;
 	$_POST['CreditText']= $cart->Comments;

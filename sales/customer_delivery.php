@@ -548,7 +548,7 @@ start_table(TABLESTYLE2);
 
 policy_list_row(_("Action For Balance"), "bo_policy", null);
 label_cell(_("Move Order to"), "class='label'");
-locations_list_cells(null, 'bo_location', isset($_POST['bo_location']) ? $_POST['bo_location'] :  'BACK', false, true);
+locations_list_cells(null, 'bo_location', isset($_POST['bo_location']) ? $_POST['bo_location'] : $_POST['Location'] , false, true);
 
 textarea_row(_("Memo"), 'Comments', null, 50, 4);
 

@@ -261,7 +261,7 @@ if ($trans_type == ST_SALESORDER)
 	$cols = array(
 		_("Order #") => array('fun'=>'view_link'),
 		_("Ref") => array('type' => 'sorder.reference', 'ord' => '') ,
-		_("Customer") => array('type' => 'debtor.name' , 'ord' => '') ,
+		_("Customer") => array('type' => 'debtor.name' , 'ord' => 'asc') ,
 		_("Branch"), 
 		_("Cust Order Ref"),
 		_("Order Date") => array('type' =>  'date', 'ord' => ''),
