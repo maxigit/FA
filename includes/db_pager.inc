@@ -299,9 +299,15 @@ class db_pager {
 
 			// sort order column by priority instead of table order.
 			$columns = array();
-	    foreach ($this->columns as $col) {
+	    foreach ($this->columns as $i => $col ) {
+
 					if(isset($col['ord_priority'])) {
 						$columns[$col['ord_priority']] = $col;
+					}
+					else if(isset($col['ord']))  {
+						if(!isset($col['name']))
+							$col['name'] = $col['type'];
+						$columns[count($columns)+$i] = $col; 
 					}
 			}
 			krsort($columns);
