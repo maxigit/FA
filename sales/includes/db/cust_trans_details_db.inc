@@ -11,7 +11,7 @@
 ***********************************************************************/
 //----------------------------------------------------------------------------------------
 
-function get_customer_trans_details($debtor_trans_type, $debtor_trans_no)
+function get_customer_trans_details($debtor_trans_type, $debtor_trans_no, $order_by)
 {
 if (!is_array($debtor_trans_no))
 	$debtor_trans_no = array( 0=>$debtor_trans_no );
@@ -32,7 +32,7 @@ if (!is_array($debtor_trans_no))
 
 	$sql.=	") AND debtor_trans_type=".db_escape($debtor_trans_type)."
 		AND ".TB_PREF."stock_master.stock_id=".TB_PREF."debtor_trans_details.stock_id
-		ORDER BY id";
+		ORDER BY ".($order_by ? $order_by : "id");
 	return db_query($sql, "The debtor transaction detail could not be queried");
 }
 
