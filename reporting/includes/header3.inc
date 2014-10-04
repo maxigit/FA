@@ -45,11 +45,11 @@
 		$this->Line($iline1, 3);
 		$this->SetDrawColor(128, 128, 128);
 		$this->Line($iline1);
-		$this->rectangle($this->leftMargin, $iline2, $right - $this->leftMargin, $iline2 - $iline3, "F", null, array(222, 255, 222));   
+		$this->rectangle($this->leftMargin, $iline2, $right - $this->leftMargin, $iline2 - $iline3, "F", null, array(255, 222, 204));   
 		$this->Line($iline2);
 		$this->Line($iline3);
 		$this->Line($iline4);
-		$this->rectangle($this->leftMargin, $iline5, $right - $this->leftMargin, $iline5 - $iline6, "F", null, array(222, 255, 222));   
+		$this->rectangle($this->leftMargin, $iline5, $right - $this->leftMargin, $iline5 - $iline6, "F", null, array(255, 222, 204));   
 		$this->Line($iline5);
 		$this->Line($iline6);
 		$this->Line($iline7);
