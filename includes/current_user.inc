@@ -488,7 +488,7 @@ function user_rep_popup()
 
 function user_query_size()
 {
-	return $_SESSION["wa_current_user"]->prefs->query_size();
+	return $_SESSION["wa_current_user"]->prefs->query_size()*10;
 }
 
 function user_graphic_links()
