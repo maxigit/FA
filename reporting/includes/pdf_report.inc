@@ -69,6 +69,7 @@ class FrontReport extends Cpdf
 	
 	var $dest;	// destination: email or printer
 	var $email_body; // custom mail body set by the report it self.
+	var $no_attachment; // custom mail body. No file to attach.
 	
 	function FrontReport($title, $filename, $size = 'A4', $fontsize = 9, $orientation = 'P', $margins = NULL, $excelColWidthFactor = NULL)
 	{
@@ -999,10 +1000,21 @@ class FrontReport extends Cpdf
 			if ($email == 1)
 			{
 				$contactData = array();
-				if ($this->contactData)
+                // Filter contacts without email.
+                // Also only use the same contact once.
+                // We keep the last.
+				if ($this->contactData) {
+                    $keys = array('email'=>true
+                        , 'name'=>true
+                        , 'name2'=>true);
+                    $contactMap = array();
 					foreach($this->contactData as $contact)
-						if (!empty($contact['email']))
-							$contactData[] = $contact;
+						if (!empty($contact['email'])) {
+                            $key = implode('|', array_intersect_key($contact, $keys));
+							$contactMap[$key] = $contact;
+                        }
+                    $contactData = array_values($contactMap);
+                }
 
 				if(!count($contactData)) {
 					$this->SetLang(user_language());
@@ -1048,12 +1060,14 @@ class FrontReport extends Cpdf
 								$msg.= _("You can pay through"). " $service: $url\n\n";
 						}
 
-	    				$msg .= _("Kindest regards") . "\n\n";
+                        if(!$this->email_body)
+                            $msg .= _("Kindest regards") . "\n\n";
     					$sender = $this->user . "\n" . $this->company['coy_name'] . "\n" . $this->company['postal_address'] . "\n" . $this->company['email'] . "\n" . $this->company['phone'];
     					$mail->to($to); $try++;
     					$mail->subject($subject);
     					$mail->text($msg . $sender);
-    					$mail->attachment($fname);
+                        if(!$this->no_attachment)
+                            $mail->attachment($fname);
     					$emails .= " " . $contact['email'];
     					if ($mail->send()) $sent++;
 					} // foreach contact
