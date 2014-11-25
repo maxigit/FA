@@ -16,6 +16,7 @@ include_once($path_to_root . "/purchasing/includes/po_class.inc");
 include_once($path_to_root . "/includes/session.inc");
 include_once($path_to_root . "/purchasing/includes/purchasing_db.inc");
 include_once($path_to_root . "/purchasing/includes/purchasing_ui.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_manager.inc");
 
 $js = "";
 if ($use_popup_windows)
@@ -55,7 +56,7 @@ if ((!isset($_GET['PONumber']) || $_GET['PONumber'] == 0) && !isset($_SESSION['P
 
 //--------------------------------------------------------------------------------------------------
 
-function display_po_receive_items()
+function display_po_receive_items($cart)
 {
 	div_start('grn_items');
     start_table(TABLESTYLE, "colspan=7 width=90%");
@@ -68,9 +69,9 @@ function display_po_receive_items()
     $total = 0;
     $k = 0; //row colour counter
 
-    if (count($_SESSION['PO']->line_items)> 0 )
+    if (count($cart->line_items)> 0 )
     {
-       	foreach ($_SESSION['PO']->line_items as $ln_itm)
+       	foreach ($cart->line_items as $ln_itm)
        	{
 
 			alt_table_row_color($k);
@@ -117,9 +118,9 @@ function display_po_receive_items()
 	$display_sub_total = price_format($total/* + input_num('freight_cost')*/);
 
 	label_row(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right");
-	$taxes = $_SESSION['PO']->get_taxes(input_num('freight_cost'), true);
+	$taxes = $cart->get_taxes(input_num('freight_cost'), true);
 	
-	$tax_total = display_edit_tax_items($taxes, $colspan, $_SESSION['PO']->tax_included);
+	$tax_total = display_edit_tax_items($taxes, $colspan, $cart->tax_included);
 
 	$display_total = price_format(($total + input_num('freight_cost') + $tax_total));
 
@@ -321,6 +322,20 @@ if (isset($_POST['Update']) || isset($_POST['ProcessGoodsReceived']))
 }
 
 //--------------------------------------------------------------------------------------------------
+$textcart_mgr = new DeliveryPOTextCartManager();
+$textcart_mgr->handle_post_request();
+
+function display_order_in_tab ($title, $cart) {
+display_heading(_("Items to Receive"));
+
+    if(!isset($_GET['qty'])) {
+	hyperlink_params("$path_to_root/purchasing/po_receive_items.php", _("Set quantity to zero"), "OrderNumber={$_GET['PONumber']}&qty=0");
+    }
+    else {
+	hyperlink_params("$path_to_root/purchasing/po_receive_items.php", _("Reset quantity"), "OrderNumber={$_GET['PONumber']}");
+    }
+  display_po_receive_items($cart);
+}
 
 if (isset($_POST['ProcessGoodsReceived']))
 {
@@ -332,15 +347,7 @@ if (isset($_POST['ProcessGoodsReceived']))
 start_form();
 
 edit_grn_summary($_SESSION['PO'], true);
-display_heading(_("Items to Receive"));
-
-    if(!isset($_GET['qty'])) {
-	hyperlink_params("$path_to_root/purchasing/po_receive_items.php", _("Set quantity to zero"), "OrderNumber={$_GET['PONumber']}&qty=0");
-    }
-    else {
-	hyperlink_params("$path_to_root/purchasing/po_receive_items.php", _("Reset quantity"), "OrderNumber={$_GET['PONumber']}");
-    }
-display_po_receive_items();
+$textcart_mgr->tab_display('', &$_SESSION['PO'], "display_order_in_tab");
 
 echo '<br>';
 submit_center_first('Update', _("Update"), '', true);
