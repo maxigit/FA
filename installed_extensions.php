@@ -6,7 +6,7 @@
 	FA extension system documentation.
 */
 
-$next_extension_id = 36; // unique id for next installed extension
+$next_extension_id = 38; // unique id for next installed extension
 
 $installed_extensions = array (
   0 => 
@@ -221,6 +221,26 @@ $installed_extensions = array (
     'available' => '',
     'type' => 'extension',
     'path' => 'modules/rep_customer_statement_account',
+    'active' => false,
+  ),
+  36 => 
+  array (
+    'package' => 'rep_magic_customer_invoice',
+    'name' => 'rep_magic_customer_invoice',
+    'version' => '-',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/rep_magic_customer_invoice',
+    'active' => false,
+  ),
+  37 => 
+  array (
+    'package' => 'rep_email_customers',
+    'name' => 'rep_email_customers',
+    'version' => '-',
+    'available' => '',
+    'type' => 'extension',
+    'path' => 'modules/rep_email_customers',
     'active' => false,
   ),
 );
