@@ -59,7 +59,9 @@ class hooks_dashboard extends hooks {
                 $app->add_widget('reminders',_('Reminders'),
                 '/modules/dashboard/widgets/reminders.php', 'SA_SETUPDISPLAY');
                 $app->add_widget('weeklyaccount',_('Weekly account'),
-		'/modules/dashboard/widgets/weeklyaccount.php', 'SA_GLANALYTIC');
+                    '/modules/dashboard/widgets/weeklyaccount.php', 'SA_GLANALYTIC');
+                $app->add_widget('weeklystock',_('Weekly stock'),
+                    '/modules/dashboard/widgets/weeklystock.php', 'SA_GLANALYTIC');
                 break;
         }
     }
