@@ -126,6 +126,7 @@ if (isset($_POST['go']) || isset($_POST['show']))
 				{
 					$id = get_next_trans_no(ST_JOURNAL);
 					$ref = $Refs->get_next(ST_JOURNAL);
+                    $ref = $memo." ref:".$ref;
 					add_gl_trans(ST_JOURNAL, $id, $date, get_post('acc_act'), 0,
 						0, $ref, $am0 * -1);
 					add_gl_trans(ST_JOURNAL, $id, $date, get_post('res_act'), get_post('dimension_id'),
