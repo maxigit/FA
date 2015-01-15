@@ -184,7 +184,7 @@ function get_sql_for_supplier_inquiry($filter, $after_date, $to_date, $supplier_
     	WHERE supplier.supplier_id = trans.supplier_id
      	AND trans.tran_date >= '$date_after'
     	AND trans.tran_date <= '$date_to'
-		AND trans.ov_amount != 0";	// exclude voided transactions
+		AND (trans.ov_amount + trans.ov_gst) != 0";	// exclude voided transactions
 
 	$sql2 = "SELECT ".ST_SUPPRECEIVE." as type, 
 		trans.id as trans_no,
