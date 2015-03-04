@@ -265,6 +265,10 @@ class db_pager {
 				case 'skip':		// skip the column (no header)
 					unset($c['head']); break;
 	  		}
+            // If a column is used to sort the table, set it's ord_priority
+            if(isset($c['ord']) &&  $c['ord'] != '') {
+                    $c['ord_priority'] = count($this->columns);
+            }
 			$this->columns[] = $c;	
 		}
 	}
@@ -321,8 +325,6 @@ class db_pager {
 	    }
 				
 	    if (count($ord)) {
-			$ord = array_map(function_exists('db_escape') ? 
-				'db_escape': 'db_escape', $ord);
 			$sql .= " ORDER BY " . implode(',', $ord);
 		} else {
 			if($order)
