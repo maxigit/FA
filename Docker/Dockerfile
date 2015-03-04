@@ -1,7 +1,7 @@
-FROM php:5.3-apache
+FROM php:5.6-apache
 
 #RUN docker-php-ext-install pdo_mysql
-#RUN docker-php-ext-install mysql mysqli
+RUN docker-php-ext-install mysql mysqli
 
 #RUN apt-get update && apt-get install -y \
 #	php5-memcache   \
@@ -13,11 +13,11 @@ FROM php:5.3-apache
 # Install mysql client to connect to the database easily
 RUN apt-get update && apt-get install -y mysql-client
 
-#RUN apt-get update && apt-get install -y \
-#    libpng12-dev libfreetype6-dev libjpeg62-turbo-dev \
-#    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-#    && docker-php-ext-install gd
-#
+RUN apt-get update && apt-get install -y \
+    libpng12-dev libfreetype6-dev libjpeg62-turbo-dev \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install gd
+
 # Enable Apache rewrite mod
 RUN a2enmod rewrite
 # Make drush use local php.ini
