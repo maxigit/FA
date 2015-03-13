@@ -319,7 +319,7 @@ class db_pager {
 	    foreach ($columns as $col) {
 	       	if (isset($col['ord'])) {
 	        	if ( $col['ord'] != '' && isset($col['name'])) {
-		    	    $ord[] = $col['name'] .' '. $col['ord'];
+		    	    $ord[] = '`'.$col['name'] .'` '. $col['ord'];
 			    }
 			}
 	    }
