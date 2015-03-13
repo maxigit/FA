@@ -143,13 +143,11 @@ class db_pager {
 	//
 	function sort_table($col) 
 	{
-
 			$max_priority = 0;
 			foreach($this->columns as $id => $_col) {
 			if(!isset($_col['ord_priority'])) continue;
 				$max_priority = max($max_priority, $_col['ord_priority']);
 			};
-
 
 	    $ord = $this->columns[$col]['ord'];
   		$this->columns[$col]['ord_priority']  = $max_priority+1; // set priority , higher than anything else
@@ -268,6 +266,7 @@ class db_pager {
             // If a column is used to sort the table, set it's ord_priority
             if(isset($c['ord']) &&  $c['ord'] != '') {
                     $c['ord_priority'] = count($this->columns);
+                    $c['name']= $c['type'];
             }
 			$this->columns[] = $c;	
 		}
@@ -304,7 +303,6 @@ class db_pager {
 			// sort order column by priority instead of table order.
 			$columns = array();
 	    foreach ($this->columns as $i => $col ) {
-
 					if(isset($col['ord_priority'])) {
 						$columns[$col['ord_priority']] = $col;
 					}
@@ -319,7 +317,11 @@ class db_pager {
 	    foreach ($columns as $col) {
 	       	if (isset($col['ord'])) {
 	        	if ( $col['ord'] != '' && isset($col['name'])) {
-		    	    $ord[] = '`'.$col['name'] .'` '. $col['ord'];
+                    //  table.name => `table`.`name`
+                    $identifiers = explode('.', $col['name']);
+                    $escaped = array_map(function($word) {
+                                return '`'.$word.'`'; }, $identifiers);
+		    	    $ord[] = implode('.', $escaped).' '. $col['ord'];
 			    }
 			}
 	    }
