@@ -266,7 +266,7 @@ class db_pager {
             // If a column is used to sort the table, set it's ord_priority
             if(isset($c['ord']) &&  $c['ord'] != '') {
                     $c['ord_priority'] = count($this->columns);
-                    $c['name']= $c['type'];
+                    if(!isset($c['name'])) $c['name']= $c['type'];
             }
 			$this->columns[] = $c;	
 		}
