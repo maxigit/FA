@@ -371,17 +371,33 @@ hr {
 .evenrow {
 	background-color: #f3f3f3;
 }
+.oddrow:hover {
+	background-color: #cacaca;
+}
+.evenrow:hover {
+	background-color: #c3c3c3;
+}
 
 .overduebg {
 	background-color: pink;
+}
+.overduebg:hover {
+	background-color: #7cc;
 }
 
 .overduefg {
 	color: pink;
 }
 
+.overduebg:hover {
+	background-color: #c77;
+}
+
 .currentfg {
 	color: #f66;
+}
+.currentfg:hover {
+	color: #c33;
 }
 
 .redfg, a.redfg {
@@ -389,6 +405,9 @@ hr {
 	font-weight: bold;
 }
 
+.redfg:hover, a.redfg:hover {
+	color: #400;
+}
 .settledbg {
 	background-color: #0b0;
 }
