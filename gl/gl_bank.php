@@ -192,7 +192,10 @@ function create_cart($type, $trans_no)
 					$tax_type = is_tax_account($row['account']);
 					$tax_info = $tax_trans_details[$tax_type];
 					if($tax_info) {
-						$net_amount = $tax_info['net_amount'];
+                        // we need the abs value here
+                        // because what stored in the db has a sign
+                        // but what comes from the UI is always > 0.
+						$net_amount = abs($tax_info['net_amount']);
 						// We need to delete the tax info in case
 						// the same tax account appears more than once in the cart
 						unset($tax_trans_details[$tax_type]);
