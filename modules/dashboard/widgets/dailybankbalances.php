@@ -127,6 +127,7 @@ class dailybankbalances
         $today = Today();
         if (!isset($data->days_past))
             $this->days_past = 60;
+        else $this->days_past = $data->day_past;
         if (!isset($data->days_future))
             $this->days_future = 60;
 		$from = add_days($today, -$this->days_past);
@@ -134,8 +135,12 @@ class dailybankbalances
 
         $transactions = array();
 		$this->get_bank_transactions($from, $to, $transactions);
+        /* Hack, only to forecast for main account. */
+        if($this->bank_act == 1)
+        {
 		$this->get_pending_invoices($today, $to, $transactions);
 		$this->get_supplier_invoices($today, $to, $transactions);
+        }
 
 		usort($transactions, function($a, $b) { return strcmp($a["trans_date"], $b["trans_date"]); } );
 		print_r($transactions);
