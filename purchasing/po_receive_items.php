@@ -347,7 +347,7 @@ if (isset($_POST['ProcessGoodsReceived']))
 start_form();
 
 edit_grn_summary($_SESSION['PO'], true);
-$textcart_mgr->tab_display('', &$_SESSION['PO'], "display_order_in_tab");
+$textcart_mgr->tab_display('', $_SESSION['PO'], "display_order_in_tab");
 
 echo '<br>';
 submit_center_first('Update', _("Update"), '', true);
