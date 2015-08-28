@@ -143,7 +143,7 @@ if (isset($_GET['AddedID'])) {
 	submenu_option(_("Select A Different &Order"),
 		"/sales/inquiry/sales_orders_view.php?OutstandingOnly=1");
 
-    extra_links();
+    extra_links($order_no);
 
 	display_footer_exit();
 
