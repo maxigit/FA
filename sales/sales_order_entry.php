@@ -122,8 +122,7 @@ if (isset($_GET['AddedID'])) {
 
 	submenu_option(_("Enter a &New Order"),	"/sales/sales_order_entry.php?NewOrder=0");
 
-	submenu_option(_("Order &Xtra"),
-		"/modules/order_line_extra/order_lines_view.php?order_id=$order_no");
+    extra_links($order_no);
 
 	display_footer_exit();
 
@@ -144,8 +143,7 @@ if (isset($_GET['AddedID'])) {
 	submenu_option(_("Select A Different &Order"),
 		"/sales/inquiry/sales_orders_view.php?OutstandingOnly=1");
 
-	submenu_option(_("Order &Xtra"),
-		"/modules/order_line_extra/order_lines_view.php?order_id=$order_no");
+    extra_links();
 
 	display_footer_exit();
 
@@ -248,6 +246,22 @@ if (isset($_GET['AddedID'])) {
 	check_edit_conflicts();
 //-----------------------------------------------------------------------------
 
+function extra_links($order_no) {
+	submenu_option(_("Order &Xtra"),
+		"/modules/order_line_extra/order_lines_view.php?order_id=$order_no");
+
+    start_form(false, false,
+        "/sales/inquiry/sales_orders_view.php?OutstandingOnly=1");
+    start_table(TABLESTYLE_NOBORDER);
+    start_row();
+    label_cells("Oustanding order");
+    ref_cells(_("#:"), 'OrderNumber', '',null, '', true);
+    ref_cells(_("Ref"), 'OrderReference', '',null, '', true);
+    submit_cells('SearchOrders', _("Search"));
+    end_row();
+    end_table();
+    end_form();
+}
 function copy_to_cart()
 {
 	$cart = &$_SESSION['Items'];
