@@ -24,6 +24,7 @@ include_once($path_to_root . "/sales/includes/db/sales_types_db.inc");
 include_once($path_to_root . "/sales/includes/ui/sales_credit_ui.inc");
 include_once($path_to_root . "/sales/includes/ui/sales_order_ui.inc");
 include_once($path_to_root . "/reporting/includes/reporting.inc");
+include_once($path_to_root . "/modules/textcart/includes/textcart_manager.inc");
 
 $js = "";
 if ($use_popup_windows) {
@@ -264,6 +265,11 @@ if (!processing_active()) {
 
 //-----------------------------------------------------------------------------
 
+$textcart_mgr = new SalesTextCartManager();
+$textcart_mgr->handle_post_request();
+function display_order_in_tab($title, $cart) {
+	display_credit_items(_("Credit Note Items"), $_SESSION['Items']);
+}
 start_form();
 hidden('cart_id');
 
@@ -272,7 +278,10 @@ $customer_error = display_credit_header($_SESSION['Items']);
 if ($customer_error == "") {
 	start_table(TABLESTYLE, "width=80%", 10);
 	echo "<tr><td>";
-	display_credit_items(_("Credit Note Items"), $_SESSION['Items']);
+  $textcart_mgr->tab_display($orderitems
+    ,$_SESSION['Items']
+    ,"display_order_in_tab"
+  );
 	credit_options_controls($_SESSION['Items']);
 	echo "</td></tr>";
 	end_table();
