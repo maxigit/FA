@@ -292,7 +292,8 @@ function show_allocatable($show_totals) {
 
 		foreach ($cart->allocs as $id => $alloc_item)
 		{
-		    if (floatcmp(abs($alloc_item->amount), $alloc_item->amount_allocated))
+            if ((floatcmp(abs($alloc_item->amount), $alloc_item->amount_allocated))
+                || abs($alloc_item->current_allocated) > 1e-6)
 		    {
 				alt_table_row_color($k);
     			label_cell($systypes_array[$alloc_item->type]);
