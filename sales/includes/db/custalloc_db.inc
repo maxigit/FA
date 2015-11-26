@@ -129,17 +129,18 @@ function get_alloc_trans_sql($extra_fields=null, $extra_conditions=null, $extra_
 
 function get_allocatable_from_cust_sql($customer_id, $settled)
 {
+	$amount_sql = "ov_amount+ov_gst+ov_freight+ov_freight_tax+ov_discount";
 	$settled_sql = "";
 	if (!$settled)
 	{
-		$settled_sql = " AND (round(ov_amount+ov_gst+ov_freight+ov_freight_tax-ov_discount-alloc,6) > 0)";
+		$settled_sql = " AND (abs(ov_amount+ov_gst+ov_freight+ov_freight_tax+ov_discount-alloc) > 1e-6)";
 	}
 	$cust_sql = "";
 	if ($customer_id != null)
 		$cust_sql = " AND trans.debtor_no = ".db_escape($customer_id);
 
-	$sql = get_alloc_trans_sql("round(ov_amount+ov_gst+ov_freight+ov_freight_tax-ov_discount-alloc,6) <= 0 AS settled",
-		"(type=".ST_CUSTPAYMENT." OR type=".ST_CUSTCREDIT." OR type=".ST_BANKDEPOSIT.") AND (trans.ov_amount > 0) " . $settled_sql . $cust_sql);
+	$sql = get_alloc_trans_sql("abs(".$amount."-alloc) >= 1e-6 AS settled",
+		"(type=".ST_CUSTPAYMENT." OR type=".ST_CUSTCREDIT." OR type=".ST_BANKDEPOSIT.") AND (abs(".$amount_sql.") > 1e-6) " . $settled_sql . $cust_sql);
 
 	return $sql;
 }
