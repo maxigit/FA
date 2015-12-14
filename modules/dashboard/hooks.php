@@ -62,6 +62,8 @@ class hooks_dashboard extends hooks {
                     '/modules/dashboard/widgets/weeklyaccount.php', 'SA_GLANALYTIC');
                 $app->add_widget('weeklystock',_('Weekly stock'),
                     '/modules/dashboard/widgets/weeklystock.php', 'SA_GLANALYTIC');
+                $app->add_widget('weeklyaccountT',_('Weekly accountT'),
+                    '/modules/dashboard/widgets/weeklyaccountT.php', 'SA_GLANALYTIC');
                 break;
         }
     }
