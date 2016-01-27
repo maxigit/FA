@@ -272,8 +272,8 @@ function get_sql_for_bank_account_reconcile($bank_account, $date)
 		FROM ".TB_PREF."bank_trans
 		WHERE ".TB_PREF."bank_trans.bank_act = ".db_escape($bank_account) . "
 			AND (reconciled IS NULL OR reconciled='". date2sql($date) ."')
-		ORDER BY trans_date,".TB_PREF."bank_trans.id";
-// or	ORDER BY reconciled desc, trans_date,".TB_PREF."bank_trans.id";
+    	ORDER BY reconciled asc, trans_date,".TB_PREF."bank_trans.id";
+// orORDER BY trans_date,".TB_PREF."bank_trans.id";
 	return $sql;
 }
 
