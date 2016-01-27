@@ -28,6 +28,11 @@ function update_average_material_cost($supplier, $stock_id, $price, $qty, $date,
 
 	if ($currency != null)
 	{
+        // price should be already in home currencty (for stock_moves at least)
+        // but might be different for transaction.
+        // The best at the moment, is to investigate manually and update the code temporarily
+        // to be able to void the transaction properly.
+        display_error("Can void GRN in foreign currency, contact your system administationr");
 		$ex_rate = get_exchange_rate_to_home_currency($currency, $date);
 		$price_in_home_currency = $price / $ex_rate;
 	}	
