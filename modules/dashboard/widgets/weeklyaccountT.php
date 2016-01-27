@@ -79,7 +79,6 @@ function week_of_month($date) {
         else {
             $basic_sql .= " AND amount > 0 ";
             }
-        /*
 		if($this->display_total) {
 			$sql = $basic_sql . " AND (tran_date <= '$from_sql')";
 			$result = db_query($sql);
@@ -88,7 +87,6 @@ function week_of_month($date) {
 			$rows[]= array('trans_date' => '2000-01-01', 'amount' => $this->convert*$r['amount'] , 'type' => $type);
 		}
 
-         */
 
 		$sql = $basic_sql." AND (tran_date > '$from_sql' AND tran_date < '$to_sql') GROUP BY trans_date";
 	$result = db_query($sql);
@@ -180,6 +178,8 @@ function week_of_month($date) {
 				$temp = array();
 				$temp[] = array('v' => (string) $date, 'f' => $date);
 				if($this->display_total)  {
+					$temp[] = array('v' => (float) $credit, 'f' => number_format2($credit, user_price_dec()));
+					$temp[] = array('v' => (float) $debit, 'f' => number_format2($debit, user_price_dec()));
 					$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 					$temp[] = array('v' => (float) $previous_total, 'f' => number_format2($previous_total, user_price_dec()));
 				}
@@ -207,7 +207,7 @@ function week_of_month($date) {
 			$temp = array();
 			switch($r['type']) {
 			case 'credit':
-				$total += $r['amount'];
+				$total -= $r['amount'];
 				$credit += $r['amount'];
 				break;
 			case 'credit previous':
@@ -215,7 +215,7 @@ function week_of_month($date) {
 				$previous_credit -= $r['amount'];
 				break;
 			case 'debit':
-				$total += $r['amount'];
+				$total -= $r['amount'];
 				$debit -= $r['amount'];
 				break;
 			case 'debit previous':
@@ -232,13 +232,14 @@ function week_of_month($date) {
 	}
 	$temp[] = array('v' => (string) $balance_date, 'f' => $balance_date);
 				if($this->display_total)  {
+					$temp[] = array('v' => (float) $credit, 'f' => number_format2($credit, user_price_dec()));
+					$temp[] = array('v' => (float) $debit, 'f' => number_format2($debit, user_price_dec()));
 					$temp[] = array('v' => (float) $total, 'f' => number_format2($total, user_price_dec()));
 					$temp[] = array('v' => (float) $previous_total, 'f' => number_format2($previous_total, user_price_dec()));
 				}
 				else {
 					$temp[] = array('v' => (float) $credit, 'f' => number_format2($credit, user_price_dec()));
 					$temp[] = array('v' => (float) $previous_credit, 'f' => number_format2($previous_credit, user_price_dec()));
-					$temp[] = array('v' => (float) $debit, 'f' => number_format2($debit, user_price_dec()));
 					$temp[] = array('v' => (float) $previous_debit, 'f' => number_format2($previous_debit, user_price_dec()));
 				}
 	$temp[] = array('v' => (float) $credit, 'f' => number_format2($credit, user_price_dec()));
@@ -285,8 +286,8 @@ function week_of_month($date) {
 		$js .= "title: '".$title."'
 			,seriesType:'bars'
 			,series: {1: {type: 'line', areaOpacity: 0.1}
-			, 2: {type: 'line', areaOpacity: 0.1}
-			, 0: {type: 'line'}
+			, 2: {type: 'area', areaOpacity: 0.1}
+			, 0: {type: 'area'}
 			, 3: {type: 'line'}}
 			, bar: {groupWidth: 20}
 			, isStacked: false
