@@ -233,10 +233,10 @@ HSBC
 or alternatively by cheque payable to Max & Ellie Ltd and post to the address below.
 
 Max & Ellie Ltd
-Unit 6 Salvesen way
+Max & Ellie Warehouse, Walcott Street
 Hull
 East riding of Yorkshire
-HU3 4UQ
+HU3 4AU
 
 International Payment: Please note that we are not liable for any bank charges. Make sure 
 all payment costs are covered from your side.
