@@ -181,6 +181,7 @@ class BoxReports
 				case 'DATEENDM':
 				case 'DATEBEGINTAX':
 				case 'DATEENDTAX':
+				case 'DATEMINUS6':
 					if (!isset($_POST[$name]))
 					{
 						if ($type == 'DATEBEGIN')
@@ -207,6 +208,12 @@ class BoxReports
 								$date = $bdate;
 							}
 						}
+                        elseif ($type == 'DATEMINUS6')
+                        {
+                            // find either 1 of jan or 1 of may (fiscal)
+                            $date = add_months($date,-6);
+
+                        }
 					}
 					else // saved parameters 2010-10-16 Joe Hunt
 						$date = $_POST[$name];
