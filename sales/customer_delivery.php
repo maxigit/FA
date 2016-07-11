@@ -526,7 +526,7 @@ $display_sub_total = price_format($inv_items_total + input_num('ChargeFreightCos
 
 label_row(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right");
 
-$taxes = $_SESSION['Items']->get_taxes(input_num('ChargeFreightCost'));
+$taxes = $_SESSION['Items']->get_taxes(input_num('ChargeFreightCost'),null);
 $tax_total = display_edit_tax_items($taxes, $colspan, $_SESSION['Items']->tax_included);
 
 $display_total = price_format(($inv_items_total + input_num('ChargeFreightCost') + $tax_total));

@@ -34,7 +34,7 @@ function write_sales_delivery(&$delivery,$bo_policy, $bo_location)
 	update_sales_order_version($delivery->src_docs);
 
 	$tax_total = 0;
-	$taxes = $delivery->get_taxes(); // all taxes with freight_tax
+	$taxes = $delivery->get_taxes(null, null); // all taxes with freight_tax
 
 	foreach ($taxes as $taxitem) {
 		$taxitem['Value'] =  round2($taxitem['Value'], user_price_dec());

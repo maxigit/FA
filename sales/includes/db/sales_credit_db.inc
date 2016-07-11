@@ -46,7 +46,7 @@ function write_credit_note(&$credit_note, $write_off_acc)
 	$credit_note_total = $credit_note->get_items_total_dispatch();
 	$freight_tax = $credit_note->get_shipping_tax();
 
-	$taxes = $credit_note->get_taxes();
+	$taxes = $credit_note->get_taxes(null, null);
 
 	$tax_total = 0;
 	foreach ($taxes as $taxitem) {

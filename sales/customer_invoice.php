@@ -599,7 +599,7 @@ $display_sub_total = price_format($inv_items_total + input_num('ChargeFreightCos
 
 label_row(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", $is_batch_invoice ? 2 : 0);
 
-$taxes = $_SESSION['Items']->get_taxes(input_num('ChargeFreightCost'));
+$taxes = $_SESSION['Items']->get_taxes(input_num('ChargeFreightCost'),0);
 $tax_total = display_edit_tax_items($taxes, $colspan, $_SESSION['Items']->tax_included, $is_batch_invoice ? 2:0);
 
 $display_total = price_format(($inv_items_total + input_num('ChargeFreightCost') + $tax_total));

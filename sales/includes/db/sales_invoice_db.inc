@@ -41,7 +41,7 @@ function write_sales_invoice(&$invoice)
 	update_customer_trans_version(get_parent_type(ST_SALESINVOICE), $invoice->src_docs);
 
 	$ov_gst = 0;
-	$taxes = $invoice->get_taxes(); // all taxes with freight_tax
+	$taxes = $invoice->get_taxes(null, null); // all taxes with freight_tax
 
 	foreach ($taxes as $taxitem) {
 		$taxitem['Value'] =  round2($taxitem['Value'], user_price_dec());

@@ -20,9 +20,10 @@ function add_sales_order(&$order)
 	$del_date = date2sql($order->due_date);
 	$order_type = 0; // this is default on new order
 	$total = $order->get_trans_total();
+	$total_ppd = $order->get_trans_total_ppd();
 	$sql = "INSERT INTO ".TB_PREF."sales_orders (order_no, type, debtor_no, trans_type, branch_code, customer_ref, reference, comments, ord_date,
 		order_type, ship_via, deliver_to, delivery_address, contact_phone,
-		freight_cost, from_stk_loc, delivery_date, payment_terms, total)
+		freight_cost, from_stk_loc, delivery_date, payment_terms, total, total_ppd)
 		VALUES (" .db_escape($order_no) . "," .db_escape($order_type) . "," . db_escape($order->customer_id) .
 		 ", " .db_escape($order->trans_type) . "," .db_escape($order->Branch) . ", ".
 			db_escape($order->cust_ref) .",". 
@@ -38,7 +39,8 @@ function add_sales_order(&$order)
 			db_escape($order->Location) .", " .
 			db_escape($del_date) . "," .
 			db_escape($order->payment) . "," .
-			db_escape($total). ")";
+			db_escape($total). ","  .
+			db_escape($total_ppd). ")";
 
 	db_query($sql, "order Cannot be Added");
 
@@ -57,10 +59,10 @@ function add_sales_order(&$order)
 		if ($loc_notification == 1 && is_inventory_item($line->stock_id))
 			$loc = calculate_reorder_level($order->Location, $line, $st_ids, $st_names, $st_num, $st_reorder); 
 
-		$sql = "INSERT INTO ".TB_PREF."sales_order_details (order_no, trans_type, stk_code, description, unit_price, quantity, discount_percent) VALUES (";
+		$sql = "INSERT INTO ".TB_PREF."sales_order_details (order_no, trans_type, stk_code, description, unit_price, ppd_price, quantity, discount_percent) VALUES (";
 		$sql .= $order_no . ",".$order->trans_type .
 				",".db_escape($line->stock_id).", "
-				.db_escape($line->item_description).", $line->price,
+				.db_escape($line->item_description).", $line->price, $line->ppd_price
 				$line->quantity,
 				$line->discount_percent)";
 		db_query($sql, "order Details Cannot be Added");
@@ -125,6 +127,7 @@ function update_sales_order($order)
 	$order_no =  key($order->trans_no);
 	$version= current($order->trans_no);
 	$total = $order->get_trans_total();
+	$total_ppd = $order->get_trans_total_ppd();
 
 	begin_transaction();
 	hook_db_prewrite($order, $order->trans_type);
@@ -147,6 +150,7 @@ function update_sales_order($order)
 		version = ".($version+1).",
 		payment_terms = " .db_escape($order->payment). ",
 		total = ". db_escape($total) ."
+		total_ppd = ". db_escape($total_ppd) ."
 	 WHERE order_no=" . db_escape($order_no) ."
 	 AND trans_type=".$order->trans_type." AND version=".$version;
 	db_query($sql, "order Cannot be Updated, this can be concurrent edition conflict");
@@ -178,13 +182,14 @@ function update_sales_order($order)
 			$sql = "UPDATE ".TB_PREF."sales_order_details
 						SET description = ".db_escape($line->item_description) . ", 
 								unit_price = ".db_escape($line->price) . ",
+								ppd_price = ".db_escape($line->ppd_price) . ",
 								quantity = ".db_escape($line->quantity) . ",
 								discount_percent = ".db_escape($line->discount_percent) . "
 						WHERE id = {$line->id}";
 		}
 		else {
 		$sql = "INSERT INTO ".TB_PREF."sales_order_details
-		 (id, order_no, trans_type, stk_code,  description, unit_price, quantity,
+		 (id, order_no, trans_type, stk_code,  description, unit_price, ppd_price, quantity,
 		  discount_percent, qty_sent)
 		 VALUES (";
 		$sql .= db_escape($line->id ? $line->id : 0) . ","
@@ -192,6 +197,7 @@ function update_sales_order($order)
 		  .db_escape($line->stock_id) . ","
 		  .db_escape($line->item_description) . ", "
 		  .db_escape($line->price) . ", "
+		  .db_escape($line->ppd_price) . ", "
 		  .db_escape($line->quantity) . ", "
 		  .db_escape($line->discount_percent) . ", "
 		  .db_escape($line->qty_done) ." )";
@@ -261,7 +267,7 @@ function get_sales_order_header($order_no, $trans_type)
 //----------------------------------------------------------------------------------------
 
 function get_sales_order_details($order_no, $trans_type) {
-	$sql = "SELECT id, stk_code, unit_price, "
+	$sql = "SELECT id, stk_code, unit_price, ppd_price "
 		.TB_PREF."sales_order_details.description,"
 		.TB_PREF."sales_order_details.quantity,
 		  discount_percent,
@@ -317,7 +323,7 @@ function read_sales_order($order_no, &$order, $trans_type)
 		while ($myrow = db_fetch($result))
 		{
 			$order->add_to_cart($line_no,$myrow["stk_code"],$myrow["quantity"],
-				$myrow["unit_price"], $myrow["discount_percent"],
+				$myrow["unit_price"], $myrow["ppd_price"], $myrow["discount_percent"],
 				$myrow["qty_done"], $myrow["standard_cost"], $myrow["description"], $myrow["id"] );
 		$line_no++;
 		}

@@ -234,7 +234,7 @@ $display_sub_tot = price_format($sub_tot);
 label_row(_("Sub Total"), $display_sub_tot, "align=right colspan=6",
 	"nowrap align=right", 1);
 
-$taxes = $_SESSION['View']->get_taxes();
+$taxes = $_SESSION['View']->get_taxes(null, null);
 
 $tax_total = display_edit_tax_items($taxes, 6, $_SESSION['View']->tax_included,2);
 
