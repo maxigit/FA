@@ -3,10 +3,10 @@
  * Install all fields to store PPD prices
  * per item (in order, invoices etc)
  */
-class PDD {
+class PPD {
     var $version = '2.3';
     var $description = 'Prompt Payment Discount';
-    var $sql='alterPDD.sql';
+    var $sql='alterPPD.sql';
 
     function install($pref, $force) {
        return true;
@@ -21,5 +21,5 @@ class PDD {
     }
 }
 
-$install = new PDD;
+$install = new PPD;
 ?>
