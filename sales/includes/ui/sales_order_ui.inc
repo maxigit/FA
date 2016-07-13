@@ -47,7 +47,7 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 	 if (!$item['is_foreign'] && $item['item_code'] != $item['stock_id'])
 	 {	// this is sales kit - recurse 
 		add_to_order($order, $item['stock_id'], $new_item_qty*$item['quantity'],
-			$item_price, $discount);
+                     $item_price, 0.1, $discount);
 	 }
 	 else
 	 {	// stock item record eventually with foreign code
@@ -63,7 +63,7 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 			}
 		}
 		$order->add_to_cart (count($order->line_items),	$item['stock_id'], 
-			$new_item_qty*$item['quantity'], $item_price, $discount, 0,0, $description);
+                             $new_item_qty*$item['quantity'], $item_price, 0.1, $discount, 0,0, $description);
 	 }
 	}
 
@@ -143,7 +143,9 @@ function display_order_summary($title, &$order, $editable_items=false)
 	start_table(TABLESTYLE, "colspan=7 width=90%");
 	$th = array(_("Item Code"), _("Item Description"), _("Quantity"),
 		_("Delivered"),
-		_("Unit"), $order->tax_included ? _("Price after Tax") : _("Price before Tax"), _("Discount %"), _("Total"), "");
+		_("Unit"), $order->tax_included ? _("Price after Tax") : _("Price before Tax"),
+                _("PPD "),
+        _("Discount %"), _("Total"), "");
 
 	if ($order->trans_no == 0) {
 	unset( $th[3] );
@@ -179,7 +181,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 					$quantity_on_database = $stock_item->qty_old;
 					$qoh = get_qoh_on_date($stock_item->stock_id, 
 						$_POST['Location'], $_POST['delivery_date']);
-					$qoh_all = get_qoh_on_date($stock_item->stock_id, null, null, 0, true) + get_on_porder_qty($stock_item->stock_id);
+					$qoh_all = get_qoh_on_date($stock_item->stock_id, null, null, 0, true) + get_on_porder_qty($stock_item->stock_id,"");
 					//$total_demand = get_demand_qty($stock_item->stock_id) - $quantity_on_database;
 					$total_demand = get_quantity_booked_for_other($stock_item->stock_id, $order);
 					//print "total $total_demand, qoh_all $qoh_all";
@@ -249,6 +251,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 
 			label_cell($stock_item->units);
 			amount_cell($stock_item->price);
+			amount_cell((1-$stock_item->ppd)*$stock_item->price);
 
 			percent_cell($stock_item->discount_percent * 100);
 			amount_cell($line_total);
@@ -598,6 +601,7 @@ function sales_order_item_controls(&$order, &$rowcounter, $line_no=-1)
 	label_cell($units, '', 'units');
 
 	amount_cells(null, 'price');
+	label_cells("","");
 
 	small_amount_cells(null, 'Disc', percent_format($_POST['Disc']), null, null, user_percent_dec());
 

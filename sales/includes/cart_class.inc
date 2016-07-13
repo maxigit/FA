@@ -365,10 +365,10 @@ class cart
 			$this->freight_cost = $freight_cost;
 	}
 
-	function add_to_cart($line_no, $stock_id, $qty, $price, $ppd_price, $disc, $qty_done=0, $standard_cost=0, $description=null, $id=0, $src_no=0,
+	function add_to_cart($line_no, $stock_id, $qty, $price, $ppd, $disc, $qty_done=0, $standard_cost=0, $description=null, $id=0, $src_no=0,
 		$src_id=0)
 	{
-		$line = new line_details($stock_id, $qty, $price, $ppd_price, $disc,
+		$line = new line_details($stock_id, $qty, $price, $ppd, $disc,
 			$qty_done,  $standard_cost, $description, $id, $src_no, $src_id);
 
 		if ($line->valid) {
@@ -379,14 +379,13 @@ class cart
 		return 0;
 	}
 
-	function update_cart_item($line_no, $qty, $price, $ppd_price, $disc, $description="")
+	function update_cart_item($line_no, $qty, $price, $disc, $description="")
 	{
 		if ($description != "")
 			$this->line_items[$line_no]->item_description = $description;
 		$this->line_items[$line_no]->quantity = $qty;
 		$this->line_items[$line_no]->qty_dispatched = $qty;
 		$this->line_items[$line_no]->price = $price;
-		$this->line_items[$line_no]->ppd_price = $ppd_price;
 		$this->line_items[$line_no]->discount_percent = $disc;
 	}
 
@@ -567,7 +566,7 @@ class line_details
 	var $src_no;	// number of src doc for this line
 	var $src_id;
 	var $price;
-	var $ppd_price; // Prompt Payment Discounted price (the price, not the discount)
+	var $ppd; // Prompt Payment Discounted price (the price, not the discount)
 	var $discount_percent;
 	
 	var $standard_cost;
@@ -601,7 +600,7 @@ class line_details
 	var $qty_old = 0;
 
 
-	function line_details ($stock_id, $qty, $prc, $ppd_price, $disc_percent,
+	function line_details ($stock_id, $qty, $prc, $ppd, $disc_percent,
 		$qty_done, $standard_cost, $description, $id=0, $src_no=0, $src_id=0)
 	{
 	/* Constructor function to add a new LineDetail object with passed params */
@@ -628,7 +627,7 @@ class line_details
 		$this->quantity = $qty;
 		$this->qty_dispatched = $qty;
 		$this->price = $prc;
-		$this->ppd_price = $ppd_price;
+		$this->ppd = $ppd;
 		$this->discount_percent = $disc_percent;
 		$this->qty_done = $qty_done;
 		$this->standard_cost = $standard_cost;
@@ -638,7 +637,7 @@ class line_details
 	// get unit price as stated on document
 	function line_price($ppd)
 	{
-		return $ppd ? $this->ppd_price : $this->price;
+		return $this->price*($ppd ? 1-$this->ppd : 1);
 	}
 }
 

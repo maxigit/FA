@@ -17,7 +17,7 @@ class PPD {
        return true;
     }
     function installed($pref) {
-        check_table($pref, 'sales_order_details', 'ppd_price');
+        return check_table($pref, 'sales_order_details', 'ppd');
     }
 }
 
