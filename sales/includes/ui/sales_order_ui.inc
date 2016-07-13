@@ -286,7 +286,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 	start_row();
 	label_cell(_("Shipping Charge"), "colspan=$colspan align=right");
 	small_amount_cells(null, 'freight_cost', price_format(get_post('freight_cost',0)));
-	label_cell('With PPD', 'colspan=2; align=center');
+	label_cell('With PPD', 'colspan=2; align=center class="tableheader"');
 	end_row();
 	$display_sub_total = price_format($total + input_num('freight_cost'));
 

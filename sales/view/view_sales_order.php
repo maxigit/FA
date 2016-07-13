@@ -199,7 +199,7 @@ display_heading2(_("Line Details"));
 
 start_table(TABLESTYLE, "colspan=9 width=95%");
 $th = array(_("Item Code"), _("Item Description"), _("Quantity"), _("Unit"),
-	_("Price"), _("Discount"), _("Total"), _("Quantity Delivered"));
+            _("Price"), _("PPD"), _("Discount"), _("Total"), _("Quantity Delivered"));
 table_header($th);
 
 $k = 0;  //row colour counter
@@ -217,6 +217,7 @@ foreach ($_SESSION['View']->line_items as $stock_item) {
 	qty_cell($stock_item->quantity, false, $dec);
 	label_cell($stock_item->units);
 	amount_cell($stock_item->price);
+	amount_cell((1-$stock_item->ppd)*$stock_item->price);
 	amount_cell($stock_item->discount_percent * 100);
 	amount_cell($line_total);
 
@@ -224,24 +225,34 @@ foreach ($_SESSION['View']->line_items as $stock_item) {
 	end_row();
 }
 
-label_row(_("Shipping"), price_format($_SESSION['View']->freight_cost),
-	"align=right colspan=6", "nowrap align=right", 1);
+$colspan=7;
+start_row();
+label_cells(_("Shipping"), price_format($_SESSION['View']->freight_cost),
+	"align=right colspan=$colspan", "nowrap align=right", 1);
+label_cell("Price With PPD", "align=center class=\"tableheader\"");
+end_row();
 
-$sub_tot = $_SESSION['View']->get_items_total(null) + $_SESSION['View']->freight_cost;
+$sub_tot = $_SESSION['View']->get_items_total(false) + $_SESSION['View']->freight_cost;
+$sub_tot_ppd = $_SESSION['View']->get_items_total(true) + $_SESSION['View']->freight_cost;
 
 $display_sub_tot = price_format($sub_tot);
 
-label_row(_("Sub Total"), $display_sub_tot, "align=right colspan=6",
+start_row();
+label_cells(_("Sub Total"), $display_sub_tot, "align=right colspan=$colspan",
 	"nowrap align=right", 1);
+amount_cell($sub_tot_ppd);
 
-$taxes = $_SESSION['View']->get_taxes(null, null);
+$taxes = $_SESSION['View']->get_taxes_and_ppd(null);
 
-$tax_total = display_edit_tax_items($taxes, 6, $_SESSION['View']->tax_included,2);
+$tax_totals = display_edit_tax_items($taxes, 7, $_SESSION['View']->tax_included,2,false,1);
+$tax_total = $tax_totals['total'];
+$tax_total_ppd = $tax_totals['totalWithPPD'];
 
 $display_total = price_format($sub_tot + $tax_total);
 
 start_row();
-label_cells(_("Amount Total"), $display_total, "colspan=6 align='right'","align='right'");
+label_cells(_("Amount Total"), $display_total, "colspan=$colspan align='right'","align='right'");
+amount_cell($sub_tot_ppd+$tax_total_ppd);
 label_cell('', "colspan=2");
 end_row();
 end_table(2);

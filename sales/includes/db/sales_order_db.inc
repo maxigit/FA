@@ -322,7 +322,7 @@ function read_sales_order($order_no, &$order, $trans_type)
 		$line_no=0;
 		while ($myrow = db_fetch($result))
 		{
-            display_error($myrow);
+            // display_error($myrow);
 			$order->add_to_cart($line_no,$myrow["stk_code"],$myrow["quantity"],
 				$myrow["unit_price"], $myrow["ppd"], $myrow["discount_percent"],
 				$myrow["qty_done"], $myrow["standard_cost"], $myrow["description"], $myrow["id"] );
