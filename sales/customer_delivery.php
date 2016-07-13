@@ -446,7 +446,7 @@ start_table(TABLESTYLE, "width=80%");
 $new = $_SESSION['Items']->trans_no==0;
 $th = array(_("Item Code"), _("Item Description"), 
 	$new ? _("Ordered") : _("Max. delivery"), _("Units"), $new ? _("Delivered") : _("Invoiced"),
-	_("This Delivery"), _("Price"), _("Tax Type"), _("Discount"), _("Total"));
+            _("This Delivery"), _("Price"), _("PPD Price"), _("Tax Type"), _("Discount"), _("Total"));
 
 table_header($th);
 $k = 0;
@@ -503,6 +503,7 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	$line_total = ($ln_itm->qty_dispatched * $ln_itm->price * (1 - $ln_itm->discount_percent));
 
 	amount_cell($ln_itm->price);
+	amount_cell($ln_itm->price*(1-$ln_itm->ppd));
 	label_cell($ln_itm->tax_type_name);
 	label_cell($display_discount_percent, "nowrap align=right");
 	amount_cell($line_total);
@@ -518,20 +519,32 @@ $colspan = 9;
 start_row();
 label_cell(_("Shipping Cost"), "colspan=$colspan align=right");
 small_amount_cells(null, 'ChargeFreightCost', $_SESSION['Items']->freight_cost);
+label_cell('With PPD', 'colspan=2; align=center class="tableheader"');
 end_row();
 
-$inv_items_total = $_SESSION['Items']->get_items_total_dispatch();
+$inv_items_total = $_SESSION['Items']->get_items_total_dispatch(false);
+$total_ppd = $_SESSION['Items']->get_items_total_dispatch(true);
 
 $display_sub_total = price_format($inv_items_total + input_num('ChargeFreightCost'));
 
-label_row(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right");
+start_row();
+label_cells(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", 2);
+$display_sub_total_ppd = price_format($total_ppd + input_num('freight_cost'));
+amount_cell($display_sub_total_ppd,'',"colspan=2");
+end_row();
 
-$taxes = $_SESSION['Items']->get_taxes(input_num('ChargeFreightCost'),null);
-$tax_total = display_edit_tax_items($taxes, $colspan, $_SESSION['Items']->tax_included);
+$taxes = $_SESSION['Items']->get_taxes_and_ppd(input_num('ChargeFreightCost'));
+$tax_totals = display_edit_tax_items($taxes, $colspan, $_SESSION['Items']->tax_included, 1, false, 1);
+$tax_total = $tax_totals['total'];
+$tax_total_ppd = $tax_totals['totalWithPPD'];
 
 $display_total = price_format(($inv_items_total + input_num('ChargeFreightCost') + $tax_total));
+$display_total_ppd = price_format(($total_ppd + input_num('freight_cost') + $tax_total_ppd));
 
-label_row(_("Amount Total"), $display_total, "colspan=$colspan align=right","align=right");
+start_row();
+label_cells(_("Amount Total"), $display_total, "colspan=$colspan align=right","align=right");
+amount_cell($display_total_ppd, '', "colspan=1");
+end_row();
 
 end_table(1);
 
@@ -540,7 +553,8 @@ if ($has_marked) {
 }
 }
 
-$textcart_mgr->tab_display(""
+$title="";
+$textcart_mgr->tab_display($title
 	,$_SESSION['Items']
 	,"display_delivery_in_tab"
 );

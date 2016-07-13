@@ -297,7 +297,7 @@ function display_order_summary($title, &$order, $editable_items=false)
     end_row();
 
 	$taxes = $order->get_taxes_and_ppd(input_num('freight_cost'));
-	$tax_totals = display_edit_tax_items($taxes, $colspan, $order->tax_included, 2, false, 2);
+	$tax_totals = display_edit_tax_items($taxes, $colspan, $order->tax_included, 2, 2);
     $tax_total = $tax_totals['total'];
     $tax_total_ppd = $tax_totals['totalWithPPD'];
 
