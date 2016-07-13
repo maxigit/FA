@@ -475,14 +475,15 @@ function display_supp_trans_tax_details($tax_items, $columns)
 
 //--------------------------------------------------------------------------------------
 
-function display_edit_tax_items($taxes, $columns, $tax_included, $rightspan=0, $editable=false)
+function display_edit_tax_items($taxes, $columns, $tax_included, $rightspan=0, $editable=false, $ppd_span=0)
 {
 	$total = 0;
+    $total_ppd=0;
 
     foreach ($taxes as $taxitem)
 	{
 		$amount = isset($taxitem['Override']) ? $taxitem['Override'] : $taxitem['Value'];
-		if ($taxitem['Value'] != 0){
+		if ($taxitem['Value'] != 0 || ($ppd_span && $taxitem['ValueWithPPD'] != 0)) {
 			if ($editable) {
 				if (!isset($_POST['mantax['.$taxitem['tax_type_id'].']']))
 					$_POST['mantax['.$taxitem['tax_type_id'].']'] = price_format($amount);
@@ -509,16 +510,24 @@ function display_edit_tax_items($taxes, $columns, $tax_included, $rightspan=0, $
 					label_row(_("Included") . " " . $taxitem['tax_type_name']
 						. " " . $value , "", "colspan=$columns align=right", "align=right", $rightspan);
 				}
-				else
+				else 
 				{
-					label_row($taxitem['tax_type_name'],
+                    $value_ppd = number_format2($taxitem['ValueWithPPD'],user_price_dec());
+                    start_row();
+					label_cells($taxitem['tax_type_name'],
 						$value, "colspan=$columns align=right", "align=right", $rightspan);
+                    if($ppd_span) amount_cell($value_ppd,'', "colspan=$ppd_span");
+                    end_row();
 					$total +=  round2($taxitem['Value'], user_price_dec());
+					$total_ppd +=  round2($taxitem['ValueWithPPD'], user_price_dec());
 				}
 			}
 		}
 	}
-	return $total;
+    if($ppd_span) {
+        return array('total'=> $total, 'totalWithPPD' => $total_ppd);
+    }
+    else return $total;
 }
 
 //--------------------------------------------------------------------------------------

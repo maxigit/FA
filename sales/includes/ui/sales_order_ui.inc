@@ -144,7 +144,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 	$th = array(_("Item Code"), _("Item Description"), _("Quantity"),
 		_("Delivered"),
 		_("Unit"), $order->tax_included ? _("Price after Tax") : _("Price before Tax"),
-                _("PPD "),
+                _("PPD Price"),
         _("Discount %"), _("Total"), "");
 
 	if ($order->trans_no == 0) {
@@ -157,6 +157,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 	table_header($th);
 
 	$total = 0;
+    $total_ppd = 0;
 	$k = 0;  //row colour counter
 
 	$id = find_submit('Edit');
@@ -166,7 +167,9 @@ function display_order_summary($title, &$order, $editable_items=false)
 	{
 
 		$line_total = round($stock_item->qty_dispatched * $stock_item->price * (1 - $stock_item->discount_percent),
-		   user_price_dec());
+                            user_price_dec());
+        $line_total_ppd = round($stock_item->qty_dispatched * $stock_item->price * (1 - $stock_item->discount_percent)*(1-$stock_item->ppd),
+                                user_price_dec());
 
 		$qoh_msg = '';
 		if (!$editable_items || $id != $line_no)
@@ -271,29 +274,40 @@ function display_order_summary($title, &$order, $editable_items=false)
 		}
 
 		$total += $line_total;
+        $total_ppd += $line_total_ppd;
 	}
 
 	if ($id==-1 && $editable_items)
 		sales_order_item_controls($order, $k);
 
-	$colspan = 6;
+	$colspan = 7;
 	if ($order->trans_no!=0)
 		++$colspan;
 	start_row();
 	label_cell(_("Shipping Charge"), "colspan=$colspan align=right");
 	small_amount_cells(null, 'freight_cost', price_format(get_post('freight_cost',0)));
-	label_cell('', 'colspan=2');
+	label_cell('With PPD', 'colspan=2; align=center');
 	end_row();
 	$display_sub_total = price_format($total + input_num('freight_cost'));
-	label_row(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", 2);
-	$taxes = $order->get_taxes(input_num('freight_cost'), 0);
-	$tax_total = display_edit_tax_items($taxes, $colspan, $order->tax_included, 2);
+
+    start_row();
+	label_cells(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", 2);
+	$display_sub_total_ppd = price_format($total_ppd + input_num('freight_cost'));
+    amount_cell($display_sub_total_ppd,'',"colspan=2");
+    end_row();
+
+	$taxes = $order->get_taxes_and_ppd(input_num('freight_cost'));
+	$tax_totals = display_edit_tax_items($taxes, $colspan, $order->tax_included, 2, false, 2);
+    $tax_total = $tax_totals['total'];
+    $tax_total_ppd = $tax_totals['totalWithPPD'];
 
 	$display_total = price_format(($total + input_num('freight_cost') + $tax_total));
+	$display_total_ppd = price_format(($total_ppd + input_num('freight_cost') + $tax_total_ppd));
 
 	start_row();
-	label_cells(_("Amount Total"), $display_total, "colspan=$colspan align=right","align=right");
-	submit_cells('update', _("Update"), "colspan=2 align='center'", _("Refresh"), true);
+	submit_cells('update', _("Update"), "colspan=6 align='right'", _("Refresh"), true);
+	label_cells(_("Amount Total"), $display_total, "colspan=1 align=right","align=right");
+    amount_cell($display_total_ppd, '', "colspan=2");
 	end_row();
 
 	end_table();

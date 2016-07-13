@@ -500,6 +500,22 @@ class cart
 		return $taxes;
 	}
 
+    // computes taxes with and without Prompt Payment Discount
+    // and merge the results.
+    // normal taxes are in 'Value' 
+    // PPD taxes are in 'ValueWithPPD' 
+    function get_taxes_and_ppd($shipping_cost) {
+        $taxes = $this->get_taxes($shipping_cost, 0);
+        $taxes_ppd = $this->get_taxes($shipping_cost, 1);
+
+        // We assume that the two arrays have the same number
+        // of tax items in the same order. Only the tax value should change.
+
+        return array_map(function($tax, $ppd) {$tax['ValueWithPPD'] = $ppd['Value']; return $tax;}
+                 , $taxes, $taxes_ppd);
+        
+    }
+
 
 	function get_tax_free_shipping()
 	{
