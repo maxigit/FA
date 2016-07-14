@@ -11,7 +11,7 @@
 ***********************************************************************/
 //----------------------------------------------------------------------------------------
 
-function get_customer_trans_details($debtor_trans_type, $debtor_trans_no, $order_by)
+function get_customer_trans_details($debtor_trans_type, $debtor_trans_no, $order_by=false)
 {
 if (!is_array($debtor_trans_no))
 	$debtor_trans_no = array( 0=>$debtor_trans_no );

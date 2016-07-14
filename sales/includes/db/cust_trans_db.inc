@@ -82,14 +82,14 @@ $date_, $reference, $Total, $ppd_amount, $discount=0, $Tax=0, $Tax_ppd, $Freight
 		debtor_no, branch_code,
 		tran_date, due_date,
 		reference, tpe,
-		order_, ov_amount, ov_discount,
-		ov_gst, ov_freight, ov_freight_tax,
+		order_, ov_amount, ov_ppd_amount, ov_discount,
+		ov_gst, ov_ppd_gst, ov_freight, ov_freight_tax,
 		rate, ship_via, alloc,
 		dimension_id, dimension2_id, payment_terms
 		) VALUES (".db_escape($trans_no).", ".db_escape($trans_type).",
 		".db_escape($debtor_no).", ".db_escape($BranchNo).",
 		'$SQLDate', '$SQLDueDate', ".db_escape($reference).",
-		".db_escape($sales_type).", ".db_escape($order_no).", $Total, ".db_escape($discount).", $Tax,
+		".db_escape($sales_type).", ".db_escape($order_no).", $Total, $ppd_amount, ".db_escape($discount).", $Tax, $Tax_ppd,
 		".db_escape($Freight).",
 		$FreightTax, $rate, ".db_escape($ship_via).", $AllocAmt,
 		".db_escape($dimension_id).", ".db_escape($dimension2_id).", "
