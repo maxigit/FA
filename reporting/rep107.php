@@ -114,13 +114,13 @@ function print_invoices()
 				$Net = round2($sign * ((1 - $myrow2["discount_percent"]) * $myrow2["unit_price"] * $myrow2["quantity"]),
 				   user_price_dec());
 				$SubTotal += $Net;
-	    		$DisplayPrice = number_format2($myrow2["unit_price"],$dec);
+	    		$DisplayPrice = number_format2($myrow2["unit_price"]*(1-$myrow2["discount_percent"]),$dec);
 	    		$DisplayQty = number_format2($sign*$myrow2["quantity"],get_qty_dec($myrow2['stock_id']));
 	    		$DisplayNet = number_format2($Net,$dec);
-	    		if ($myrow2["discount_percent"]==0)
-		  			$DisplayDiscount ="";
+	    		if ($myrow2["ppd"]==0)
+		  			$DisplayDiscount ="NA";
 	    		else
-		  			$DisplayDiscount = number_format2($myrow2["discount_percent"]*100,user_percent_dec()) . "%";
+		  			$DisplayDiscount = number_format2($DisplayPrice*(1-$myrow2["ppd"]),$dec+1);
 				$rep->TextCol(0, 1,	$myrow2['stock_id'], -2);
 				$oldrow = $rep->row;
 				$rep->TextColLines(1, 2, $myrow2['StockDescription'], -2);
@@ -198,8 +198,9 @@ function print_invoices()
     		}
 
     		$rep->NewLine();
-			$DisplayTotal = number_format2($sign*($myrow["ov_freight"] + $myrow["ov_gst"] +
-				$myrow["ov_amount"]+$myrow["ov_freight_tax"]),$dec);
+			$total = $myrow["ov_freight"] + $myrow["ov_gst"] + $myrow["ov_amount"]+$myrow["ov_freight_tax"];
+			$DisplayTotal = number_format2($sign*$total,$dec);
+            $DisplayTotalPPD = number_format2($total - $myrow["ov_ppd_amount"] - $myrow["ov_ppd_gst"], $dec);
 			$rep->Font('bold');
 			$rep->TextCol(3, 6, _("TOTAL INVOICE"), - 2);
 			$rep->TextCol(6, 7, $DisplayTotal, -2);
@@ -219,6 +220,9 @@ Hi [contact],
 
 Your order is picked, packed and ready to be dispatched.
 The total amount due is $DisplayTotal $cur (including delivery).
+However, if you pay within 10 days, you are entitled to a prompt payment discount of 10.0%
+and therefore only need to pay $DisplayTotalPPD.
+                                                                                       
 Could you please arrange the payment ASAP and we will send your order upon receipt.
 
 
