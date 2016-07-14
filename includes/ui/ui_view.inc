@@ -421,7 +421,8 @@ function display_debit_or_credit_cells($value, $bold=false)
 
 //--------------------------------------------------------------------------------------
 
-function display_customer_trans_tax_details($tax_items, $columns)
+// ov_gst_with_ppd total amount of tax to pay if Prompt payment made
+function display_customer_trans_tax_details($tax_items, $columns, $ov_gst_with_ppd=false)
 {
 	global $alternative_tax_include_on_docs, $suppress_tax_rates;
 	$first = true;
@@ -435,22 +436,27 @@ function display_customer_trans_tax_details($tax_items, $columns)
 			$tax_type_name = $tax_item['tax_type_name'];
 		else
 			$tax_type_name = $tax_item['tax_type_name']." (".$tax_item['rate']."%) ";
+        start_row();
     	if ($tax_item['included_in_price'])
     	{
 			if (isset($alternative_tax_include_on_docs) && $alternative_tax_include_on_docs == 1)
   			{
   				if ($first)
-  					label_row(_("Total Tax Excluded"), number_format2($tax_item['net_amount'], user_price_dec()),
+  					label_cells(_("Total Tax Excluded"), number_format2($tax_item['net_amount'], user_price_dec()),
   						"colspan=$columns align=right", "align=right");
-        		label_row($tax_type_name, $tax, "colspan=$columns align=right", "align=right");
+        		label_cells($tax_type_name, $tax, "colspan=$columns align=right", "align=right");
         		$first = false;
         	}
         	else
-        		label_row(_("Included") . " " . $tax_type_name
+        		label_cells(_("Included") . " " . $tax_type_name
         			. ": $tax", "", "colspan=$columns align=right", "align=right");
         }			
     	else
-        	label_row($tax_type_name, $tax, "colspan=$columns align=right", "align=right");
+        	label_cells($tax_type_name, $tax, "colspan=$columns align=right", "align=right");
+        // displays PPD
+        if($first && $ov_gst_with_ppd !== false)
+            amount_cell($ov_gst_with_ppd);
+        end_row();
     }
 }
 
