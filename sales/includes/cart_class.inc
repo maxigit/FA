@@ -651,7 +651,7 @@ class line_details
 	}
 
 	// get unit price as stated on document
-	function line_price($ppd)
+	function line_price($ppd=false)
 	{
 		return $this->price*($ppd ? 1-$this->ppd : 1);
 	}

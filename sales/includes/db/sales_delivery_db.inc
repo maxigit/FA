@@ -27,24 +27,27 @@ function write_sales_delivery(&$delivery,$bo_policy, $bo_location)
 
 	add_new_exchange_rate($customer['curr_code'], $delivery->document_date, $delivery->ex_rate);
 
-	$delivery_items_total = $delivery->get_items_total_dispatch();
+	$delivery_items_total = $delivery->get_items_total_dispatch(false);
+	$delivery_items_total_ppd = $delivery->get_items_total_dispatch(true);
 	$freight_tax = $delivery->get_shipping_tax();
 
 // mark sales order for concurrency conflicts check
 	update_sales_order_version($delivery->src_docs);
 
 	$tax_total = 0;
-	$taxes = $delivery->get_taxes(null, null); // all taxes with freight_tax
+    $tax_total_ppd = 0;
+	$taxes = $delivery->get_taxes_and_ppd(null); // all taxes with freight_tax
 
 	foreach ($taxes as $taxitem) {
 		$taxitem['Value'] =  round2($taxitem['Value'], user_price_dec());
 		$tax_total +=  $taxitem['Value'];
+        $tax_total_ppd += $taxitem['ValueWithPPD'];
 	}
 	/* Insert/update the debtor_trans */
 	$delivery_no = write_customer_trans(ST_CUSTDELIVERY, $trans_no, $delivery->customer_id,
 		$delivery->Branch, $delivery->document_date, $delivery->reference,
-		$delivery_items_total, 0,
-		$delivery->tax_included ? 0 : $tax_total-$freight_tax,
+        $delivery_items_total, $delivery_items_total - $delivery_items_total_ppd, 0,
+        $delivery->tax_included ? 0 : $tax_total-$freight_tax, $tax_total-$tax_total_ppd,
 		$delivery->freight_cost,
 		$delivery->tax_included ? 0 : $freight_tax,
 		$delivery->sales_type, $delivery->order_no,
@@ -73,7 +76,7 @@ function write_sales_delivery(&$delivery,$bo_policy, $bo_location)
 
 		$XXX_id = $delivery_line->stock_id;
 
-		$line_price = $delivery_line->line_price();
+		$line_price = $delivery_line->line_price(false);
 		$line_taxfree_price = get_tax_free_price_for_item($delivery_line->stock_id,
 			$delivery_line->price, 0, $delivery->tax_included,
 			$delivery->tax_group_array);
@@ -87,7 +90,7 @@ function write_sales_delivery(&$delivery,$bo_policy, $bo_location)
 		/* add delivery details for all lines */
 		write_customer_trans_detail_item(ST_CUSTDELIVERY, $delivery_no, $delivery_line->stock_id,
 			$delivery_line->item_description, $delivery_line->qty_dispatched,
-			$delivery_line->line_price(), $line_tax,
+            $delivery_line->line_price(), $line_tax, $delivery_line->ppd,
 			$delivery_line->discount_percent, $delivery_line->standard_cost, $delivery_line->src_id,
 			$trans_no ? $delivery_line->id : 0);
 
