@@ -221,7 +221,7 @@ Hi [contact],
 Your order is picked, packed and ready to be dispatched.
 The total amount due is $DisplayTotal $cur (including delivery).
 However, if you pay within 10 days, you are entitled to a prompt payment discount of 10.0%
-and therefore only need to pay $DisplayTotalPPD.
+and selected items and therefore only need to pay $DisplayTotalPPD.
                                                                                        
 Could you please arrange the payment ASAP and we will send your order upon receipt.
 
