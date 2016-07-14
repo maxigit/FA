@@ -53,7 +53,7 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
 
 	// do not use $rate here: global rate stored in exrate table is always used
 	$payment_no = write_customer_trans(ST_CUSTPAYMENT, $trans_no, $customer_id, $branch_id, 
-		$date_, $ref, $amount, $discount);
+                                       $date_, $ref, $amount, 0, $discount);
 
 	$bank_gl_account = get_bank_gl_account($bank_account);
 

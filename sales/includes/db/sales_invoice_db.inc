@@ -36,16 +36,19 @@ function write_sales_invoice(&$invoice)
 
 	// offer price values without freight costs
 	$items_total = $invoice->get_items_total_dispatch();
+	$items_total_ppd = $invoice->get_items_total_dispatch(true);
 	$freight_tax = $invoice->get_shipping_tax();
 
 	update_customer_trans_version(get_parent_type(ST_SALESINVOICE), $invoice->src_docs);
 
 	$ov_gst = 0;
-	$taxes = $invoice->get_taxes(null, null); // all taxes with freight_tax
+	$ov_gst_ppd = 0;
+	$taxes = $invoice->get_taxes_and_ppd(null); // all taxes with freight_tax
 
 	foreach ($taxes as $taxitem) {
 		$taxitem['Value'] =  round2($taxitem['Value'], user_price_dec());
 		$ov_gst +=  $taxitem['Value'];
+		$ov_gst_ppd +=  $taxitem['ValueWithPPD'];
 	}
 
 	if($invoice->tax_included==0) {
@@ -68,8 +71,8 @@ function write_sales_invoice(&$invoice)
          void_trans_tax_details(ST_SALESINVOICE, $trans_no);
     } 
     $invoice_no = write_customer_trans(ST_SALESINVOICE, $trans_no, $invoice->customer_id,
-	$invoice->Branch, $date_, $invoice->reference, $items_total, 0,
-	$items_added_tax, $invoice->freight_cost, $freight_added_tax,
+                                       $invoice->Branch, $date_, $invoice->reference, $items_total, $items_total-$items_total_ppd, 0,
+                                       $items_added_tax, $ov_gst-$ov_gst_ppd, $invoice->freight_cost, $freight_added_tax,
 	$invoice->sales_type, $sales_order, $invoice->ship_via, 
 	$invoice->due_date, 0, 0, $invoice->dimension_id, 
 	$invoice->dimension2_id, $invoice->payment); 
