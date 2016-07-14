@@ -166,12 +166,13 @@ end_row();
 $tax_items = get_trans_tax_details(ST_SALESINVOICE, $trans_id);
 display_customer_trans_tax_details($tax_items, 6, $myrow['ov_gst']-$myrow['ov_ppd_gst']);
 
-$display_total = price_format($myrow["ov_freight"]+$myrow["ov_gst"]+$myrow["ov_amount"]+$myrow["ov_freight_tax"]);
+$total = $myrow["ov_freight"]+$myrow["ov_gst"]+$myrow["ov_amount"]+$myrow["ov_freight_tax"];
+$display_total = price_format($total);
 
 start_row();
 label_cells(_("TOTAL INVOICE"), $display_total, "colspan=6 align=right",
 	"nowrap align=right");
-amount_cell($display_total-$myrow["ov_ppd_amount"]-$myrow["ov_ppd_gst"]);
+amount_cell($total-$myrow["ov_ppd_amount"]-$myrow["ov_ppd_gst"]);
 end_row();
 end_table(1);
 
@@ -179,7 +180,7 @@ $voided = is_voided_display(ST_SALESINVOICE, $trans_id, _("This invoice has been
 
 if (!$voided)
 {
-	display_allocations_to(PT_CUSTOMER, $myrow['debtor_no'], ST_SALESINVOICE, $trans_id, $myrow['Total']);
+	// display_allocations_to(PT_CUSTOMER, $myrow['debtor_no'], ST_SALESINVOICE, $trans_id, $myrow['Total']);
 }
 
 end_page(true, false, false, ST_SALESINVOICE, $trans_id);
