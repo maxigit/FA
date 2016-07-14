@@ -305,7 +305,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 	$display_total_ppd = price_format(($total_ppd + input_num('freight_cost') + $tax_total_ppd));
 
 	start_row();
-	submit_cells('update', _("Update"), "colspan=6 align='right'", _("Refresh"), true);
+	submit_cells('update', _("Update"), "colspan=".($colspan-1)." align='right'", _("Refresh"), true);
 	label_cells(_("Amount Total"), $display_total, "colspan=1 align=right","align=right");
     amount_cell($display_total_ppd, '', "colspan=2");
 	end_row();
