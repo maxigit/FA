@@ -149,7 +149,7 @@ if (db_num_rows($result) > 0)
     start_row();
 	label_cells(_("Sub-total"), $display_sub_tot, "colspan=6 align=right",
                 "nowrap align=right width=15%");
-    amount_cell($display_sub_tot-$myrow["ov_ppd_amount"]);
+    amount_cell($sub_total-$myrow["ov_ppd_amount"]);
     end_row();
 }
 else

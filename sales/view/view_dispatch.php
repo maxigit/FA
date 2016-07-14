@@ -147,7 +147,7 @@ if (db_num_rows($result) > 0)
     start_row();
 	label_cells(_("Sub-total"), $display_sub_tot, "colspan=6 align=right",
 		"nowrap align=right width=15%");
-    amount_cell($display_sub_tot-$myrow["ov_ppd_amount"]);
+    amount_cell($sub_total-$myrow["ov_ppd_amount"]);
     end_row();
 
 }
@@ -164,12 +164,13 @@ end_row();
 $tax_items = get_trans_tax_details(ST_CUSTDELIVERY, $trans_id);
 display_customer_trans_tax_details($tax_items, 6, $myrow['ov_gst']-$myrow['ov_ppd_gst']);
 
-$display_total = price_format($myrow["ov_freight"]+$myrow["ov_amount"]+$myrow["ov_freight_tax"]+$myrow["ov_gst"]);
+$total = $myrow["ov_freight"]+$myrow["ov_amount"]+$myrow["ov_freight_tax"]+$myrow["ov_gst"];
+$display_total = price_format($total);
 
 start_row();
 label_cells(_("TOTAL VALUE"), $display_total, "colspan=6 align=right",
 	"nowrap align=right");
-amount_cell($display_total-$myrow["ov_ppd_amount"]-$myrow["ov_ppd_gst"]);
+amount_cell($total-$myrow["ov_ppd_amount"]-$myrow["ov_ppd_gst"]);
 end_row();
 end_table(1);
 
