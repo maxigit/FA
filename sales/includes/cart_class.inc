@@ -426,7 +426,9 @@ class cart
 			$total += round($ln_itm->quantity * $price * (1 - $ln_itm->discount_percent), 
                             user_price_dec($ppd));
 		}
-		return $total;
+        // In theory round2 should work in both case, but we prefer
+        // to leave the old code to not introduce any regression.
+		return $ppd ? round2($total, user_price_dec()) : $total;
 	}
 
 	function get_items_total_dispatch($ppd)
@@ -438,7 +440,9 @@ class cart
 			$total += round(($ln_itm->qty_dispatched * $price * (1 - $ln_itm->discount_percent)), 
                             user_price_dec($ppd));
 		}
-		return $total;
+        // In theory round2 should work in both case, but we prefer
+        // to leave the old code to not introduce any regression.
+		return $ppd ? round2($total, user_price_dec()) : $total;
 	}
 
 	function has_items_dispatch()
@@ -497,7 +501,11 @@ class cart
 			$val1 = (floatval((intval(round(($val*20),0)))/20));
 			$taxes['1']['Value'] = $val1;
 		} 
-		return $taxes;
+    if ($ppd) {
+        $dec = user_price_dec();
+        return array_map(function($tax) use($dec) {$tax['Value'] = round2($tax['Value'], $dec); return $tax;}
+                 , $taxes);
+    } else return $taxes;
 	}
 
     // computes taxes with and without Prompt Payment Discount
