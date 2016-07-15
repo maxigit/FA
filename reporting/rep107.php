@@ -120,7 +120,7 @@ function print_invoices()
 	    		if ($myrow2["ppd"]==0)
 		  			$DisplayDiscount ="NA";
 	    		else
-		  			$DisplayDiscount = number_format2($DisplayPrice*(1-$myrow2["ppd"]),$dec+1);
+		  			$DisplayDiscount = number_format2($DisplayPrice*(1-$myrow2["ppd"]),$dec+2);
 				$rep->TextCol(0, 1,	$myrow2['stock_id'], -2);
 				$oldrow = $rep->row;
 				$rep->TextColLines(1, 2, $myrow2['StockDescription'], -2);
@@ -136,8 +136,10 @@ function print_invoices()
 				}	
 				$rep->row = $newrow;
 				//$rep->NewLine(1);
-				if ($rep->row < $rep->bottomMargin + (15 * $rep->lineHeight))
+				if ($rep->row < $rep->bottomMargin + (12 * $rep->lineHeight)) {
 					$rep->NewPage();
+                    
+                }
 			}
 
 			$memo = get_comments_string(ST_SALESINVOICE, $i);
@@ -150,7 +152,7 @@ function print_invoices()
    			$DisplaySubTot = number_format2($SubTotal,$dec);
    			$DisplayFreight = number_format2($sign*$myrow["ov_freight"],$dec);
 
-    		$rep->row = $rep->bottomMargin + (15 * $rep->lineHeight);
+    		$rep->row = $rep->bottomMargin + (12 * $rep->lineHeight);
 			$doctype = ST_SALESINVOICE;
 
 			$rep->TextCol(3, 6, _("Sub-total"), -2);
@@ -199,11 +201,31 @@ function print_invoices()
 
     		$rep->NewLine();
 			$total = $myrow["ov_freight"] + $myrow["ov_gst"] + $myrow["ov_amount"]+$myrow["ov_freight_tax"];
+            $tax = $myrow["ov_gst"] + $myrow["ov_freight_tax"];
+            $net = $total - $tax;
+            $ppd = $myrow["ov_ppd_amount"];
+            $ppd_gst = $myrow["ov_ppd_gst"];
 			$DisplayTotal = number_format2($sign*$total,$dec);
             $DisplayTotalPPD = number_format2($total - $myrow["ov_ppd_amount"] - $myrow["ov_ppd_gst"], $dec);
 			$rep->Font('bold');
 			$rep->TextCol(3, 6, _("TOTAL INVOICE"), - 2);
 			$rep->TextCol(6, 7, $DisplayTotal, -2);
+            // Add PPD text if needed
+            if($ppd+$ppd_gst <> 0) {
+                $rep->Font('italic');
+                $rep->SetTextColor(0,0,255);
+                $rep->NewLine(2);
+                $rep->TextCol(0,6, _("(*) A Prompt Payment Discount (PPD) of 10.0 % applies on selected items if payment made within 10 days."));
+
+                $rep->NewLine(1);
+                $rep->TextCol(0,6, _("Discount : ") . number_format($ppd,$dec). _("  -  Net : ") . number_format($net-$ppd, $dec). "  -  VAT : " . number_format($tax-$ppd_gst, $dec));
+                $rep->TextCol(3,6, _("          Amount due if discount taken"));
+                $rep->TextCol(6,7, number_format($DisplayTotalPPD, $dec),-2);
+
+                $rep->NewLine(1);
+                  $rep->TextCol(0,6, _("No credit note will be issued. Following payment you must ensure you have only recovered the VAT actually paid."));
+            }
+            $rep->SetTextColor(0,0,0);
 			$words = price_in_words($myrow['Total'], ST_SALESINVOICE);
 			if ($words != "")
 			{

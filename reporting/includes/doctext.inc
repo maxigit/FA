@@ -27,7 +27,7 @@
 
 	// default item column headers
 	$this->headers = array(_("Item Code"), _("Item Description"), _("Quantity"),
-		_("Unit"), _("Price"), _("With PPD"), _("Total"));
+		_("Unit"), _("Price"), _("With PPD (*)"), _("Total"));
 
 	// for links use 'text' => 'url'
 	$Footer[0] = _("All amounts stated in") . " - " . @$this->formData['curr_code'];
@@ -111,21 +111,7 @@
 				$this->formData['document_name'] =_("Invoice No.");
 			}
 			$this->formData['domicile'] = $this->company['domicile'];
-            $total = $this->formData['Total'];
-            $tax = $this->formData['ov_gst'] + $this->formData['ov_freight_tax'];
-            $net = $total - $tax;
-            $ppd = $this->formData['ov_ppd_amount'];
-            $ppd_gst = $this->formData['ov_ppd_gst'];
-            
-            display_warning($this->formData);
-            $dec = user_price_dec();
-	  		$Footer[0] = _("A discount of 10.0 % applies on selected items if payment made within 10 days.");
-            $Footer[] = _("Total amount due if discount taken : "). number_format($total-$ppd-$ppd_gst, $dec)
-                      . _(". Net : ") . number_format($net-$ppd, $dec). ". VAT : " . number_format($tax-$ppd_gst, $dec).".";
-            $Footer[] = "No credit note will be issued. Following payment you must ensure you have only recovered the VAT actually paid.";
-			$Footer[] = "";
-			$Footer[] = _("Please quote Invoice no. when paying. All amounts stated in"). " - " . $this->formData['curr_code'];
-
+			$Footer[0] = _("Please quote Invoice no. when paying. All amounts stated in"). " - " . $this->formData['curr_code'];
 
 			$deliveries = get_sales_parent_numbers(ST_SALESINVOICE, $this->formData['trans_no']);
 			if ($print_invoice_no == 0)
