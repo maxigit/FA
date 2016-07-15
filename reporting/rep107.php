@@ -218,7 +218,7 @@ function print_invoices()
                 $rep->TextCol(0,6, _("(*) A Prompt Payment Discount (PPD) of 10.0 % applies on selected items if payment made within 10 days."));
 
                 $rep->NewLine(1);
-                $rep->TextCol(0,2, _("Discount : ") . number_format($ppd,$dec). _("  -  Net : ") . number_format($net-$ppd, $dec). "  -  VAT : " . number_format($tax-$ppd_gst, $dec). "  -");
+                $rep->TextCol(0,2, _("Net Disc. : ") . number_format($ppd,$dec). _("  -  Net : ") . number_format($net-$ppd, $dec). "  -  VAT : " . number_format($tax-$ppd_gst, $dec). "  -");
                 $rep->TextCol(2,6, _("Amount due if payment made before the ").add_days(sql2date($myrow['tran_date']),10)." ");
                 $rep->TextCol(6,7, number_format($DisplayTotalPPD, $dec),-2);
 
