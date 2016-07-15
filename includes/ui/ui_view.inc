@@ -518,14 +518,16 @@ function display_edit_tax_items($taxes, $columns, $tax_included, $rightspan=0, $
 				}
 				else 
 				{
-                    $value_ppd = number_format2($taxitem['ValueWithPPD'],user_price_dec());
                     start_row();
 					label_cells($taxitem['tax_type_name'],
 						$value, "colspan=$columns align=right", "align=right", $rightspan);
-                    if($ppd_span) amount_cell($value_ppd,'', "colspan=$ppd_span");
+                    if($ppd_span) {
+                        $value_ppd = number_format2($taxitem['ValueWithPPD'],user_price_dec());
+                        amount_cell($value_ppd,'', "colspan=$ppd_span");
+                        $total_ppd +=  round2($taxitem['ValueWithPPD'], user_price_dec());
+                    }
                     end_row();
 					$total +=  round2($taxitem['Value'], user_price_dec());
-					$total_ppd +=  round2($taxitem['ValueWithPPD'], user_price_dec());
 				}
 			}
 		}

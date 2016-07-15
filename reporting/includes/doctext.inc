@@ -26,8 +26,11 @@
 	);
 
 	// default item column headers
+    $displayPPD = $this->formData['doctype'] == ST_SALESINVOICE;
+    $discColumn = $displayPPD ? "With PPD (*)" : "Discount %";
+
 	$this->headers = array(_("Item Code"), _("Item Description"), _("Quantity"),
-		_("Unit"), _("Price"), _("With PPD (*)"), _("Total"));
+		_("Unit"), _("Price"), _($discColumn), _("Total"));
 
 	// for links use 'text' => 'url'
 	$Footer[0] = _("All amounts stated in") . " - " . @$this->formData['curr_code'];
