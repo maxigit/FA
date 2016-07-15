@@ -395,7 +395,7 @@ start_form();
 
     start_row();
 	amount_cells(_("Amount of Discount:"), 'discount', null, '', $cust_currency);
-    amount_cells(_("including VAT"), 'vat_discount', null, '', $cust_currency);
+    amount_cells(_("including"), 'vat_discount', null, '', "VAT");
     end_row();
 
 	amount_row(_("Amount:"), 'amount', null, '', $cust_currency);

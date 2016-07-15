@@ -307,40 +307,45 @@ function show_allocatable($show_totals) {
 			display_heading(sprintf(_("Allocated amounts in %s:"), $cart->person_curr));
 		start_table(TABLESTYLE, "width=60%");
    		$th = array(_("Transaction Type"), _("#"), $supp_ref ? _("Supplier Ref"): _("Ref"), _("Date"), _("Due Date"), _("Amount"), _("PPD"), ("PPD VAT"),
-   			_("Other Allocations"), _("Left to Allocate"), _("This Allocation"),'','');
+                    _("Other Allocations"), _("Left to Allocate"), _("This Allocation"),'','','');
 
 	   	table_header($th);
 
 		foreach ($cart->allocs as $id => $alloc_item)
 		{
-            if ((floatcmp(abs($alloc_item->amount), $alloc_item->amount_allocated))
-                || abs($alloc_item->current_allocated) > 1e-6)
-		    {
-				alt_table_row_color($k);
+            if 
+				((floatcmp(abs($alloc_item->amount), $alloc_item->amount_allocated))
+                 || abs($alloc_item->current_allocated) > 1e-6)
+            {
+                    $ppd_amount_gst = $alloc_item->ppd_amount_gst;
+	    		$ppd_total = $alloc_item->ppd_amount+$ppd_amount_gst;
+                alt_table_row_color($k);
     			label_cell($systypes_array[$alloc_item->type]);
 	   			label_cell(get_trans_view_str($alloc_item->type, $alloc_item->type_no));
 		   		label_cell($alloc_item->ref);
     			label_cell($alloc_item->date_, "align=right");
     			label_cell($alloc_item->due_date, "align=right");
 	    		amount_cell(abs($alloc_item->amount));
-	    		amount_cell(abs($alloc_item->ppd_amount+$alloc_item->ppd_amount_gst));
-	    		amount_cell(abs($alloc_item->ppd_amount_gst));
+	    		amount_cell(abs($ppd_total));
+	    		amount_cell(abs($ppd_amount_gst));
 				amount_cell($alloc_item->amount_allocated);
 
 		    	$_POST['amount' . $id] = price_format($alloc_item->current_allocated);
 
 	    		$un_allocated = round((abs($alloc_item->amount) - $alloc_item->amount_allocated), 6);
 	    		amount_cell($un_allocated, false,'', 'maxval'.$id);
-    			amount_cells(null, "amount" . $id);//, input_num('amount' . $id));
+    			amount_cells(null, "amount" . $id); //, input_num('amount' . $id));
 				label_cell("<a href='#' name=Alloc$id onclick='allocate_all(this.name.substr(5));return true;'>"
-					 . _("All") . "</a>");
+                           . _("All") . "</a>");
+				label_cell("<a href='#' name=Alloc$id onclick='allocate_ppd(this.name.substr(5),$ppd_total, $ppd_amount_gst);return true;'>"
+                           . _("PPD") . "</a>");
 				label_cell("<a href='#' name=DeAll$id onclick='allocate_none(this.name.substr(5));return true;'>"
-					 . _("None") . "</a>".hidden("un_allocated" . $id, 
-					 price_format($un_allocated), false));
+                           . _("None") . "</a>".hidden("un_allocated" . $id, 
+                                                       price_format($un_allocated), false));
 				end_row();
 
    	    		$total_allocated += input_num('amount' . $id);
-		   	}
+                }
 		}
 		if ($show_totals) {
     	   	label_row(_("Total Allocated"), price_format($total_allocated),
