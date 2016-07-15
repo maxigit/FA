@@ -36,6 +36,7 @@ function allocate_all(doc) {
 
 var allocated_ppd = {};
 function allocate_ppd(doc, ppd, ppd_gst) {
+  if(allocated_ppd[doc]) allocate_none(doc);
 	var amount = get_amount('amount'+doc);
 	var unallocated = get_amount('un_allocated'+doc);
 	var total = get_amount('amount');
