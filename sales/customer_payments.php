@@ -261,7 +261,7 @@ if (get_post('AddPaymentItem') && can_process()) {
 	//Chaitanya : 13-OCT-2011 - To support Edit feature
 	$payment_no = write_customer_payment($_SESSION['alloc']->trans_no, $_POST['customer_id'], $_POST['BranchID'],
 		$_POST['bank_account'], $_POST['DateBanked'], $_POST['ref'],
-		input_num('amount'), input_num('discount'), $_POST['memo_'], 0, input_num('charge'), input_num('bank_amount', input_num('amount')));
+        input_num('amount'), input_num('discount'), input_num('vat_discount'), $_POST['memo_'], 0, input_num('charge'), input_num('bank_amount', input_num('amount')));
 
 	$_SESSION['alloc']->trans_no = $payment_no;
 	$_SESSION['alloc']->write();
@@ -309,6 +309,7 @@ if (isset($_GET['trans_no']) && $_GET['trans_no'] > 0 )
 	$_POST["amount"] = price_format($myrow['Total'] - $myrow['ov_discount']);
 	$_POST["bank_amount"] = price_format($myrow['bank_amount']+$charge);
 	$_POST["discount"] = price_format($myrow['ov_discount']);
+	$_POST["vat_discount"] = price_format($myrow['ov_ppd_gst']);
 	$_POST["memo_"] = get_comments_string(ST_CUSTPAYMENT,$_POST['trans_no']);
 
 	//Prepare allocation cart 
@@ -392,7 +393,10 @@ start_form();
 
 	label_row(_("Customer prompt payment discount :"), $display_discount_percent);
 
-	amount_row(_("Amount of Discount:"), 'discount', null, '', $cust_currency);
+    start_row();
+	amount_cells(_("Amount of Discount:"), 'discount', null, '', $cust_currency);
+    amount_cells(_("including VAT"), 'vat_discount', null, '', $cust_currency);
+    end_row();
 
 	amount_row(_("Amount:"), 'amount', null, '', $cust_currency);
 

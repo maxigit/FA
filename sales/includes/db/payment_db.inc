@@ -21,7 +21,7 @@
 	$charge - in bank currency
 */
 function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_account,
-	$date_, $ref, $amount, $discount, $memo_, $rate=0, $charge=0, $bank_amount=0)
+ $date_, $ref, $amount, $discount, $vat_discount, $memo_, $rate=0, $charge=0, $bank_amount=0)
 {
 	global $Refs;
 
@@ -53,7 +53,7 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
 
 	// do not use $rate here: global rate stored in exrate table is always used
 	$payment_no = write_customer_trans(ST_CUSTPAYMENT, $trans_no, $customer_id, $branch_id, 
-                                       $date_, $ref, $amount, 0, $discount);
+                                       $date_, $ref, $amount, 0, $discount, 0, $vat_discount);
 
 	$bank_gl_account = get_bank_gl_account($bank_account);
 
@@ -84,8 +84,12 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
 	if ($discount != 0)	{
 		/* Now Debit discount account with discounts allowed*/
 		$total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
-			$discount_account, 0, 0, $discount, $customer_id,
+			$discount_account, 0, 0, $discount-$vat_discount, $customer_id,
 			"Cannot insert a GL transaction for the payment discount debit");
+        $vat_discount_account = 2150; //TODO move in config or customer
+		$total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
+                                        $vat_discount_account, 0, 0, $vat_discount, $customer_id,
+                                        "Cannot insert a GL transaction for the payment discount debit");
 	}
 
 	if ($charge != 0)	{

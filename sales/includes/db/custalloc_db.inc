@@ -102,6 +102,7 @@ function get_alloc_trans_sql($extra_fields=null, $extra_conditions=null, $extra_
 		debtor.name AS DebtorName, 
 		debtor.curr_code, 
 		ov_amount+ov_gst+ov_freight+ov_freight_tax+ov_discount AS Total,
+        ov_ppd_amount, ov_ppd_gst,
 		trans.alloc,
 		trans.due_date,
 		debtor.address,
