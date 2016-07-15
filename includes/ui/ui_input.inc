@@ -435,8 +435,10 @@ function amount_cell($label, $bold=false, $params="", $id=null)
 		label_cell(price_format($label), "nowrap align=right ".$params, $id);
 }
 
-function amount_ppd_cell($label, $bold=false, $params="", $id=null)
+function amount_ppd_cell($ppd, $price, $bold=false, $params="", $id=null)
 {
+    $label = $price*(1-$ppd);
+    if(!$ppd) $params.='style="color:gray;"';
 	if ($bold)
 		label_cell("<b>".number_format($label, user_price_dec(true))."</b>", "nowrap align=right ".$params, $id);
 	else

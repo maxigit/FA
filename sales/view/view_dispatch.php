@@ -138,7 +138,7 @@ if (db_num_rows($result) > 0)
         qty_cell($myrow2["quantity"], false, get_qty_dec($myrow2["stock_id"]));
         label_cell($myrow2["units"], "align=right");
         amount_cell($myrow2["unit_price"]);
-        amount_ppd_cell($myrow2["unit_price"]*(1-$myrow2["ppd"]));
+        amount_ppd_cell($myrow2["ppd"],$myrow2["unit_price"]);
         label_cell($display_discount, "nowrap align=right");
         amount_cell($value);
 	end_row();

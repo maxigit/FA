@@ -47,7 +47,7 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 	 if (!$item['is_foreign'] && $item['item_code'] != $item['stock_id'])
 	 {	// this is sales kit - recurse 
 		add_to_order($order, $item['stock_id'], $new_item_qty*$item['quantity'],
-                     $item_price, 0.1, $discount);
+                     $item_price, $discount);
 	 }
 	 else
 	 {	// stock item record eventually with foreign code
@@ -62,8 +62,14 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 				break;
 			}
 		}
+        // hardcode PPD
+        $ppd = 0;
+        if (preg_match("/^....-...-.../", $item['stock_id'])) {
+                $ppd = 0.1; // 10%
+            
+        }
 		$order->add_to_cart (count($order->line_items),	$item['stock_id'], 
-                             $new_item_qty*$item['quantity'], $item_price, 0.1, $discount, 0,0, $description);
+                             $new_item_qty*$item['quantity'], $item_price, $ppd, $discount, 0,0, $description);
 	 }
 	}
 
@@ -254,7 +260,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 
 			label_cell($stock_item->units);
 			amount_cell($stock_item->price);
-			amount_ppd_cell((1-$stock_item->ppd)*$stock_item->price);
+			amount_ppd_cell($stock_item->ppd,$stock_item->price);
 
 			percent_cell($stock_item->discount_percent * 100);
 			amount_cell($line_total);
