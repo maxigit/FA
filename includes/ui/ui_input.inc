@@ -435,6 +435,13 @@ function amount_cell($label, $bold=false, $params="", $id=null)
 		label_cell(price_format($label), "nowrap align=right ".$params, $id);
 }
 
+function amount_ppd_cell($label, $bold=false, $params="", $id=null)
+{
+	if ($bold)
+		label_cell("<b>".number_format($label, user_price_dec(true))."</b>", "nowrap align=right ".$params, $id);
+	else
+		label_cell(number_format($label, user_price_dec(true)), "nowrap align=right ".$params, $id);
+}
 //JAM  Allow entered unit prices to be fractional
 function unit_amount_cell($label, $bold=false, $params="", $id=null)
 {

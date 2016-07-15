@@ -120,7 +120,7 @@ function print_invoices()
 	    		if ($myrow2["ppd"]==0)
 		  			$DisplayDiscount ="NA";
 	    		else
-		  			$DisplayDiscount = number_format2($DisplayPrice*(1-$myrow2["ppd"]),$dec+2);
+		  			$DisplayDiscount = number_format2($DisplayPrice*(1-$myrow2["ppd"]),user_price_dec(true));
 				$rep->TextCol(0, 1,	$myrow2['stock_id'], -2);
 				$oldrow = $rep->row;
 				$rep->TextColLines(1, 2, $myrow2['StockDescription'], -2);

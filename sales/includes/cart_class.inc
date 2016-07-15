@@ -424,7 +424,7 @@ class cart
 		foreach ($this->line_items as $ln_itm) {
 			$price = $ln_itm->line_price($ppd);
 			$total += round($ln_itm->quantity * $price * (1 - $ln_itm->discount_percent), 
-			   user_price_dec());
+                            user_price_dec($ppd));
 		}
 		return $total;
 	}
@@ -436,7 +436,7 @@ class cart
 		foreach ($this->line_items as $ln_itm) {
 			$price = $ln_itm->line_price($ppd);
 			$total += round(($ln_itm->qty_dispatched * $price * (1 - $ln_itm->discount_percent)), 
-			   user_price_dec());
+                            user_price_dec($ppd));
 		}
 		return $total;
 	}
@@ -485,7 +485,7 @@ class cart
 			$items[] = $ln_itm->stock_id;
 			$prices[] = round(((
 				$this->trans_type==ST_SALESORDER ? 	$ln_itm->quantity : $ln_itm->qty_dispatched) *
-				$ln_itm->line_price($ppd)* (1 - $ln_itm->discount_percent)),  user_price_dec());
+				$ln_itm->line_price($ppd)* (1 - $ln_itm->discount_percent)),  user_price_dec($ppd));
 		}
 
 		$taxes = get_tax_for_items($items, $prices, $shipping_cost,

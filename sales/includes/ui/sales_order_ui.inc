@@ -254,7 +254,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 
 			label_cell($stock_item->units);
 			amount_cell($stock_item->price);
-			amount_cell((1-$stock_item->ppd)*$stock_item->price);
+			amount_ppd_cell((1-$stock_item->ppd)*$stock_item->price);
 
 			percent_cell($stock_item->discount_percent * 100);
 			amount_cell($line_total);
