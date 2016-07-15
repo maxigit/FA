@@ -323,8 +323,18 @@ function show_allocatable($show_totals) {
     			label_cell($systypes_array[$alloc_item->type]);
 	   			label_cell(get_trans_view_str($alloc_item->type, $alloc_item->type_no));
 		   		label_cell($alloc_item->ref);
+                if(date1_greater_date2($cart->date_, $alloc_item->due_date)) {
+                    // overdue
+                    $due_colour = "red";
+                    
+                }
+                else if(date1_greater_date2($cart->date_, add_days($alloc_item->date_,10))) {
+                    // past PPD
+                    $due_colour = "black";
+                }
+                else $due_colour = "blue";
     			label_cell($alloc_item->date_, "align=right");
-    			label_cell($alloc_item->due_date, "align=right");
+    			label_cell($alloc_item->due_date, "align=right style=\"color:$due_colour\"");
 	    		amount_cell(abs($alloc_item->amount));
 	    		amount_cell(abs($ppd_total));
 	    		amount_cell(abs($ppd_amount_gst));
