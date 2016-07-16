@@ -61,6 +61,7 @@ function allocate_ppd(doc, ppd, ppd_gst) {
 	      price_format('vat_discount', vat_discount+ppd_gst, user.pdec);
         
     }
+    update_real_amount();
 }
 
 function allocate_none(doc) {
@@ -76,6 +77,14 @@ function allocate_none(doc) {
     price_format('vat_discount', vat_discount-ppds.vat, user.pdec);
 
     allocated_ppd[doc] = null;
+
+    update_real_amount();
+}
+
+function update_real_amount() {
+    var amount = get_amount('amount');
+    var discount = get_amount('discount');
+    price_format('real_amount', amount-discount, user.pdec);
 }
 
 var allocations = {

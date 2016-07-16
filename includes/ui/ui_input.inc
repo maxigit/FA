@@ -438,7 +438,7 @@ function amount_cell($label, $bold=false, $params="", $id=null)
 function amount_ppd_cell($ppd, $price, $bold=false, $params="", $id=null)
 {
     $label = $price*(1-$ppd);
-    if(!$ppd) $params.='style="color:gray;"';
+    if($ppd) $params.='style="color:gray;"';
 	if ($bold)
 		label_cell("<b>".number_format($label, user_price_dec(true))."</b>", "nowrap align=right ".$params, $id);
 	else
@@ -721,7 +721,7 @@ function percent_row($label, $name, $init=null)
 	small_amount_row($label, $name, $_POST[$name], null, "%", user_percent_dec());
 }
 
-function amount_cells_ex($label, $name, $size, $max=null, $init=null, $params=null, $post_label=null, $dec=null)
+function amount_cells_ex($label, $name, $size, $max=null, $init=null, $params=null, $post_label=null, $dec=null,$params2=null)
 {
 	global $Ajax;
 
@@ -748,7 +748,7 @@ function amount_cells_ex($label, $name, $size, $max=null, $init=null, $params=nu
 	else
 		echo "<td align='right'>";
 
-	echo "<input class='amount' type=\"text\" name=\"$name\" size=\"$size\" maxlength=\"$max\" dec=\"$dec\" value=\"" . $_POST[$name]. "\">";
+	echo "<input class='amount' type=\"text\" name=\"$name\" size=\"$size\" maxlength=\"$max\" dec=\"$dec\" value=\"" . $_POST[$name]. "\" $params2>";
 
 	if ($post_label) {
 		echo "<span id='_{$name}_label'> $post_label</span>";
@@ -762,9 +762,9 @@ function amount_cells_ex($label, $name, $size, $max=null, $init=null, $params=nu
 
 //-----------------------------------------------------------------------------------
 
-function amount_cells($label, $name, $init=null, $params=null, $post_label=null, $dec=null)
+function amount_cells($label, $name, $init=null, $params=null, $post_label=null, $dec=null,$params2=null)
 {
-	amount_cells_ex($label, $name, 15, 15, $init, $params, $post_label, $dec);
+	amount_cells_ex($label, $name, 15, 15, $init, $params, $post_label, $dec,$params2);
 }
 
 //JAM  Allow entered unit prices to be fractional
@@ -776,10 +776,10 @@ function unit_amount_cells($label, $name, $init=null, $params=null, $post_label=
 	amount_cells_ex($label, $name, 15, 15, $init, $params, $post_label, $dec+2);
 }
 
-function amount_row($label, $name, $init=null, $params=null, $post_label=null, $dec=null)
+function amount_row($label, $name, $init=null, $params=null, $post_label=null, $dec=null,$params2=null)
 {
 	echo "<tr>";
-	amount_cells($label, $name, $init, $params, $post_label, $dec);
+	amount_cells($label, $name, $init, $params, $post_label, $dec,$params2=null);
 	echo "</tr>\n";
 }
 
