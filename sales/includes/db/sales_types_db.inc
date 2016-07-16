@@ -9,19 +9,22 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
     See the License here <http://www.gnu.org/licenses/gpl-3.0.html>.
 ***********************************************************************/
-function add_sales_type($name, $tax_included, $factor)
+function add_sales_type($name, $tax_included, $factor, $ppd, $ppd_term)
 {
-	$sql = "INSERT INTO ".TB_PREF."sales_types (sales_type,tax_included,factor) VALUES (".db_escape($name).","
-		.db_escape($tax_included).",".db_escape($factor).")";
+	$sql = "INSERT INTO ".TB_PREF."sales_types (sales_type,tax_included,factor, ppd, ppd_terms) VALUES (".db_escape($name).","
+         .db_escape($tax_included).",".db_escape($factor).", $ppd, $ppd_term)";
+    display_warning($sql);
 	db_query($sql, "could not add sales type");		
 }
 
-function update_sales_type($id, $name, $tax_included, $factor)
+function update_sales_type($id, $name, $tax_included, $factor, $ppd, $ppd_terms)
 {
 
 	$sql = "UPDATE ".TB_PREF."sales_types SET sales_type = ".db_escape($name).",
-	tax_included =".db_escape($tax_included).", factor=".db_escape($factor)." WHERE id = ".db_escape($id);
+	tax_included =".db_escape($tax_included).", factor=".db_escape($factor).
+         " , ppd=$ppd, ppd_terms= $ppd_terms WHERE id = ".db_escape($id);
 	
+    display_warning($sql);
 	db_query($sql, "could not update sales type");			
 }
 

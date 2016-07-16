@@ -44,7 +44,7 @@ function can_process()
 if ($Mode=='ADD_ITEM' && can_process())
 {
 	add_sales_type($_POST['sales_type'], isset($_POST['tax_included']) ? 1:0,
-	    input_num('factor'));
+                   input_num('factor'), input_num('ppd_percent'), input_num('ppd_terms'));
 	display_notification(_('New sales type has been added'));
 	$Mode = 'RESET';
 }
@@ -55,7 +55,7 @@ if ($Mode=='UPDATE_ITEM' && can_process())
 {
 
 	update_sales_type($selected_id, $_POST['sales_type'], isset($_POST['tax_included']) ? 1:0,
-	     input_num('factor'));
+                      input_num('factor'), input_num('ppd_percent'), input_num('ppd_terms'));
 	display_notification(_('Selected sales type has been updated'));
 	$Mode = 'RESET';
 }
@@ -100,7 +100,7 @@ $result = get_all_sales_types(check_value('show_inactive'));
 start_form();
 start_table(TABLESTYLE, "width=30%");
 
-$th = array (_('Type Name'), _('Factor'), _('Tax Incl'), '','');
+$th = array (_('Type Name'), _('Factor'), _('Prompt Payment Discount Percent'), ('Prompt Payment Terms'), _('Tax Incl'), '','');
 inactive_control_column($th);
 table_header($th);
 $k = 0;
@@ -116,6 +116,8 @@ while ($myrow = db_fetch($result))
 	$f = number_format2($myrow["factor"],4);
 	if($myrow["id"] == $base_sales) $f = "<I>"._('Base')."</I>";
 	label_cell($f);
+    percent_cell($myrow["ppd"]);
+    label_cell(get_payment_terms($myrow["ppd_terms"])["terms"]);
 	label_cell($myrow["tax_included"] ? _('Yes'):_('No'), 'align=center');
 	inactive_control_cell($myrow["id"], $myrow["inactive"], 'sales_types', 'id');
  	edit_button_cell("Edit".$myrow['id'], _("Edit"));
@@ -144,6 +146,8 @@ if ($selected_id != -1)
 
 		$_POST['sales_type']  = $myrow["sales_type"];
 		$_POST['tax_included']  = $myrow["tax_included"];
+		$_POST['ppd_percent']  = $myrow["ppd"];
+		$_POST['ppd_terms']  = $myrow["ppd_terms"];
 		$_POST['factor']  = number_format2($myrow["factor"],4);
 	}
 	hidden('selected_id', $selected_id);
@@ -153,6 +157,8 @@ if ($selected_id != -1)
 
 text_row_ex(_("Sales Type Name").':', 'sales_type', 20);
 amount_row(_("Calculation factor").':', 'factor', null, null, null, 4);
+percent_row(_("Prompt Payment Discount").':', 'ppd_percent');
+payment_terms_list_row(_("PPD Terms").':', 'ppd_terms');
 check_row(_("Tax included").':', 'tax_included', $_POST['tax_included']);
 
 end_table(1);
