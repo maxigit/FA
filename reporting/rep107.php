@@ -231,6 +231,12 @@ function print_invoices()
                 $rep->NewLine(1);
                   $rep->TextCol(0,6, _("No credit note will be issued. Following payment you must ensure you have only recovered the VAT actually paid."));
             }
+            else {
+                $rep->Font('italic');
+                $rep->SetTextColor(0,0,255);
+                $rep->NewLine(2);
+                $rep->TextCol(0,6, _("(*) This invoice is not eligible for Prompt Payment Discount (PPD)."));
+            }
             $rep->SetTextColor(0,0,0);
 			$words = price_in_words($myrow['Total'], ST_SALESINVOICE);
 			if ($words != "")
