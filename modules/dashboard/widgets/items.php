@@ -59,7 +59,7 @@ class items
             SUM(trans.quantity*if(d.type = ".ST_SALESINVOICE.",1, -1)) AS qty FROM
             ".TB_PREF."debtor_trans_details AS trans, ".TB_PREF."stock_master AS s, ".TB_PREF."debtor_trans AS d
             WHERE trans.stock_id=s.stock_id AND trans.debtor_trans_type=d.type AND trans.debtor_trans_no=d.trans_no
-            AND (d.type = ".ST_SALESINVOICE." OR d.type = ".ST_CUSTCREDIT.") ";
+            AND (d.type = ".ST_SALESINVOICE.")"; # exclude credit note OR d.type = ".ST_CUSTCREDIT.") ";
         if ($this->item_type == 'manuf')
             $sql .= "AND s.mb_flag='M' ";
         if ($this->data_filter != '')
