@@ -317,8 +317,8 @@ function show_allocatable($show_totals) {
 				((floatcmp(abs($alloc_item->amount), $alloc_item->amount_allocated))
                  || abs($alloc_item->current_allocated) > 1e-6)
             {
-                    $ppd_amount_gst = $alloc_item->ppd_amount_gst;
-	    		$ppd_total = $alloc_item->ppd_amount+$ppd_amount_gst;
+                    $ppd_amount_gst = $alloc_item->ppd_amount_gst ?: 0;
+	    		$ppd_total = $alloc_item->ppd_amount+$ppd_amount_gst ?: 0;
                 alt_table_row_color($k);
     			label_cell($systypes_array[$alloc_item->type]);
 	   			label_cell(get_trans_view_str($alloc_item->type, $alloc_item->type_no));
