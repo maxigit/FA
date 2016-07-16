@@ -64,9 +64,11 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 		}
         // hardcode PPD
         $ppd = 0;
-        if (preg_match("/^....-...-.../", $item['stock_id'])) {
-                $ppd = 0.1; // 10%
-            
+        if($order->customer_id != 2) {
+            if (preg_match("/^....-...-.../", $item['stock_id'])) {
+                    $ppd = 0.1; // 10%
+                
+            }
         }
 		$order->add_to_cart (count($order->line_items),	$item['stock_id'], 
                              $new_item_qty*$item['quantity'], $item_price, $ppd, $discount, 0,0, $description);
