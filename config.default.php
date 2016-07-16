@@ -270,6 +270,13 @@ $xr_provider_authoritative = false;
 $sort_sales_items = false;
 
 /*
+    GL Account to use for the VAT 
+    on prompt payment
+
+ */
+
+$vat_ppd_account;
+/*
 	Trial Balance opening balance presentation option.
 	When set to true past years part of opening balance is cleared.
 */

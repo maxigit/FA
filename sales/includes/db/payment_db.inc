@@ -23,7 +23,7 @@
 function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_account,
  $date_, $ref, $amount, $discount, $vat_discount, $memo_, $rate=0, $charge=0, $bank_amount=0)
 {
-	global $Refs;
+	global $Refs, $vat_ppd_account;
 
 	begin_transaction();
 	$args = func_get_args(); while (count($args) < 12) $args[] = 0;
@@ -86,7 +86,7 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
 		$total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
 			$discount_account, 0, 0, $discount-$vat_discount, $customer_id,
 			"Cannot insert a GL transaction for the payment discount debit");
-        $vat_discount_account = 2150; //TODO move in config or customer
+        $vat_discount_account =$vat_ppd_account; //TODO move in config or customer
 		$total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
                                         $vat_discount_account, 0, 0, $vat_discount, $customer_id,
                                         "Cannot insert a GL transaction for the payment discount debit");
