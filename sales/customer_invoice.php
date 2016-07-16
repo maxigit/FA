@@ -520,7 +520,7 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	$line_total = ($ln_itm->qty_dispatched * $ln_itm->price * (1 - $ln_itm->discount_percent));
 
 	amount_cell($ln_itm->price);
-	amount_cell($ln_itm->line_price(true));
+	amount_ppd_cell($ln_itm->ppd, $ln_itm->line_price(false));
 	label_cell($ln_itm->tax_type_name);
 	label_cell($display_discount_percent, "nowrap align=right");
 	amount_cell($line_total);
@@ -613,7 +613,7 @@ $tax_totals = display_edit_tax_items($taxes, $colspan, $_SESSION['Items']->tax_i
 $tax_total = $tax_totals['total'];
 $tax_total_ppd = $tax_totals['totalWithPPD'];
 $display_total = price_format(($inv_items_total + input_num('ChargeFreightCost') + $tax_total));
-$display_total_ppd = price_format(($inv_items_total + input_num('ChargeFreightCost') + $tax_total_ppd));
+$display_total_ppd = price_format(($inv_items_total_ppd + input_num('ChargeFreightCost') + $tax_total_ppd));
 
 start_row();
 label_cells(_("Invoice Total"), $display_total, "colspan=$colspan align=right","align=right", $is_batch_invoice ? 2 : 0);
