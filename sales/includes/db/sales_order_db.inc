@@ -16,12 +16,12 @@ function check_ppd(&$order) {
             $myrow = get_sales_type($order->sales_type);
             $order->set_sales_type($myrow['id'], $myrow['sales_type'],
                                    $myrow['tax_included'], $myrow['factor'], $myrow['ppd'], $myrow['ppd_days']);
-            $order->set_sales_type($order->sales_type);
         }
         else
             display_error("Sales type no test");
         
     }
+    // else display_error("ppd = ".$order->pp." ppd_days = ".$order->ppd_days);
     
 }
 function add_sales_order(&$order)
@@ -56,10 +56,10 @@ function add_sales_order(&$order)
 			db_escape($order->payment) . "," .
 			db_escape($total). ","  .
             db_escape($total_ppd). "," .
-            ($this->ppd ?: 0). ","  .
-            ($this->ppd_days). ")";
+            ($order->ppd ?: 0). ","  .
+         ($order->ppd_days ?: "null"). ")";
 
-    display_error($sql);
+    // display_error($sql);
 	db_query($sql, "order Cannot be Added");
 
 	$order->trans_no = array($order_no=>0);
@@ -325,7 +325,7 @@ function read_sales_order($order_no, &$order, $trans_type)
 	  $myrow["tax_group_name"], $myrow["contact_phone"]);
 
 	$order->set_sales_type($myrow["sales_type_id"], $myrow["sales_type"], 
-                           $myrow["tax_included"], $myrow["factor"], $myrow['ppd']); // no default price calculations on edit
+                           $myrow["tax_included"], $myrow["factor"], $myrow['ppd'], $myrow['ppd_days']); // no default price calculations on edit
 
 	$order->set_location($myrow["from_stk_loc"], $myrow["location_name"]);
 
@@ -420,6 +420,8 @@ function get_customer_to_order($customer_id) {
 		  stype.sales_type,
 		  stype.tax_included,
 		  stype.factor,
+		  stype.ppd,
+		  stype.ppd_days,
 		  cust.curr_code,
 		  cust.discount,
 		  cust.payment_terms,

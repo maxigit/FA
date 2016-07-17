@@ -346,6 +346,7 @@ class cart
 
 	function set_sales_type($sales_type, $sales_name, $tax_included=0, $factor=0, $ppd=0, $ppd_days=null)
 	{
+        //display_error("set_sales_type = ppd = $ppd, ppd_days =$ppd_days");
 	    $this->sales_type = $sales_type;
 	    $this->sales_type_name = $sales_name;
 	    $this->tax_included = $tax_included;

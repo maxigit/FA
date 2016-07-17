@@ -12,6 +12,12 @@
 include_once($path_to_root . "/sales/includes/cart_class.inc");
 include_once($path_to_root . "/includes/manufacturing.inc");
 
+function ppd_for($stock_id, $order) {
+    if (preg_match("/^....-...-.../", $stock_id)) {
+        return get_sales_type($order->sales_type)['ppd'];
+    }
+    return 0;
+}
 //--------------------------------------------------------------------------------
 function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $description='')
 {
@@ -62,17 +68,15 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 				break;
 			}
 		}
-        // hardcode PPD
-        $ppd = 0;
-        if (preg_match("/^....-...-.../", $item['stock_id'])) {
-            $ppd = get_sales_type($order->sales_type)['ppd'];
-        }
+        $ppd = ppd_for($item['stock_id'], $order);
 		$order->add_to_cart (count($order->line_items),	$item['stock_id'], 
                              $new_item_qty*$item['quantity'], $item_price, $ppd, $discount, 0,0, $description);
 	 }
 	}
 
 }
+
+    
 //---------------------------------------------------------------------------------
 
 function get_customer_details_to_order(&$order, $customer_id, $branch_id)
@@ -95,7 +99,7 @@ function get_customer_details_to_order(&$order, $customer_id, $branch_id)
 
 	// the sales type determines the price list to be used by default
 	$order->set_sales_type($myrow['salestype'], $myrow['sales_type'], $myrow['tax_included'],
-                           $myrow['factor'], $myrow['ppd']);
+                           $myrow['factor'], $myrow['ppd'], $myrow['ppd_days']);
 
 	$order->credit = $myrow['cur_credit'];
 
@@ -491,7 +495,7 @@ function display_order_header(&$order, $editable, $date_text)
 	} else {
 		label_row(_("Price List:"), $order->sales_type_name);
 	}
-	if ($order->sales_type != $_POST['sales_type']) {
+	if ($order->sales_type !== $_POST['sales_type']) {
 		$myrow = get_sales_type($_POST['sales_type']);
 		$order->set_sales_type($myrow['id'], $myrow['sales_type'],
                                $myrow['tax_included'], $myrow['factor'], $myrow['ppd'], $myrow['ppd_days']);
@@ -549,7 +553,7 @@ function display_order_header(&$order, $editable, $date_text)
 			$line = &$order->line_items[$line_no];
 			$line->price = get_kit_price($line->stock_id, $order->customer_currency,
 				$order->sales_type, $order->price_factor, get_post('OrderDate'));
-            $line->ppd = $order->ppd;
+            $line->ppd = ppd_for($line->stock_id, $order);
         
 		//		$line->discount_percent = $order->default_discount;
 		}
