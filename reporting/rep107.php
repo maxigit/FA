@@ -213,6 +213,9 @@ function print_invoices()
             $ppd_gst = $myrow["ov_ppd_gst"];
 			$DisplayTotal = number_format2($sign*$total,$dec);
             $DisplayTotalPPD = number_format2($total - $myrow["ov_ppd_amount"] - $myrow["ov_ppd_gst"], $dec);
+            $ppd_percent= number_format2(($myrow["ppd"] ?: 0)*100,user_percent_dec());
+            $ppd_days = $myrow["ppd_days"] ?: 1; // can be null
+            $ppd_days_s = $ppd_days  > 1 ? "s" : "";
 			$rep->Font('bold');
 			$rep->TextCol(3, 6, _("TOTAL INVOICE"), - 2);
 			$rep->TextCol(6, 7, $DisplayTotal, -2);
@@ -221,7 +224,7 @@ function print_invoices()
                 $rep->Font('italic');
                 $rep->SetTextColor(0,0,255);
                 $rep->NewLine(2);
-                $rep->TextCol(0,6, _("(*) A Prompt Payment Discount (PPD) of 10.0 % applies on selected items if payment made within 10 days."));
+                $rep->TextCol(0,6, _("(*) A Prompt Payment Discount (PPD) of $ppd_percent % applies on selected items if payment made within $ppd_days day$ppd_days_s."));
 
                 $rep->NewLine(1);
                 $rep->TextCol(0,2, _("Net Disc. : ") . number_format($ppd,$dec). _("  -  Net : ") . number_format($net-$ppd, $dec). "  -  VAT : " . number_format($tax-$ppd_gst, $dec). "  -");
@@ -248,15 +251,20 @@ function print_invoices()
 			if ($email == 1)
 			{
 				if($print_as_quote)  {
+                    $ppd_body = "";
+                    if($DisplayTotalPPD != $DisplayTotal)  {
+                        $ppd_body =  <<<EOT
+However, if you pay within $ppd_days day$ppd_days_s, you are entitled to a prompt payment discount of $ppd_percent
+                    and selected items and therefore only need to pay $DisplayTotalPPD.
+EOT;
+                    }
 					$rep->email_body =  <<<EOT
 
 Hi [contact],
 
 Your order is picked, packed and ready to be dispatched.
 The total amount due is $DisplayTotal $cur (including delivery).
-However, if you pay within 10 days, you are entitled to a prompt payment discount of 10.0%
-and selected items and therefore only need to pay $DisplayTotalPPD.
-                                                                                       
+$ppd_body                                                                                       
 Could you please arrange the payment ASAP and we will send your order upon receipt.
 
 
