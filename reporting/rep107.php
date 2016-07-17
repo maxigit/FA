@@ -254,8 +254,9 @@ function print_invoices()
                     $ppd_body = "";
                     if($DisplayTotalPPD != $DisplayTotal)  {
                         $ppd_body =  <<<EOT
-However, if you pay within $ppd_days day$ppd_days_s, you are entitled to a prompt payment discount of $ppd_percent
-                    and selected items and therefore only need to pay $DisplayTotalPPD.
+However, if you pay within $ppd_days day$ppd_days_s, you are entitled to a prompt payment discount of $ppd_percent %
+on selected items and therefore only need to pay $DisplayTotalPPD $cur.
+
 EOT;
                     }
 					$rep->email_body =  <<<EOT
