@@ -111,7 +111,6 @@ function write_customer_trans($trans_type, $trans_no, $debtor_no, $BranchNo,
         ppd_days = $ppd_days
 		WHERE trans_no=".db_escape($trans_no)." AND type=".db_escape($trans_type);
 	}
-    display_error($sql);
 	db_query($sql, "The debtor transaction record could not be inserted");
 
 	add_audit_trail($trans_type, $trans_no, $date_, $new ? '': _("Updated."));
@@ -379,6 +378,8 @@ function get_sql_for_sales_deliveries_view($selected_customer, $selected_stock_i
 			trans.tran_date,
 			trans.due_date,
 			(ov_amount+ov_gst+ov_freight+ov_freight_tax) AS DeliveryValue,
+            trans.ppd,
+            trans.ppd_days,
 			debtor.curr_code,
 			Sum(line.quantity-line.qty_done) AS Outstanding,
 			Sum(line.qty_done) AS Done

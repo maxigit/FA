@@ -69,7 +69,7 @@ if (isset($_POST['BatchInvoice']))
     if (!$del_count) {
 		display_error(_('For batch invoicing you should
 		    select at least one delivery. All items must be dispatched to
-		    the same customer branch.'));
+		    the same customer branch and have the same PPD parameters.'));
     } else {
 		$_SESSION['DeliveryBatch'] = $selected;
 		meta_forward($path_to_root . '/sales/customer_invoice.php','BatchInvoice=Yes');
@@ -145,7 +145,7 @@ function batch_checkbox($row)
 		"<input type='checkbox' name='$name' value='1' >"
 // add also trans_no => branch code for checking after 'Batch' submit
 	 ."<input name='Sel_[".$row['trans_no']."]' type='hidden' value='"
-	 .$row['branch_code']."'>\n";
+	 .$row['branch_code'].'-'.$row['ppd'].'-'.$row['ppd_days']."'>\n";
 }
 
 function edit_link($row)
@@ -172,6 +172,11 @@ function check_overdue($row)
    	return date1_greater_date2(Today(), sql2date($row["due_date"])) && 
 			$row["Outstanding"]!=0;
 }
+
+function ppd_percent($row) {
+    return number_format2($row['ppd']*100, user_percent_dec())."% (".$row['ppd_days'] .")";
+    
+}
 //------------------------------------------------------------------------------------------------
 $sql = get_sql_for_sales_deliveries_view($selected_customer, $selected_stock_item);
 
@@ -186,6 +191,8 @@ $cols = array(
 		_("Delivery Date") => array('type'=>'date', 'ord'=>''),
 		_("Due By") => 'date', 
 		_("Delivery Total") => array('type'=>'amount', 'ord'=>''),
+        _("PPD") => array('fun'=>'ppd_percent', 'align'=>'right') ,
+        _("days") => 'skip', // array('align'=>'center') ,
 		_("Currency") => array('align'=>'center'),
 		submit('BatchInvoice',_("Batch"), false, _("Batch Invoicing")) 
 			=> array('insert'=>true, 'fun'=>'batch_checkbox', 'align'=>'center'),
