@@ -12,6 +12,12 @@
 include_once($path_to_root . "/sales/includes/cart_class.inc");
 include_once($path_to_root . "/includes/manufacturing.inc");
 
+function ppd_for($stock_id, $order) {
+    if (preg_match("/^....-...-.../", $stock_id)) {
+        return get_sales_type($order->sales_type)['ppd'];
+    }
+    return 0;
+}
 //--------------------------------------------------------------------------------
 function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $description='')
 {
@@ -47,7 +53,7 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 	 if (!$item['is_foreign'] && $item['item_code'] != $item['stock_id'])
 	 {	// this is sales kit - recurse 
 		add_to_order($order, $item['stock_id'], $new_item_qty*$item['quantity'],
-			$item_price, $discount);
+                     $item_price, $discount);
 	 }
 	 else
 	 {	// stock item record eventually with foreign code
@@ -62,12 +68,15 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 				break;
 			}
 		}
+        $ppd = ppd_for($item['stock_id'], $order);
 		$order->add_to_cart (count($order->line_items),	$item['stock_id'], 
-			$new_item_qty*$item['quantity'], $item_price, $discount, 0,0, $description);
+                             $new_item_qty*$item['quantity'], $item_price, $ppd, $discount, 0,0, $description);
 	 }
 	}
 
 }
+
+    
 //---------------------------------------------------------------------------------
 
 function get_customer_details_to_order(&$order, $customer_id, $branch_id)
@@ -90,7 +99,7 @@ function get_customer_details_to_order(&$order, $customer_id, $branch_id)
 
 	// the sales type determines the price list to be used by default
 	$order->set_sales_type($myrow['salestype'], $myrow['sales_type'], $myrow['tax_included'],
-	    $myrow['factor']);
+                           $myrow['factor'], $myrow['ppd'], $myrow['ppd_days']);
 
 	$order->credit = $myrow['cur_credit'];
 
@@ -143,7 +152,9 @@ function display_order_summary($title, &$order, $editable_items=false)
 	start_table(TABLESTYLE, "colspan=7 width=90%");
 	$th = array(_("Item Code"), _("Item Description"), _("Quantity"),
 		_("Delivered"),
-		_("Unit"), $order->tax_included ? _("Price after Tax") : _("Price before Tax"), _("Discount %"), _("Total"), "");
+		_("Unit"), $order->tax_included ? _("Price after Tax") : _("Price before Tax"),
+                _("PPD Price"),
+        _("Discount %"), _("Total"), "");
 
 	if ($order->trans_no == 0) {
 	unset( $th[3] );
@@ -155,6 +166,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 	table_header($th);
 
 	$total = 0;
+    $total_ppd = 0;
 	$k = 0;  //row colour counter
 
 	$id = find_submit('Edit');
@@ -164,7 +176,9 @@ function display_order_summary($title, &$order, $editable_items=false)
 	{
 
 		$line_total = round($stock_item->qty_dispatched * $stock_item->price * (1 - $stock_item->discount_percent),
-		   user_price_dec());
+                            user_price_dec());
+        $line_total_ppd = round($stock_item->qty_dispatched * $stock_item->price * (1 - $stock_item->discount_percent)*(1-$stock_item->ppd),
+                                user_price_dec());
 
 		$qoh_msg = '';
 		if (!$editable_items || $id != $line_no)
@@ -179,7 +193,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 					$quantity_on_database = $stock_item->qty_old;
 					$qoh = get_qoh_on_date($stock_item->stock_id, 
 						$_POST['Location'], $_POST['delivery_date']);
-					$qoh_all = get_qoh_on_date($stock_item->stock_id, null, null, 0, true) + get_on_porder_qty($stock_item->stock_id);
+					$qoh_all = get_qoh_on_date($stock_item->stock_id, null, null, 0, true) + get_on_porder_qty($stock_item->stock_id,"");
 					//$total_demand = get_demand_qty($stock_item->stock_id) - $quantity_on_database;
 					$total_demand = get_quantity_booked_for_other($stock_item->stock_id, $order);
 					//print "total $total_demand, qoh_all $qoh_all";
@@ -249,6 +263,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 
 			label_cell($stock_item->units);
 			amount_cell($stock_item->price);
+			amount_ppd_cell($stock_item->ppd,$stock_item->price);
 
 			percent_cell($stock_item->discount_percent * 100);
 			amount_cell($line_total);
@@ -268,29 +283,40 @@ function display_order_summary($title, &$order, $editable_items=false)
 		}
 
 		$total += $line_total;
+        $total_ppd += $line_total_ppd;
 	}
 
 	if ($id==-1 && $editable_items)
 		sales_order_item_controls($order, $k);
 
-	$colspan = 6;
+	$colspan = 7;
 	if ($order->trans_no!=0)
 		++$colspan;
 	start_row();
 	label_cell(_("Shipping Charge"), "colspan=$colspan align=right");
 	small_amount_cells(null, 'freight_cost', price_format(get_post('freight_cost',0)));
-	label_cell('', 'colspan=2');
+	label_cell('With PPD', 'colspan=2; align=center class="tableheader"');
 	end_row();
 	$display_sub_total = price_format($total + input_num('freight_cost'));
-	label_row(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", 2);
-	$taxes = $order->get_taxes(input_num('freight_cost'));
-	$tax_total = display_edit_tax_items($taxes, $colspan, $order->tax_included, 2);
+
+    start_row();
+	label_cells(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", 2);
+	$display_sub_total_ppd = price_format($total_ppd + input_num('freight_cost'));
+    amount_cell($display_sub_total_ppd,'',"colspan=2");
+    end_row();
+
+	$taxes = $order->get_taxes_and_ppd(input_num('freight_cost'));
+	$tax_totals = display_edit_tax_items($taxes, $colspan, $order->tax_included, 2, false, 2);
+    $tax_total = $tax_totals['total'];
+    $tax_total_ppd = $tax_totals['totalWithPPD'];
 
 	$display_total = price_format(($total + input_num('freight_cost') + $tax_total));
+	$display_total_ppd = price_format(($total_ppd + input_num('freight_cost') + $tax_total_ppd));
 
 	start_row();
-	label_cells(_("Amount Total"), $display_total, "colspan=$colspan align=right","align=right");
-	submit_cells('update', _("Update"), "colspan=2 align='center'", _("Refresh"), true);
+	submit_cells('update', _("Update"), "colspan=".($colspan-1)." align='right'", _("Refresh"), true);
+	label_cells(_("Amount Total"), $display_total, "colspan=1 align=right","align=right");
+    amount_cell($display_total_ppd, '', "colspan=2");
 	end_row();
 
 	end_table();
@@ -469,10 +495,10 @@ function display_order_header(&$order, $editable, $date_text)
 	} else {
 		label_row(_("Price List:"), $order->sales_type_name);
 	}
-	if ($order->sales_type != $_POST['sales_type']) {
+	if ($order->sales_type !== $_POST['sales_type']) {
 		$myrow = get_sales_type($_POST['sales_type']);
 		$order->set_sales_type($myrow['id'], $myrow['sales_type'],
-			$myrow['tax_included'], $myrow['factor']);
+                               $myrow['tax_included'], $myrow['factor'], $myrow['ppd'], $myrow['ppd_days']);
 		$Ajax->activate('sales_type');
 		$change_prices = 1;
 	}
@@ -527,6 +553,8 @@ function display_order_header(&$order, $editable, $date_text)
 			$line = &$order->line_items[$line_no];
 			$line->price = get_kit_price($line->stock_id, $order->customer_currency,
 				$order->sales_type, $order->price_factor, get_post('OrderDate'));
+            $line->ppd = ppd_for($line->stock_id, $order);
+        
 		//		$line->discount_percent = $order->default_discount;
 		}
 	    $Ajax->activate('items_table');
@@ -598,6 +626,7 @@ function sales_order_item_controls(&$order, &$rowcounter, $line_no=-1)
 	label_cell($units, '', 'units');
 
 	amount_cells(null, 'price');
+	label_cells("","");
 
 	small_amount_cells(null, 'Disc', percent_format($_POST['Disc']), null, null, user_percent_dec());
 

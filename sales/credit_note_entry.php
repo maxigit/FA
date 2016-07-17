@@ -218,7 +218,7 @@ function handle_update_item()
 {
 	if ($_POST['UpdateItem'] != "" && check_item_data()) {
 		$_SESSION['Items']->update_cart_item($_POST['line_no'], input_num('qty'),
-			input_num('price'), input_num('Disc') / 100);
+        input_num('price'), input_num('Disc') / 100);
 	}
     line_start_focus();
 }

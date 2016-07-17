@@ -264,7 +264,8 @@ function read_sales_trans($doc_type, $trans_no, &$cart)
 		else
 			$cart->trans_no = array($trans_no[0]=>$myrow["version"]);
 
-		$cart->set_sales_type($myrow["tpe"], $myrow["sales_type"], $myrow["tax_included"],0);
+		$cart->set_sales_type($myrow["tpe"], $myrow["sales_type"], $myrow["tax_included"],0
+                              ,$myrow['ppd'], $myrow['ppd_days']);
 
 		$cart->set_customer($myrow["debtor_no"], $myrow["DebtorName"],
 			$myrow["curr_code"], $myrow["discount"], $myrow["payment_terms"]);
@@ -300,7 +301,7 @@ function read_sales_trans($doc_type, $trans_no, &$cart)
 			for($line_no=0; $myrow = db_fetch($result); $line_no++)	{
 				$cart->line_items[$line_no] = new line_details(
 					$myrow["stock_id"],$myrow["quantity"],
-					$myrow["unit_price"], $myrow["discount_percent"],
+					$myrow["unit_price"], $myrow["ppd"], $myrow["discount_percent"],
 					$myrow["qty_done"], $myrow["standard_cost"],
 					$myrow["StockDescription"],$myrow["id"], $myrow["debtor_trans_no"],
 					@$myrow["src_id"]);

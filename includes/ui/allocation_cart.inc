@@ -51,13 +51,13 @@ class allocation
 		return $this->person_curr;
 	}
 
-	function add_item($type, $type_no, $date_, $due_date, $amount, $amount_allocated, 
+	function add_item($type, $type_no, $date_, $due_date, $amount, $ppd_amount, $ppd_amount_gst, $amount_allocated, 
 		$current_allocated, $ref)
 	{
 		if (floatcmp($amount, 0))
 		{
 			$this->allocs[count($this->allocs)] = new allocation_item($type, $type_no, 
-				$date_, $due_date, $amount, $amount_allocated, $current_allocated, $ref);
+                                                                      $date_, $due_date, $amount, $ppd_amount, $ppd_amount_gst, $amount_allocated, $current_allocated, $ref);
 			return true;
 		} 
 		else 
@@ -67,12 +67,12 @@ class allocation
 	}
 	
 	function update_item($index, $type, $type_no, $date_, $due_date, 
-		$amount, $amount_allocated, $current_allocated, $ref)
+                         $amount, $ppd_amount, $ppd_amount_gst, $amount_allocated, $current_allocated, $ref)
 	{
 		if (floatcmp($amount, 0))
 		{
 			$this->allocs[$index] = new allocation_item($type, $type_no, 
-				$date_, $due_date, $amount, $amount_allocated, $current_allocated, $ref);
+                                                        $date_, $due_date, $amount, $ppd_amount, $ppd_amount_gst, $amount_allocated, $current_allocated, $ref);
 			return true;
 		} 
 		else 
@@ -82,7 +82,7 @@ class allocation
 	}
 	
 	function add_or_update_item($type, $type_no, $date_, $due_date, 
-		$amount, $amount_allocated, $current_allocated, $ref)
+                                $amount, $ppd_amount, $ppd_amount_gst, $amount_allocated, $current_allocated, $ref)
 	{
 		for ($i = 0; $i < count($this->allocs); $i++) 
 		{
@@ -90,11 +90,11 @@ class allocation
 			if (($item->type == $type) && ($item->type_no == $type_no)) 
 			{
 				return $this->update_item($i, $type, $type_no, $date_, $due_date, 
-					$amount, $amount_allocated, $current_allocated, $ref);
+                       $amount, $ppd_amount, $ppd_amount_gst, $amount_allocated, $current_allocated, $ref);
 			}
 		}
         return $this->add_item($type, $type_no, $date_, $due_date, 
-        	$amount, $amount_allocated, $current_allocated, $ref);
+               $amount, $ppd_amount, $ppd_amount_gst, $amount_allocated, $current_allocated, $ref);
 	}
 
 	//
@@ -148,10 +148,19 @@ class allocation
 		 		$trans_items = get_allocatable_to_cust_transactions($this->person_id);
 			while ($myrow = db_fetch($trans_items))
 			{
+                if($this->person_type==PT_CUSTOMER) {
+                    $ppd_amount = $myrow["ov_ppd_amount"];
+                    $ppd_amount_gst = $myrow["ov_ppd_gst"];
+                }
+                else {
+                    $ppd_amount = 0;
+                    $ppd_amount_gst = 0;
+                }
 				$this->add_item($myrow["type"], $myrow["trans_no"],
 					sql2date($myrow["tran_date"]),
 					sql2date($myrow["due_date"]),
 					$myrow["Total"], // trans total
+                    $ppd_amount, $ppd_amount_gst,
 					$myrow["alloc"], // trans total allocated
 					0,
 					$myrow["reference"]); // this allocation
@@ -172,10 +181,18 @@ class allocation
 
 		while ($myrow = db_fetch($trans_items))
 		{
+            if($this->person_type==PT_CUSTOMER) {
+                $ppd_amount = $myrow["ppd_amount"];
+                $ppd_amount_gst = $myrow["ppd_amount_gst"];
+                                }
+            else {
+                $ppd_amount = 0;
+                $ppd_amount_gst = 0;
+            }
 			$this->add_or_update_item ($myrow["type"], $myrow["trans_no"],
 				sql2date($myrow["tran_date"]),
 				sql2date($myrow["due_date"]),
-				$myrow["Total"],
+                $myrow["Total"], $ppd_amount, $ppd_amount_gst,
 				$myrow["alloc"] - $myrow["amt"], $myrow["amt"], $myrow["reference"]);
 		}
 	}
@@ -247,11 +264,13 @@ class allocation_item
 	
 	var $amount_allocated;
 	var $amount;
+    var $ppd_amount = 0; /*discount in case of Prompt Payment */
+    var $ppd_amount_gst = 0; /*vat discount in case of Prompt Payment */
 	var $ref;
 	
 	var $current_allocated;
 	
-	function allocation_item ($type, $type_no, $date_, $due_date, $amount, 
+	function allocation_item ($type, $type_no, $date_, $due_date, $amount, $ppd_amount, $ppd_amount_gst,
 		$amount_allocated, $current_allocated, $ref)
 	{
 
@@ -264,6 +283,8 @@ class allocation_item
 		$this->due_date = $due_date;
 		
 		$this->amount = $amount;
+        $this->ppd_amount = $ppd_amount;
+        $this->ppd_amount_gst = $ppd_amount_gst;
 		$this->amount_allocated = $amount_allocated;
 		$this->current_allocated = $current_allocated;
 	}
@@ -285,39 +306,56 @@ function show_allocatable($show_totals) {
 		if ($cart->currency != $cart->person_curr)
 			display_heading(sprintf(_("Allocated amounts in %s:"), $cart->person_curr));
 		start_table(TABLESTYLE, "width=60%");
-   		$th = array(_("Transaction Type"), _("#"), $supp_ref ? _("Supplier Ref"): _("Ref"), _("Date"), _("Due Date"), _("Amount"),
-   			_("Other Allocations"), _("Left to Allocate"), _("This Allocation"),'','');
+   		$th = array(_("Transaction Type"), _("#"), $supp_ref ? _("Supplier Ref"): _("Ref"), _("Date"), _("Due Date"), _("Amount"), _("PPD"), ("PPD VAT"),
+                    _("Other Allocations"), _("Left to Allocate"), _("This Allocation"),'','','');
 
 	   	table_header($th);
 
 		foreach ($cart->allocs as $id => $alloc_item)
 		{
-            if ((floatcmp(abs($alloc_item->amount), $alloc_item->amount_allocated))
-                || abs($alloc_item->current_allocated) > 1e-6)
-		    {
-				alt_table_row_color($k);
+            if 
+				((floatcmp(abs($alloc_item->amount), $alloc_item->amount_allocated))
+                 || abs($alloc_item->current_allocated) > 1e-6)
+            {
+                    $ppd_amount_gst = $alloc_item->ppd_amount_gst ?: 0;
+	    		$ppd_total = $alloc_item->ppd_amount+$ppd_amount_gst ?: 0;
+                alt_table_row_color($k);
     			label_cell($systypes_array[$alloc_item->type]);
 	   			label_cell(get_trans_view_str($alloc_item->type, $alloc_item->type_no));
 		   		label_cell($alloc_item->ref);
+                if(date1_greater_date2($cart->date_, $alloc_item->due_date)) {
+                    // overdue
+                    $due_colour = "red";
+                    
+                }
+                else if(date1_greater_date2($cart->date_, add_days($alloc_item->date_,10))) {
+                    // past PPD
+                    $due_colour = "black";
+                }
+                else $due_colour = "blue";
     			label_cell($alloc_item->date_, "align=right");
-    			label_cell($alloc_item->due_date, "align=right");
+    			label_cell($alloc_item->due_date, "align=right style=\"color:$due_colour\"");
 	    		amount_cell(abs($alloc_item->amount));
+	    		amount_cell(abs($ppd_total));
+	    		amount_cell(abs($ppd_amount_gst));
 				amount_cell($alloc_item->amount_allocated);
 
 		    	$_POST['amount' . $id] = price_format($alloc_item->current_allocated);
 
 	    		$un_allocated = round((abs($alloc_item->amount) - $alloc_item->amount_allocated), 6);
 	    		amount_cell($un_allocated, false,'', 'maxval'.$id);
-    			amount_cells(null, "amount" . $id);//, input_num('amount' . $id));
+    			amount_cells(null, "amount" . $id); //, input_num('amount' . $id));
 				label_cell("<a href='#' name=Alloc$id onclick='allocate_all(this.name.substr(5));return true;'>"
-					 . _("All") . "</a>");
+                           . _("All") . "</a>");
+				label_cell("<a href='#' name=Alloc$id onclick='allocate_ppd(this.name.substr(5),$ppd_total, $ppd_amount_gst);return true;'>"
+                           . _("PPD") . "</a>");
 				label_cell("<a href='#' name=DeAll$id onclick='allocate_none(this.name.substr(5));return true;'>"
-					 . _("None") . "</a>".hidden("un_allocated" . $id, 
-					 price_format($un_allocated), false));
+                           . _("None") . "</a>".hidden("un_allocated" . $id, 
+                                                       price_format($un_allocated), false));
 				end_row();
 
    	    		$total_allocated += input_num('amount' . $id);
-		   	}
+                }
 		}
 		if ($show_totals) {
     	   	label_row(_("Total Allocated"), price_format($total_allocated),

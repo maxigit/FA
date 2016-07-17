@@ -46,7 +46,7 @@ function write_credit_note(&$credit_note, $write_off_acc)
 	$credit_note_total = $credit_note->get_items_total_dispatch();
 	$freight_tax = $credit_note->get_shipping_tax();
 
-	$taxes = $credit_note->get_taxes();
+	$taxes = $credit_note->get_taxes(null, null);
 
 	$tax_total = 0;
 	foreach ($taxes as $taxitem) {
@@ -77,7 +77,7 @@ function write_credit_note(&$credit_note, $write_off_acc)
 	// all amounts in debtor's currency
 	$credit_no = write_customer_trans(ST_CUSTCREDIT, $trans_no, $credit_note->customer_id,
 		$credit_note->Branch, $credit_date, $credit_note->reference,
-		$credit_note_total, 0, $items_added_tax,
+        $credit_note_total, 0, 0, $items_added_tax, 0,
 		$credit_note->freight_cost, $freight_added_tax,
 		$credit_note->sales_type, $credit_note->order_no, $credit_note->ship_via,
 		null, $alloc, 0, $credit_note->dimension_id, $credit_note->dimension2_id,
@@ -120,7 +120,7 @@ function write_credit_note(&$credit_note, $write_off_acc)
 
 		write_customer_trans_detail_item(ST_CUSTCREDIT, $credit_no, $credit_line->stock_id,
 			$credit_line->item_description, $credit_line->qty_dispatched,
-			$credit_line->line_price(), $line_tax, $credit_line->discount_percent,
+            $credit_line->line_price(), $line_tax, 0, $credit_line->discount_percent,
 			$credit_line->standard_cost, $credit_line->src_id, $trans_no==0 ? 0:  $credit_line->id);
 
 		add_credit_movements_item($credit_note, $credit_line,

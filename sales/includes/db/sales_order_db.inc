@@ -10,19 +10,35 @@
     See the License here <http://www.gnu.org/licenses/gpl-3.0.html>.
 ***********************************************************************/
 //----------------------------------------------------------------------------------------
+function check_ppd(&$order) {
+    if($order->ppd === null) {
+        if($order->sales_type) {
+            $myrow = get_sales_type($order->sales_type);
+            $order->set_sales_type($myrow['id'], $myrow['sales_type'],
+                                   $myrow['tax_included'], $myrow['factor'], $myrow['ppd'], $myrow['ppd_days']);
+        }
+        else
+            display_error("Sales type no test");
+        
+    }
+    // else display_error("ppd = ".$order->pp." ppd_days = ".$order->ppd_days);
+    
+}
 function add_sales_order(&$order)
 {
 	global $loc_notification, $path_to_root, $Refs;
 
+    check_ppd($order);
 	begin_transaction();
 	hook_db_prewrite($order, $order->trans_type);
 	$order_no = get_next_trans_no($order->trans_type);
 	$del_date = date2sql($order->due_date);
 	$order_type = 0; // this is default on new order
 	$total = $order->get_trans_total();
+	$total_ppd = $order->get_trans_total_ppd();
 	$sql = "INSERT INTO ".TB_PREF."sales_orders (order_no, type, debtor_no, trans_type, branch_code, customer_ref, reference, comments, ord_date,
 		order_type, ship_via, deliver_to, delivery_address, contact_phone,
-		freight_cost, from_stk_loc, delivery_date, payment_terms, total)
+		freight_cost, from_stk_loc, delivery_date, payment_terms, total, total_ppd, ppd, ppd_days)
 		VALUES (" .db_escape($order_no) . "," .db_escape($order_type) . "," . db_escape($order->customer_id) .
 		 ", " .db_escape($order->trans_type) . "," .db_escape($order->Branch) . ", ".
 			db_escape($order->cust_ref) .",". 
@@ -38,8 +54,12 @@ function add_sales_order(&$order)
 			db_escape($order->Location) .", " .
 			db_escape($del_date) . "," .
 			db_escape($order->payment) . "," .
-			db_escape($total). ")";
+			db_escape($total). ","  .
+            db_escape($total_ppd). "," .
+            ($order->ppd ?: 0). ","  .
+         ($order->ppd_days ?: "null"). ")";
 
+    // display_error($sql);
 	db_query($sql, "order Cannot be Added");
 
 	$order->trans_no = array($order_no=>0);
@@ -57,13 +77,13 @@ function add_sales_order(&$order)
 		if ($loc_notification == 1 && is_inventory_item($line->stock_id))
 			$loc = calculate_reorder_level($order->Location, $line, $st_ids, $st_names, $st_num, $st_reorder); 
 
-		$sql = "INSERT INTO ".TB_PREF."sales_order_details (order_no, trans_type, stk_code, description, unit_price, quantity, discount_percent) VALUES (";
+		$sql = "INSERT INTO ".TB_PREF."sales_order_details (order_no, trans_type, stk_code, description, unit_price, ppd, quantity, discount_percent) VALUES (";
 		$sql .= $order_no . ",".$order->trans_type .
 				",".db_escape($line->stock_id).", "
-				.db_escape($line->item_description).", $line->price,
+				.db_escape($line->item_description).", $line->price, $line->ppd,
 				$line->quantity,
 				$line->discount_percent)";
-		db_query($sql, "order Details Cannot be Added");
+		$result = db_query($sql, "order Details Cannot be Added");
 
 	// Now mark quotation line as processed
 		if ($order->trans_type == ST_SALESORDER && $line->src_id)
@@ -119,12 +139,16 @@ function update_sales_order_version($order)
 function update_sales_order($order)
 {
 	global $loc_notification, $path_to_root, $Refs;
+    check_ppd($order);
 
 	$del_date = date2sql($order->due_date);
 	$ord_date = date2sql($order->document_date);
 	$order_no =  key($order->trans_no);
 	$version= current($order->trans_no);
 	$total = $order->get_trans_total();
+	$total_ppd = $order->get_trans_total_ppd();
+    $ppd = $order->ppd;
+    $ppd_days = $order->ppd_days ?: "null";
 
 	begin_transaction();
 	hook_db_prewrite($order, $order->trans_type);
@@ -146,7 +170,10 @@ function update_sales_order($order)
 		delivery_date = " .db_escape($del_date). ",
 		version = ".($version+1).",
 		payment_terms = " .db_escape($order->payment). ",
-		total = ". db_escape($total) ."
+		total = ". db_escape($total) .",
+		total_ppd = ". db_escape($total_ppd) .",
+        ppd = $ppd,
+        ppd_days = $ppd_days
 	 WHERE order_no=" . db_escape($order_no) ."
 	 AND trans_type=".$order->trans_type." AND version=".$version;
 	db_query($sql, "order Cannot be Updated, this can be concurrent edition conflict");
@@ -178,13 +205,14 @@ function update_sales_order($order)
 			$sql = "UPDATE ".TB_PREF."sales_order_details
 						SET description = ".db_escape($line->item_description) . ", 
 								unit_price = ".db_escape($line->price) . ",
+								ppd = ".db_escape($line->ppd) . ",
 								quantity = ".db_escape($line->quantity) . ",
 								discount_percent = ".db_escape($line->discount_percent) . "
 						WHERE id = {$line->id}";
 		}
 		else {
 		$sql = "INSERT INTO ".TB_PREF."sales_order_details
-		 (id, order_no, trans_type, stk_code,  description, unit_price, quantity,
+		 (id, order_no, trans_type, stk_code,  description, unit_price, ppd, quantity,
 		  discount_percent, qty_sent)
 		 VALUES (";
 		$sql .= db_escape($line->id ? $line->id : 0) . ","
@@ -192,6 +220,7 @@ function update_sales_order($order)
 		  .db_escape($line->stock_id) . ","
 		  .db_escape($line->item_description) . ", "
 		  .db_escape($line->price) . ", "
+		  .db_escape($line->ppd) . ", "
 		  .db_escape($line->quantity) . ", "
 		  .db_escape($line->discount_percent) . ", "
 		  .db_escape($line->qty_done) ." )";
@@ -261,7 +290,7 @@ function get_sales_order_header($order_no, $trans_type)
 //----------------------------------------------------------------------------------------
 
 function get_sales_order_details($order_no, $trans_type) {
-	$sql = "SELECT id, stk_code, unit_price, "
+	$sql = "SELECT id, stk_code, unit_price, ppd, "
 		.TB_PREF."sales_order_details.description,"
 		.TB_PREF."sales_order_details.quantity,
 		  discount_percent,
@@ -296,7 +325,7 @@ function read_sales_order($order_no, &$order, $trans_type)
 	  $myrow["tax_group_name"], $myrow["contact_phone"]);
 
 	$order->set_sales_type($myrow["sales_type_id"], $myrow["sales_type"], 
-	    $myrow["tax_included"], $myrow["factor"]); // no default price calculations on edit
+                           $myrow["tax_included"], $myrow["factor"], $myrow['ppd'], $myrow['ppd_days']); // no default price calculations on edit
 
 	$order->set_location($myrow["from_stk_loc"], $myrow["location_name"]);
 
@@ -316,8 +345,9 @@ function read_sales_order($order_no, &$order, $trans_type)
 		$line_no=0;
 		while ($myrow = db_fetch($result))
 		{
+            // display_error($myrow);
 			$order->add_to_cart($line_no,$myrow["stk_code"],$myrow["quantity"],
-				$myrow["unit_price"], $myrow["discount_percent"],
+				$myrow["unit_price"], $myrow["ppd"], $myrow["discount_percent"],
 				$myrow["qty_done"], $myrow["standard_cost"], $myrow["description"], $myrow["id"] );
 		$line_no++;
 		}
@@ -390,6 +420,8 @@ function get_customer_to_order($customer_id) {
 		  stype.sales_type,
 		  stype.tax_included,
 		  stype.factor,
+		  stype.ppd,
+		  stype.ppd_days,
 		  cust.curr_code,
 		  cust.discount,
 		  cust.payment_terms,

@@ -476,7 +476,7 @@ display_heading(_("Invoice Items"));
 div_start('Items');
 start_table(TABLESTYLE, "width=80%");
 $th = array(_("Item Code"), _("Item Description"), _("Delivered"), _("Units"), _("Invoiced"),
-	_("This Invoice"), _("Price"), _("Tax Type"), _("Discount"), _("Total"));
+            _("This Invoice"), _("Price"), _("PPD Price"), _("Tax Type"), _("Discount"), _("Total"));
 
 if ($is_batch_invoice) {
     $th[] = _("DN");
@@ -520,6 +520,7 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	$line_total = ($ln_itm->qty_dispatched * $ln_itm->price * (1 - $ln_itm->discount_percent));
 
 	amount_cell($ln_itm->price);
+	amount_ppd_cell($ln_itm->ppd, $ln_itm->line_price(false));
 	label_cell($ln_itm->tax_type_name);
 	label_cell($display_discount_percent, "nowrap align=right");
 	amount_cell($line_total);
@@ -560,13 +561,14 @@ if ($is_batch_invoice && $accumulate_shipping)
 # Calculate shipping
 # 9.5 or free postage above 300 for delivery in the UK.
 # 20 otherwise
-$inv_items_total = $_SESSION['Items']->get_items_total_dispatch();
+$inv_items_total = $_SESSION['Items']->get_items_total_dispatch(false);
+$inv_items_total_ppd = $_SESSION['Items']->get_items_total_dispatch(true);
 
 function shipping_rules($cart, $ship_via, $shipping_cost) {
     switch ($ship_via) {
         case 0 :
         case 1 : // Default
-            if($cart->get_items_total_dispatch()>=340) {
+            if($cart->get_items_total_dispatch(false)>=340) {
                 $shipping_cost = price_format(0);
             }
             else {
@@ -589,6 +591,7 @@ $colspan = 9;
 start_row();
 label_cell(_("Shipping Cost"), "colspan=$colspan align=right");
 small_amount_cells(null, 'ChargeFreightCost', null);
+label_cell('With PPD', 'align=center class="tableheader"');
 if ($is_batch_invoice) {
 label_cell('', 'colspan=2');
 }
@@ -596,15 +599,27 @@ label_cell('', 'colspan=2');
 end_row();
 
 $display_sub_total = price_format($inv_items_total + input_num('ChargeFreightCost'));
+$display_sub_total_ppd = price_format($inv_items_total_ppd + input_num('ChargeFreightCost'));
 
-label_row(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", $is_batch_invoice ? 2 : 0);
+start_row();
+label_cells(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", $is_batch_invoice ? 2 : 0);
+amount_cell($display_sub_total_ppd,'',"colspan=2");
+end_row();
 
-$taxes = $_SESSION['Items']->get_taxes(input_num('ChargeFreightCost'));
-$tax_total = display_edit_tax_items($taxes, $colspan, $_SESSION['Items']->tax_included, $is_batch_invoice ? 2:0);
 
+$taxes = $_SESSION['Items']->get_taxes_and_ppd(input_num('ChargeFreightCost'));
+$tax_totals = display_edit_tax_items($taxes, $colspan, $_SESSION['Items']->tax_included, $is_batch_invoice ? 2:0,false,2);
+
+$tax_total = $tax_totals['total'];
+$tax_total_ppd = $tax_totals['totalWithPPD'];
 $display_total = price_format(($inv_items_total + input_num('ChargeFreightCost') + $tax_total));
+$display_total_ppd = price_format(($inv_items_total_ppd + input_num('ChargeFreightCost') + $tax_total_ppd));
 
-label_row(_("Invoice Total"), $display_total, "colspan=$colspan align=right","align=right", $is_batch_invoice ? 2 : 0);
+start_row();
+label_cells(_("Invoice Total"), $display_total, "colspan=$colspan align=right","align=right", $is_batch_invoice ? 2 : 0);
+amount_cell($display_total_ppd);
+end_row();
+
 
 end_table(1);
 div_end();

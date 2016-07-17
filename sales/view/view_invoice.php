@@ -111,7 +111,7 @@ start_table(TABLESTYLE, "width=95%");
 if (db_num_rows($result) > 0)
 {
 	$th = array(_("Item Code"), _("Item Description"), _("Quantity"),
-		_("Unit"), _("Price"), _("Discount %"), _("Total"));
+                _("Unit"), _("Price"), _("PPD Price"), _("Discount %"), _("Total"));
 	table_header($th);
 
 	$k = 0;	//row colour counter
@@ -139,14 +139,18 @@ if (db_num_rows($result) > 0)
         qty_cell($myrow2["quantity"], false, get_qty_dec($myrow2["stock_id"]));
         label_cell($myrow2["units"], "align=right");
         amount_cell($myrow2["unit_price"]);
+        amount_ppd_cell($myrow2["ppd"],$myrow2["unit_price"]);
         label_cell($display_discount, "nowrap align=right");
         amount_cell($value);
 		end_row();
 	} //end while there are line items to print out
 
 	$display_sub_tot = price_format($sub_total);
-	label_row(_("Sub-total"), $display_sub_tot, "colspan=6 align=right",
-		"nowrap align=right width=15%");
+    start_row();
+	label_cells(_("Sub-total"), $display_sub_tot, "colspan=6 align=right",
+                "nowrap align=right width=15%");
+    amount_cell($sub_total-$myrow["ov_ppd_amount"]);
+    end_row();
 }
 else
 	display_note(_("There are no line items on this invoice."), 1, 2);
@@ -154,22 +158,29 @@ else
 $display_freight = price_format($myrow["ov_freight"]);
 
 /*Print out the invoice text entered */
-label_row(_("Shipping"), $display_freight, "colspan=6 align=right", "nowrap align=right");
+start_row();
+label_cells(_("Shipping"), $display_freight, "colspan=6 align=right", "nowrap align=right");
+label_cell("Price With PPD", "align=center class=\"tableheader\"");
+end_row();
 
 $tax_items = get_trans_tax_details(ST_SALESINVOICE, $trans_id);
-display_customer_trans_tax_details($tax_items, 6);
+display_customer_trans_tax_details($tax_items, 6, $myrow['ov_gst']-$myrow['ov_ppd_gst']);
 
-$display_total = price_format($myrow["ov_freight"]+$myrow["ov_gst"]+$myrow["ov_amount"]+$myrow["ov_freight_tax"]);
+$total = $myrow["ov_freight"]+$myrow["ov_gst"]+$myrow["ov_amount"]+$myrow["ov_freight_tax"];
+$display_total = price_format($total);
 
-label_row(_("TOTAL INVOICE"), $display_total, "colspan=6 align=right",
+start_row();
+label_cells(_("TOTAL INVOICE"), $display_total, "colspan=6 align=right",
 	"nowrap align=right");
+amount_cell($total-$myrow["ov_ppd_amount"]-$myrow["ov_ppd_gst"]);
+end_row();
 end_table(1);
 
 $voided = is_voided_display(ST_SALESINVOICE, $trans_id, _("This invoice has been voided."));
 
 if (!$voided)
 {
-	display_allocations_to(PT_CUSTOMER, $myrow['debtor_no'], ST_SALESINVOICE, $trans_id, $myrow['Total']);
+	// display_allocations_to(PT_CUSTOMER, $myrow['debtor_no'], ST_SALESINVOICE, $trans_id, $myrow['Total']);
 }
 
 end_page(true, false, false, ST_SALESINVOICE, $trans_id);

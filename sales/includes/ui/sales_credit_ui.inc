@@ -224,7 +224,7 @@ function display_credit_items($title, &$order)
     label_cell('', 'colspan=2');
 	end_row();
 
-    $taxes = $order->get_taxes($_POST['ChargeFreightCost']);
+    $taxes = $order->get_taxes($_POST['ChargeFreightCost'],null);
 
     $tax_total = display_edit_tax_items($taxes, $colspan, $order->tax_included, 2);
 

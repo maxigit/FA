@@ -63,6 +63,8 @@ class cart
 	var $tax_group_name;
 	var $tax_group_array = null; // saves db queries
 	var $price_factor;	 // ditto for price calculations
+    var $ppd;
+    var $ppd_term;
 
 	var	$pos;			// user assigned POS (contains cash accont number/name)
 	var $cash_discount;	// not used as of FA 2.1
@@ -342,12 +344,15 @@ class cart
 		$this->tax_group_array = get_tax_group_items_as_array($tax_group_id);
 	}
 
-	function set_sales_type($sales_type, $sales_name, $tax_included=0, $factor=0)
+	function set_sales_type($sales_type, $sales_name, $tax_included=0, $factor=0, $ppd=0, $ppd_days=null)
 	{
+        //display_error("set_sales_type = ppd = $ppd, ppd_days =$ppd_days");
 	    $this->sales_type = $sales_type;
 	    $this->sales_type_name = $sales_name;
 	    $this->tax_included = $tax_included;
 	    $this->price_factor = $factor;
+        $this->ppd = $ppd;
+        $this->ppd_days = $ppd_days;
 	}
 
 	function set_location($id, $name)
@@ -365,10 +370,10 @@ class cart
 			$this->freight_cost = $freight_cost;
 	}
 
-	function add_to_cart($line_no, $stock_id, $qty, $price, $disc, $qty_done=0, $standard_cost=0, $description=null, $id=0, $src_no=0,
+	function add_to_cart($line_no, $stock_id, $qty, $price, $ppd, $disc, $qty_done=0, $standard_cost=0, $description=null, $id=0, $src_no=0,
 		$src_id=0)
 	{
-		$line = new line_details($stock_id, $qty, $price, $disc,
+		$line = new line_details($stock_id, $qty, $price, $ppd, $disc,
 			$qty_done,  $standard_cost, $description, $id, $src_no, $src_id);
 
 		if ($line->valid) {
@@ -417,28 +422,32 @@ class cart
 		return $counter;
 	}
 
-	function get_items_total()
+	function get_items_total($ppd)
 	{
 		$total = 0;
 
 		foreach ($this->line_items as $ln_itm) {
-			$price = $ln_itm->line_price();
+			$price = $ln_itm->line_price($ppd);
 			$total += round($ln_itm->quantity * $price * (1 - $ln_itm->discount_percent), 
-			   user_price_dec());
+                            user_price_dec($ppd));
 		}
-		return $total;
+        // In theory round2 should work in both case, but we prefer
+        // to leave the old code to not introduce any regression.
+		return $ppd ? round2($total, user_price_dec()) : $total;
 	}
 
-	function get_items_total_dispatch()
+	function get_items_total_dispatch($ppd)
 	{
 		$total = 0;
 
 		foreach ($this->line_items as $ln_itm) {
-			$price = $ln_itm->line_price();
+			$price = $ln_itm->line_price($ppd);
 			$total += round(($ln_itm->qty_dispatched * $price * (1 - $ln_itm->discount_percent)), 
-			   user_price_dec());
+                            user_price_dec($ppd));
 		}
-		return $total;
+        // In theory round2 should work in both case, but we prefer
+        // to leave the old code to not introduce any regression.
+		return $ppd ? round2($total, user_price_dec()) : $total;
 	}
 
 	function has_items_dispatch()
@@ -474,7 +483,7 @@ class cart
 		return 0;
 	}
 
-	function get_taxes($shipping_cost=null)
+	function get_taxes($shipping_cost, $ppd)
 	{
 		$items = array();
 		$prices = array();
@@ -485,7 +494,7 @@ class cart
 			$items[] = $ln_itm->stock_id;
 			$prices[] = round(((
 				$this->trans_type==ST_SALESORDER ? 	$ln_itm->quantity : $ln_itm->qty_dispatched) *
-				$ln_itm->line_price()* (1 - $ln_itm->discount_percent)),  user_price_dec());
+				$ln_itm->line_price($ppd)* (1 - $ln_itm->discount_percent)),  user_price_dec($ppd));
 		}
 
 		$taxes = get_tax_for_items($items, $prices, $shipping_cost,
@@ -497,8 +506,28 @@ class cart
 			$val1 = (floatval((intval(round(($val*20),0)))/20));
 			$taxes['1']['Value'] = $val1;
 		} 
-		return $taxes;
+    if ($ppd) {
+        $dec = user_price_dec();
+        return array_map(function($tax) use($dec) {$tax['Value'] = round2($tax['Value'], $dec); return $tax;}
+                 , $taxes);
+    } else return $taxes;
 	}
+
+    // computes taxes with and without Prompt Payment Discount
+    // and merge the results.
+    // normal taxes are in 'Value' 
+    // PPD taxes are in 'ValueWithPPD' 
+    function get_taxes_and_ppd($shipping_cost) {
+        $taxes = $this->get_taxes($shipping_cost, 0);
+        $taxes_ppd = $this->get_taxes($shipping_cost, 1);
+
+        // We assume that the two arrays have the same number
+        // of tax items in the same order. Only the tax value should change.
+
+        return array_map(function($tax, $ppd) {$tax['ValueWithPPD'] = $ppd['Value']; return $tax;}
+                 , $taxes, $taxes_ppd);
+        
+    }
 
 
 	function get_tax_free_shipping()
@@ -531,19 +560,27 @@ class cart
 	/*
 		Returns transaction value including all taxes
 	*/
-	function get_trans_total() {
+	function get_trans_total($ppd=0) {
 		
-		$total = $this->get_items_total() + $this->freight_cost;
+		$total = $this->get_items_total($ppd) + $this->freight_cost;
 		$dec = user_price_dec();
 		if (!$this->tax_included ) {
 			$total += $this->get_shipping_tax();
-			$taxes = $this->get_taxes();
+			$taxes = $this->get_taxes(null,$ppd);
 			foreach($taxes as $tax)
 				$total += round($tax['Value'], $dec);
 		}
 
 		return $total;
 	}
+
+    /*
+      Returns transaction value including all taxes
+      if PPD taken
+    */
+    function get_trans_total_ppd() {
+        return $this->get_trans_total(1);
+    }
 } /* end of class defintion */
 
 class line_details
@@ -558,6 +595,7 @@ class line_details
 	var $src_no;	// number of src doc for this line
 	var $src_id;
 	var $price;
+	var $ppd; // Prompt Payment Discounted price (the price, not the discount)
 	var $discount_percent;
 	
 	var $standard_cost;
@@ -591,7 +629,7 @@ class line_details
 	var $qty_old = 0;
 
 
-	function line_details ($stock_id, $qty, $prc, $disc_percent,
+	function line_details ($stock_id, $qty, $prc, $ppd, $disc_percent,
 		$qty_done, $standard_cost, $description, $id=0, $src_no=0, $src_id=0)
 	{
 	/* Constructor function to add a new LineDetail object with passed params */
@@ -618,6 +656,7 @@ class line_details
 		$this->quantity = $qty;
 		$this->qty_dispatched = $qty;
 		$this->price = $prc;
+		$this->ppd = $ppd;
 		$this->discount_percent = $disc_percent;
 		$this->qty_done = $qty_done;
 		$this->standard_cost = $standard_cost;
@@ -625,9 +664,9 @@ class line_details
 	}
 
 	// get unit price as stated on document
-	function line_price()
+	function line_price($ppd=false)
 	{
-		return $this->price;
+		return $this->price*($ppd ? 1-$this->ppd : 1);
 	}
 }
 

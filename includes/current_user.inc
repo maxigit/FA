@@ -410,9 +410,9 @@ function user_qty_dec()
 	return $_SESSION["wa_current_user"]->prefs->qty_dec();
 }
 
-function user_price_dec()
+function user_price_dec($ppd=false)
 {
-	return $_SESSION["wa_current_user"]->prefs->price_dec();
+	return $_SESSION["wa_current_user"]->prefs->price_dec() + ($ppd ? 2 : 0);
 }
 
 function user_exrate_dec()

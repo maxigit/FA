@@ -303,6 +303,7 @@ function copy_to_cart()
 	$cart->customer_id	= $_POST['customer_id'];
 	$cart->Branch = $_POST['branch_id'];
 	$cart->sales_type = $_POST['sales_type'];
+    check_ppd($cart);
 
 	if ($cart->trans_type!=ST_SALESORDER && $cart->trans_type!=ST_SALESQUOTE) { // 2008-11-12 Joe Hunt
 		$cart->dimension_id = $_POST['dimension_id'];
@@ -441,7 +442,7 @@ function can_process() {
 	if (!db_has_currency_rates($_SESSION['Items']->customer_currency, $_POST['OrderDate']))
 		return false;
 	
-   	if ($_SESSION['Items']->get_items_total() < 0) {
+   	if ($_SESSION['Items']->get_items_total(null, null) < 0) {
 		display_error("Invoice total amount cannot be less than zero.");
 		return false;
 	}
@@ -566,7 +567,7 @@ function handle_update_item()
 {
 	if ($_POST['UpdateItem'] != '' && check_item_data()) {
 		$_SESSION['Items']->update_cart_item($_POST['LineNo'],
-		 input_num('qty'), input_num('price'),
+                                             input_num('qty'), input_num('price'), 
 		 input_num('Disc') / 100, $_POST['item_description'] );
 	}
 	page_modified();
