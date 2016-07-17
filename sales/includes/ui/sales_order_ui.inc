@@ -64,11 +64,8 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 		}
         // hardcode PPD
         $ppd = 0;
-        if($order->customer_id != 2) {
-            if (preg_match("/^....-...-.../", $item['stock_id'])) {
-                    $ppd = 0.1; // 10%
-                
-            }
+        if (preg_match("/^....-...-.../", $item['stock_id'])) {
+            $ppd = get_sales_type($order->sales_type)['ppd'];
         }
 		$order->add_to_cart (count($order->line_items),	$item['stock_id'], 
                              $new_item_qty*$item['quantity'], $item_price, $ppd, $discount, 0,0, $description);
@@ -98,7 +95,7 @@ function get_customer_details_to_order(&$order, $customer_id, $branch_id)
 
 	// the sales type determines the price list to be used by default
 	$order->set_sales_type($myrow['salestype'], $myrow['sales_type'], $myrow['tax_included'],
-	    $myrow['factor']);
+                           $myrow['factor'], $myrow['ppd']);
 
 	$order->credit = $myrow['cur_credit'];
 
@@ -497,7 +494,7 @@ function display_order_header(&$order, $editable, $date_text)
 	if ($order->sales_type != $_POST['sales_type']) {
 		$myrow = get_sales_type($_POST['sales_type']);
 		$order->set_sales_type($myrow['id'], $myrow['sales_type'],
-			$myrow['tax_included'], $myrow['factor']);
+                               $myrow['tax_included'], $myrow['factor'], $myrow['ppd'], $myrow['ppd_days']);
 		$Ajax->activate('sales_type');
 		$change_prices = 1;
 	}
@@ -552,6 +549,8 @@ function display_order_header(&$order, $editable, $date_text)
 			$line = &$order->line_items[$line_no];
 			$line->price = get_kit_price($line->stock_id, $order->customer_currency,
 				$order->sales_type, $order->price_factor, get_post('OrderDate'));
+            $line->ppd = $order->ppd;
+        
 		//		$line->discount_percent = $order->default_discount;
 		}
 	    $Ajax->activate('items_table');

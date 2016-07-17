@@ -264,7 +264,8 @@ function read_sales_trans($doc_type, $trans_no, &$cart)
 		else
 			$cart->trans_no = array($trans_no[0]=>$myrow["version"]);
 
-		$cart->set_sales_type($myrow["tpe"], $myrow["sales_type"], $myrow["tax_included"],0);
+		$cart->set_sales_type($myrow["tpe"], $myrow["sales_type"], $myrow["tax_included"],0
+                              ,$myrow['ppd']);//, $myrow['ppd_days']);
 
 		$cart->set_customer($myrow["debtor_no"], $myrow["DebtorName"],
 			$myrow["curr_code"], $myrow["discount"], $myrow["payment_terms"]);

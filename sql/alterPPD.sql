@@ -7,7 +7,7 @@
 ALTER TABLE `0_sales_orders`
 ADD COLUMN total_ppd double COMMENT 'total amount if PPD'
 ,ADD COLUMN `ppd` double COMMENT 'Tax discount if PPD'
-,ADD COLUMN `ppd_terms` int(11) COMMENT 'PPD payment term'
+,ADD COLUMN `ppd_days` int(11) COMMENT 'PPD payment term'
 ;
 
 ALTER TABlE `0_debtor_trans_details`
@@ -19,11 +19,11 @@ ALTER TABLE `0_debtor_trans`
 ADD COLUMN `ov_ppd_amount` double COMMENT 'Net discount if PPD'
 ,ADD COLUMN `ov_ppd_gst` double COMMENT 'Tax discount if PPD'
 ,ADD COLUMN `ppd` double COMMENT 'Prompt Payment DISCOUNT'
-,ADD COLUMN `ppd_due_date` date COMMENT 'Prompt payment discount date'
+,ADD COLUMN `ppd_days` int(11) COMMENT 'PPD payment term'
 ;
 
 
 ALTER TABLE `0_sales_types`
 ADD COLUMN `ppd` double NOT NULL DEFAULT 0 COMMENT 'Prompt Payment DISCOUNT'
-,ADD COLUMN `ppd_terms` int(11) COMMENT 'PPD payment term'
+,ADD COLUMN `ppd_days` int(11) COMMENT 'PPD payment term'
 ;

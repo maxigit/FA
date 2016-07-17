@@ -11,18 +11,18 @@
 ***********************************************************************/
 function add_sales_type($name, $tax_included, $factor, $ppd, $ppd_term)
 {
-	$sql = "INSERT INTO ".TB_PREF."sales_types (sales_type,tax_included,factor, ppd, ppd_terms) VALUES (".db_escape($name).","
+	$sql = "INSERT INTO ".TB_PREF."sales_types (sales_type,tax_included,factor, ppd, ppd_days) VALUES (".db_escape($name).","
          .db_escape($tax_included).",".db_escape($factor).", $ppd, $ppd_term)";
     display_warning($sql);
 	db_query($sql, "could not add sales type");		
 }
 
-function update_sales_type($id, $name, $tax_included, $factor, $ppd, $ppd_terms)
+function update_sales_type($id, $name, $tax_included, $factor, $ppd, $ppd_days)
 {
 
 	$sql = "UPDATE ".TB_PREF."sales_types SET sales_type = ".db_escape($name).",
 	tax_included =".db_escape($tax_included).", factor=".db_escape($factor).
-         " , ppd=$ppd, ppd_terms= $ppd_terms WHERE id = ".db_escape($id);
+         " , ppd=$ppd, ppd_days= $ppd_days WHERE id = ".db_escape($id);
 	
     display_warning($sql);
 	db_query($sql, "could not update sales type");			
