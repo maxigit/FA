@@ -164,7 +164,7 @@ label_cell("Price With PPD", "align=center class=\"tableheader\"");
 end_row();
 
 $tax_items = get_trans_tax_details(ST_SALESINVOICE, $trans_id);
-display_customer_trans_tax_details($tax_items, 6, $myrow['ov_gst']-$myrow['ov_ppd_gst']);
+display_customer_trans_tax_details($tax_items, 6, $myrow['ov_gst']-$myrow['ov_ppd_gst']+$myrow["ov_freight_tax"]);
 
 $total = $myrow["ov_freight"]+$myrow["ov_gst"]+$myrow["ov_amount"]+$myrow["ov_freight_tax"];
 $display_total = price_format($total);
