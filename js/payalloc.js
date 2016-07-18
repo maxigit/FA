@@ -28,6 +28,7 @@ function blur_alloc(i) {
 			var total = get_amount('amount')+change;
 			price_format('amount', total, user.pdec, 0);
 		}
+        update_allocated_amount();
 }
 
 function allocate_all(doc) {
@@ -50,7 +51,7 @@ function allocate_ppd(doc, ppd, ppd_gst) {
 		left = 0;
 	}
 	  price_format('amount'+doc, amount, user.pdec);
-	  price_format('amount', total, user.pdec);
+	  price_format('amount', total-ppd, user.pdec);
     // we need to store the ppds to be able to clear the discount field if needed
     // when unallocated
     if(!allocated_ppd[doc]) {
@@ -61,30 +62,30 @@ function allocate_ppd(doc, ppd, ppd_gst) {
 	      price_format('vat_discount', vat_discount+ppd_gst, user.pdec);
         
     }
-    update_real_amount();
+    update_allocated_amount();
 }
 
 function allocate_none(doc) {
 	var amount = get_amount('amount'+doc);
 	var total = get_amount('amount');
+    var ppds = allocated_ppd[doc];
 	price_format('amount'+doc, 0, user.pdec);
-	price_format('amount', total-amount, user.pdec);
+	price_format('amount', total-amount+ppds.amount, user.pdec);
 
-  var discount = get_amount('discount');
-  var vat_discount = get_amount('vat_discount');
-  var ppds = allocated_ppd[doc];
+    var discount = get_amount('discount');
+    var vat_discount = get_amount('vat_discount');
     price_format('discount', discount-ppds.amount, user.pdec);
     price_format('vat_discount', vat_discount-ppds.vat, user.pdec);
 
     allocated_ppd[doc] = null;
 
-    update_real_amount();
+    update_allocated_amount();
 }
 
-function update_real_amount() {
+function update_allocated_amount() {
     var amount = get_amount('amount');
     var discount = get_amount('discount');
-    price_format('real_amount', amount-discount, user.pdec);
+    price_format('allocated_amount', amount+discount, user.pdec);
 }
 
 var allocations = {

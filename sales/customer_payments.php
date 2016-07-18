@@ -394,13 +394,13 @@ start_form();
 	label_row(_("Customer prompt payment discount :"), $display_discount_percent);
 
     start_row();
-	amount_cells(_("Amount of Discount:"), 'discount', null, '', $cust_currency,null, "oninput='update_real_amount();'");
+	amount_cells(_("Amount of Discount:"), 'discount', null, '', $cust_currency,null, "oninput='update_allocated_amount();'");
     amount_cells(_("including"), 'vat_discount', null, '', "VAT");
     end_row();
 
     start_row();
-	amount_cells(_("Amount:"), 'amount', null, '', $cust_currency, null, "oninput='update_real_amount();'");
-	amount_cells(_("Real:"), 'real_amount', null, '', $cust_currency, null, "DISABLED"); 
+	amount_cells(_("Amount:"), 'amount', null, '', $cust_currency, null, "oninput='update_allocated_amount();'");
+	amount_cells(_("Allocated:"), 'allocated_amount', null, '', $cust_currency, null, "DISABLED"); 
     end_row();
 
 	textarea_row(_("Memo:"), 'memo_', null, 22, 4);
