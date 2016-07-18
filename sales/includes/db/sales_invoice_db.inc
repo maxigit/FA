@@ -75,7 +75,8 @@ function write_sales_invoice(&$invoice)
                                        $items_added_tax, $ov_gst-$ov_gst_ppd, $invoice->freight_cost, $freight_added_tax,
 	$invoice->sales_type, $sales_order, $invoice->ship_via, 
 	$invoice->due_date, 0, 0, $invoice->dimension_id, 
-	$invoice->dimension2_id, $invoice->payment); 
+    $invoice->dimension2_id, $invoice->payment, 
+    $invoice->ppd, $invoice->ppd_days); 
 	// 2008-06-14 extra $alloc, 2008-11-12 added dimension_id Joe Hunt
 
 	if ($trans_no == 0) {

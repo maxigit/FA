@@ -58,9 +58,9 @@ function write_customer_trans($trans_type, $trans_no, $debtor_no, $BranchNo,
 	$sales_type=0, $order_no=0, $ship_via=0, $due_date="",
                               $AllocAmt=0, $rate=0, $dimension_id=0, $dimension2_id=0, $payment_terms=null, $ppd=null, $ppd_days=null)
 {
-    // display_error("write_customer_trans ppd=$ppd, ppd_days=$ppd_days"); 
+    //display_error("write_customer_trans ppd=$ppd, ppd_days=$ppd_days"); 
     $ppd = $ppd ?: 0;
-    $ppd_days = $ppd_days ?: null;
+    $ppd_days = $ppd_days ?: "null";
 	$new = $trans_no==0;
 	$curr = get_customer_currency($debtor_no);
 	if ($rate == 0)

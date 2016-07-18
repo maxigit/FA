@@ -252,7 +252,7 @@ function get_sales_order_header($order_no, $trans_type)
 	  ."stype.sales_type, "
 	  ."stype.id AS sales_type_id, "
 	  ."stype.tax_included, "
-	  ."stype.factor, "
+	  ."stype.factor, stype.ppd, stype.ppd_days, "
  	  ."ship.shipper_name, "
 	  ."tax_group.name AS tax_group_name , "
 	  ."tax_group.id AS tax_group_id, "
@@ -334,6 +334,8 @@ function read_sales_order($order_no, &$order, $trans_type)
 
 	$order->cust_ref = $myrow["customer_ref"];
 	$order->sales_type =$myrow["order_type"];
+	$order->ppd =$myrow["ppd"];
+	$order->ppd_days =$myrow["ppd_days"];
 	$order->reference = $myrow["reference"];
 	$order->Comments = $myrow["comments"];
 	$order->due_date = sql2date($myrow["delivery_date"]);
