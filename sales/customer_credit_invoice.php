@@ -152,6 +152,24 @@ function check_quantities()
 				$ok = 0;
 			}
 	  	}
+		if (isset($_POST['price'.$line_no])) {
+			if (check_num('price'.$line_no, 0)) {
+				$_SESSION['Items']->line_items[$line_no]->price =
+				  input_num('price'.$line_no);
+			}
+			else {
+				$ok = 0;
+			}
+	  	}
+		if (isset($_POST['discount_percent'.$line_no])) {
+			if (check_num('discount_percent'.$line_no, 0, 100)) {
+				$_SESSION['Items']->line_items[$line_no]->discount_percent =
+				  input_num('discount_percent'.$line_no)/100;
+			}
+			else {
+				$ok = 0;
+			}
+	  	}
 
 		if (isset($_POST['Line'.$line_no.'Desc'])) {
 			$line_desc = $_POST['Line'.$line_no.'Desc'];
@@ -301,8 +319,8 @@ function display_credit_items()
 			null, null, $dec);
     	$line_total =($ln_itm->qty_dispatched * $ln_itm->price * (1 - $ln_itm->discount_percent));
 
-    	amount_cell($ln_itm->price);
-    	percent_cell($ln_itm->discount_percent*100);
+    	amount_cells(null,'price'.$line_no, $ln_itm->price );
+    	small_amount_cells(null, 'discount_percent'.$line_no, percent_format($ln_itm->discount_percent*100),null, null, user_percent_dec());
     	amount_cell($line_total);
     	end_row();
     }
