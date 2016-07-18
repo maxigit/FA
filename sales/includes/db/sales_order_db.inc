@@ -252,7 +252,7 @@ function get_sales_order_header($order_no, $trans_type)
 	  ."stype.sales_type, "
 	  ."stype.id AS sales_type_id, "
 	  ."stype.tax_included, "
-	  ."stype.factor, stype.ppd, stype.ppd_days, "
+	  ."stype.factor,"
  	  ."ship.shipper_name, "
 	  ."tax_group.name AS tax_group_name , "
 	  ."tax_group.id AS tax_group_id, "
