@@ -75,7 +75,7 @@ function allocate_none(doc) {
     var discount = get_amount('discount');
     var vat_discount = get_amount('vat_discount');
     price_format('discount', discount-ppds.amount, user.pdec);
-    price_format('vat_discount', vat_discount-ppds.vat, user.pdec);
+    price_format('vat_discount', vat_discount-ppds.gst, user.pdec);
 
     allocated_ppd[doc] = null;
 
