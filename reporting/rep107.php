@@ -227,9 +227,9 @@ function print_invoices()
                 $rep->TextCol(0,6, _("(*) A Prompt Payment Discount (PPD) of $ppd_percent % applies on selected items if payment made within $ppd_days day$ppd_days_s."));
 
                 $rep->NewLine(1);
-                $rep->TextCol(0,2, _("Net Disc. : ") . number_format($ppd,$dec). _("  -  Net : ") . number_format($net-$ppd, $dec). "  -  VAT : " . number_format($tax-$ppd_gst, $dec). "  -");
+                $rep->TextCol(0,2, _("Net Disc. : ") . number_format2($ppd,$dec). _("  -  Net : ") . number_format2($net-$ppd, $dec). "  -  VAT : " . number_format2($tax-$ppd_gst, $dec). "  -");
                 $rep->TextCol(2,6, _("Amount due if payment made before the ").add_days(sql2date($myrow['tran_date']),10)." ");
-                $rep->TextCol(6,7, number_format($DisplayTotalPPD, $dec),-2);
+                $rep->TextCol(6,7, $DisplayTotalPPD,-2);
 
                 $rep->NewLine(1);
                   $rep->TextCol(0,6, _("No credit note will be issued. Following payment you must ensure you have only recovered the VAT actually paid."));
