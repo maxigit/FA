@@ -529,7 +529,7 @@ $display_sub_total = price_format($inv_items_total + input_num('ChargeFreightCos
 
 start_row();
 label_cells(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", 2);
-$display_sub_total_ppd = price_format($total_ppd + input_num('freight_cost'));
+$display_sub_total_ppd = $total_ppd + input_num('freight_cost');
 amount_cell($display_sub_total_ppd,'',"colspan=2");
 end_row();
 
@@ -539,7 +539,7 @@ $tax_total = $tax_totals['total'];
 $tax_total_ppd = $tax_totals['totalWithPPD'];
 
 $display_total = price_format(($inv_items_total + input_num('ChargeFreightCost') + $tax_total));
-$display_total_ppd = price_format(($total_ppd + input_num('freight_cost') + $tax_total_ppd));
+$display_total_ppd = $total_ppd + input_num('freight_cost') + $tax_total_ppd;
 
 start_row();
 label_cells(_("Amount Total"), $display_total, "colspan=$colspan align=right","align=right");

@@ -599,7 +599,7 @@ label_cell('', 'colspan=2');
 end_row();
 
 $display_sub_total = price_format($inv_items_total + input_num('ChargeFreightCost'));
-$display_sub_total_ppd = price_format($inv_items_total_ppd + input_num('ChargeFreightCost'));
+$display_sub_total_ppd = $inv_items_total_ppd + input_num('ChargeFreightCost');
 
 start_row();
 label_cells(_("Sub-total"), $display_sub_total, "colspan=$colspan align=right","align=right", $is_batch_invoice ? 2 : 0);
@@ -613,7 +613,7 @@ $tax_totals = display_edit_tax_items($taxes, $colspan, $_SESSION['Items']->tax_i
 $tax_total = $tax_totals['total'];
 $tax_total_ppd = $tax_totals['totalWithPPD'];
 $display_total = price_format(($inv_items_total + input_num('ChargeFreightCost') + $tax_total));
-$display_total_ppd = price_format(($inv_items_total_ppd + input_num('ChargeFreightCost') + $tax_total_ppd));
+$display_total_ppd = inv_items_total_ppd + input_num('ChargeFreightCost') + $tax_total_ppd;
 
 start_row();
 label_cells(_("Invoice Total"), $display_total, "colspan=$colspan align=right","align=right", $is_batch_invoice ? 2 : 0);
