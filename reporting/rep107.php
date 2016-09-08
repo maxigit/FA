@@ -131,7 +131,7 @@ function print_invoices()
                     if ($myrow2["ppd"]==0) {
                         $rep->Font("italic");
                         $rep->TextCol(5, 6,	"NA     ", -2);
-                        $rep->Font("normal");
+                        $rep->Font();
                     }
                         else {
                             $DisplayDiscount = number_format2($DisplayPrice*(1-$myrow2["ppd"]),user_price_dec(true));
