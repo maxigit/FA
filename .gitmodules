@@ -22,3 +22,6 @@
 [submodule "rep_email_customers"]
 	path = modules/rep_email_customers
 	url = bb:elax/fa-email_customers.git
+[submodule "magic_invoice_report"]
+	path = modules/rep_magic_customer_invoice
+	url = bb:elax/fa-magic-invoice-report.git
