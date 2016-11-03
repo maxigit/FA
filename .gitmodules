@@ -19,3 +19,6 @@
 [submodule "rep_customer_statement_account"]
 	path = modules/rep_customer_account_statement
 	url = bb:elax/fa-customer-account-statement-rep.git
+[submodule "rep_email_customers"]
+	path = modules/rep_email_customers
+	url = bb:elax/fa-email_customers.git
