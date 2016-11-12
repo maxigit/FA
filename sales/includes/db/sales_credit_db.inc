@@ -99,8 +99,11 @@ function write_credit_note(&$credit_note, $write_off_acc)
 		$total = $credit_note_total + $credit_note->freight_cost + $items_added_tax 
 			+ $freight_added_tax;
 
+        /* We disable automatic allocation of credit note.
+           It's buggy and doesn't really help anyway.
 		if (!credit_sales_invoice_allocate($credit_invoice, $credit_no, $total, $credit_date))
 			return false;
+        */
 	}
 
 	$total = 0;
