@@ -16,7 +16,7 @@
 	url = git@bb:elax/fa-customer-account-statement-rep.git
 [submodule "modules/rep_tax"]
 	path = modules/rep_tax
-	url = bb:elax/fa-rep_tax
+	url = git@bitbucket.org:elax/fa-rep_tax.git
 [submodule "rep_customer_statement_account"]
 	path = modules/rep_customer_account_statement
 	url = bb:elax/fa-customer-account-statement-rep.git
