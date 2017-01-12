@@ -277,6 +277,7 @@ function get_grn_items($grn_batch_id=0, $supplier_id="", $outstanding_only=false
     	$sql .= ", ".TB_PREF."supp_invoice_items";
     $sql .= " WHERE ".TB_PREF."grn_items.grn_batch_id=".TB_PREF."grn_batch.id
 		AND ".TB_PREF."grn_items.po_detail_item=".TB_PREF."purch_order_details.po_detail_item";
+    # filter GRN for ease $sql .= " AND ".TB_PREF."grn_items.grn_batch_id IN  (1869,1901)";
 	if ($invoice_no != 0)
 		$sql .= " AND ".TB_PREF."supp_invoice_items.supp_trans_type=".ST_SUPPINVOICE." AND 
 			".TB_PREF."supp_invoice_items.supp_trans_no=$invoice_no AND
