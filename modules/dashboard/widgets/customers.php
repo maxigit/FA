@@ -51,9 +51,12 @@ class customers
 
 
 	// Compute the total for the same criteria
-	$sql_total = "SELECT SUM((ov_amount + ov_discount) * rate*IF(trans.type = ".ST_CUSTCREDIT.", -1, 1)) AS total, COUNT(DISTINCT trans.debtor_no) AS customer_number  FROM
+	$sql_total = "SELECT SUM(IF( trans.type = ".ST_CUSTPAYMENT."
+                                   , -ov_discount
+                                   , (ov_amount + ov_discount) * rate*IF(trans.type = ".ST_CUSTCREDIT.", -1, 1))) AS total
+                             , COUNT(DISTINCT trans.debtor_no) AS customer_number  FROM
 		".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d WHERE trans.debtor_no=d.debtor_no
-		AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")
+		AND (trans.type IN (".ST_SALESINVOICE.", " .ST_CUSTCREDIT.", " .ST_CUSTPAYMENT ."))
 		AND tran_date <= '$today1'";
         if ($this->data_filter != '')
             $sql_total .= ' AND '.$this->data_filter;
@@ -67,10 +70,13 @@ class customers
 	$customer_left = $customer_number;
 
 
-        $sql = "SELECT SUM((ov_amount + ov_discount) * rate * IF(trans.type = ".ST_CUSTCREDIT.", -1, 1)) AS total,d.debtor_no, d.name"
+	$sql = "SELECT SUM(IF( trans.type = ".ST_CUSTPAYMENT."
+                                   , -ov_discount
+                                   , (ov_amount + ov_discount) * rate*IF(trans.type = ".ST_CUSTCREDIT.", -1, 1))) AS total
+                       ,d.debtor_no, d.name"
             ." FROM ".TB_PREF."debtor_trans AS trans, ".TB_PREF."debtors_master AS d"
             ." WHERE trans.debtor_no=d.debtor_no"
-            ." AND (trans.type = ".ST_SALESINVOICE." OR trans.type = ".ST_CUSTCREDIT.")"
+            ." AND (trans.type IN (".ST_SALESINVOICE.", " .ST_CUSTCREDIT.", " .ST_CUSTPAYMENT .")) "
             ." AND tran_date <= '$today1'";
         if ($this->data_filter != '')
             $sql .= ' AND '.$this->data_filter;
