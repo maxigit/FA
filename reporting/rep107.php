@@ -228,7 +228,7 @@ function print_invoices()
 
                 $rep->NewLine(1);
                 $rep->TextCol(0,2, _("Net Disc. : ") . number_format2($ppd,$dec). _("  -  Net : ") . number_format2($net-$ppd, $dec). "  -  VAT : " . number_format2($tax-$ppd_gst, $dec). "  -");
-                $rep->TextCol(2,6, _("Amount due if payment made before the ").add_days(sql2date($myrow['tran_date']),10)." ");
+                $rep->TextCol(2,6, _("Amount due if payment made before the ").add_days(sql2date($myrow['tran_date']),$ppd_days)." ");
                 $rep->TextCol(6,7, $DisplayTotalPPD,-2);
 
                 $rep->NewLine(1);
