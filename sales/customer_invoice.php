@@ -63,6 +63,17 @@ if (isset($_GET['AddedID'])) {
 
 	hyperlink_params("$path_to_root/sales/inquiry/sales_deliveries_view.php", _("Select Another &Delivery For Invoicing"), "OutstandingOnly=1");
 
+    // Quick dispatching
+    echo "<form enctype='multipart/form-data' method='GET' action='/sales/customer_delivery.php'>\n";
+    start_table(TABLESTYLE_NOBORDER);
+    start_row();
+    label_cells("Dispatch order");
+    ref_cells(_("#:"), 'OrderNumber', '',null, '', false);
+    submit_cells('dispatchOrder', _("Dispatch"));
+    end_row();
+    end_table();
+    end_form();
+
 	$sql = "SELECT trans_type_from, trans_no_from FROM ".TB_PREF."cust_allocations
 			WHERE trans_type_to=".ST_SALESINVOICE." AND trans_no_to=".db_escape($invoice_no);
 	$result = db_query($sql, "could not retrieve customer allocation");

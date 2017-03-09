@@ -65,7 +65,17 @@ if (isset($_GET['AddedID'])) {
 
 	hyperlink_params("$path_to_root/sales/customer_invoice.php", _("Invoice This Delivery"), "DeliveryNumber=$dispatch_no");
 
-	hyperlink_params("$path_to_root/sales/inquiry/sales_orders_view.php", _("Select Another Order For Dispatch"), "OutstandingOnly=1");
+	// hyperlink_params("$path_to_root/sales/inquiry/sales_orders_view.php", _("Select Another Order For Dispatch"), "OutstandingOnly=1");
+
+    echo "<form enctype='multipart/form-data' method='GET' action='/sales/customer_delivery.php'>\n";
+    start_table(TABLESTYLE_NOBORDER);
+    start_row();
+    label_cells("Dispatch order");
+    ref_cells(_("#:"), 'OrderNumber', '',null, '', false);
+    submit_cells('dispatchOrder', _("Dispatch"));
+    end_row();
+    end_table();
+    end_form();
 
 	display_footer_exit();
 
