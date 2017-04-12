@@ -343,7 +343,7 @@ function write_bank_transaction($trans_type, $trans_no, $from_account, $items, $
 			$cust_amount = -$cust_amount;
 
 		$trans_no = write_customer_trans($trans_type, 0, $person_id, $person_detail_id, $date_,
-        	$ref, $cust_amount);
+				$ref, $cust_amount, 0);
 
     }
     elseif ($person_type_id == PT_SUPPLIER)
