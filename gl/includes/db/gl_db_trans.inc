@@ -569,6 +569,7 @@ function write_journal_entries(&$cart, $reverse, $use_transaction=true)
     	//$reversingDate = date(user_date_display(),
     	//	Mktime(0,0,0,get_month($date_)+1,1,get_year($date_)));
     	$reversingDate = begin_month(add_months($date_, 1));
+    	//$reversingDate = sql2date("2017-06-22");
 
     	$trans_id_reverse = get_next_trans_no($trans_type);
 
