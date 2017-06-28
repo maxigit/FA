@@ -185,8 +185,8 @@ function write_sales_invoice(&$invoice)
 			$discount = 0; // $invoice->cash_discount*$amount;
 			$pmtno = write_customer_payment(0, $invoice->customer_id, 
 				$invoice->Branch, $invoice->pos['pos_account'], $date_,
-                $Refs->get_next(ST_CUSTPAYMENT), $amount-$discount, $discount, vat_discount,
-				_('Cash invoice').' '.$invoice_no);
+                $Refs->get_next(ST_CUSTPAYMENT), $amount-$discount, $discount, 0,
+                                            _('Cash invoice').' '.$invoice_no, );
 			add_cust_allocation($amount, ST_CUSTPAYMENT, $pmtno, ST_SALESINVOICE, $invoice_no);
 
 			update_debtor_trans_allocation(ST_SALESINVOICE, $invoice_no, $amount);
