@@ -73,7 +73,6 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
                              $new_item_qty*$item['quantity'], $item_price, $ppd, $discount, 0,0, $description);
 	 }
 	}
-
 }
 
     
@@ -392,7 +391,7 @@ function display_order_header(&$order, $editable, $date_text)
 				$_POST['deliver_to'] = $order->deliver_to;
 				$_POST['delivery_address'] = $order->delivery_address;
 				$_POST['phone'] = $order->phone;
-				$_POST['delivery_date'] = $order->due_date;
+                if(!isset($_POST['delivery_date'])) $_POST['delivery_date'] = $order->due_date;
 
 				if (!in_array($order->trans_type, array(ST_SALESQUOTE, ST_SALESORDER))
 					&& ($order->pos['cash_sale'] != $order->pos['credit_sale'])
