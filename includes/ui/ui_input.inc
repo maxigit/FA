@@ -646,7 +646,7 @@ function date_cells($label, $name, $title = null, $check=null, $inc_days=0,
 
 	echo "<td>";
 	
-	$class = $submit_on_change ? 'class="searchbox"' : '';
+	$class = $submit_on_change ? "searchbox" : '';
 
 	$aspect = $check ? 'aspect="cdate"' : '';
 	if ($check && (get_post($name) != Today()))

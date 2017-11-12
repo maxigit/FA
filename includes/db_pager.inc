@@ -81,7 +81,7 @@ class db_pager {
 		    $this->ready = false;
 
 				if(is_array($sql)) {
-					foreach(explode(' ', 'select from where group order') as $section) {
+					foreach(explode(' ', 'select from where group order raw') as $section) {
 						$this->$section = @$sql[$section];
 					}
 					$this->select = "SELECT ".$this->select;
@@ -169,9 +169,11 @@ class db_pager {
 	    if (!$this->_init()) 
 		  return false;
 
-	    if ($this->rec_count == 0) return true;
+        // print "querying {$this->rec_count}";
+	    //if ($this->rec_count == 0) return true;
 
 	    $sql = $this->_sql_gen(false);
+        // print $sql;
 
 	    $result = db_query($sql, 'Error browsing database: '.$sql );
 
@@ -284,6 +286,17 @@ class db_pager {
 		$group = $this->group;
 		$order = $this->order;
 
+        if(isset($this->raw)) {
+            if(($count)) {
+                $sql = "SELECT count(*) FROM ({$this->raw}) sub";
+                // print "COUNT: $sql";
+                // return "SELECT 1";
+                return $sql;
+                
+            } else {
+                return $this->raw;
+            }
+        }
 		if(count($this->extra_where)) {
 		    $where .= ($where=='' ? '' : ' AND ')
 				.implode(' AND ', $this->extra_where);
@@ -338,6 +351,7 @@ class db_pager {
 
 	    $sql .= " LIMIT $offset, $page_len";
 
+        // print "SQL_GEN $sql";
 		return $sql;
 		
 	}
