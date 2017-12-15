@@ -274,7 +274,7 @@ Payments can be made by bank transfer to our bank , details are :
 Max & Ellie Ltd
 sort code : 40-25-59
 account number : 40093653
-IBAN : GB18MIDL40255940093653
+IBAN : GB55HBUK40255940093653
 HSBC
 
 or alternatively by cheque payable to Max & Ellie Ltd and post to the address below.
