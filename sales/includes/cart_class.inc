@@ -65,6 +65,7 @@ class cart
 	var $price_factor;	 // ditto for price calculations
     var $ppd;
     var $ppd_term;
+    var $now_or_never;
 
 	var	$pos;			// user assigned POS (contains cash accont number/name)
 	var $cash_discount;	// not used as of FA 2.1
@@ -344,7 +345,7 @@ class cart
 		$this->tax_group_array = get_tax_group_items_as_array($tax_group_id);
 	}
 
-	function set_sales_type($sales_type, $sales_name, $tax_included=0, $factor=0, $ppd=0, $ppd_days=null)
+	function set_sales_type($sales_type, $sales_name, $tax_included=0, $factor=0, $ppd=0, $ppd_days=null, $now_or_never)
 	{
         //display_error("set_sales_type = ppd = $ppd, ppd_days =$ppd_days");
 	    $this->sales_type = $sales_type;
@@ -353,6 +354,7 @@ class cart
 	    $this->price_factor = $factor;
         $this->ppd = $ppd;
         $this->ppd_days = $ppd_days;
+        $this->now_or_never = $now_or_never;
 	}
 
 	function set_location($id, $name)

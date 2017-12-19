@@ -98,7 +98,9 @@ function get_customer_details_to_order(&$order, $customer_id, $branch_id)
 
 	// the sales type determines the price list to be used by default
 	$order->set_sales_type($myrow['salestype'], $myrow['sales_type'], $myrow['tax_included'],
-                           $myrow['factor'], $myrow['ppd'], $myrow['ppd_days']);
+                           $myrow['factor'], $myrow['ppd'], $myrow['ppd_days'],
+                           $myrow['now_or_never']
+    );
 
 	$order->credit = $myrow['cur_credit'];
 
@@ -438,6 +440,12 @@ function display_order_header(&$order, $editable, $date_text)
 					$_POST['dimension2_id'] = $order->dimension2_id;
 				    $Ajax->activate('dimension2_id');
 				}
+
+                if($old_order->now_or_never_list_row != $order->now_or_never) {
+                    $_POST['now_or_never'] = $order->now_or_never;
+				    $Ajax->activate('now_or_never');
+                    
+                }
 				unset($old_order);
 			}
 			set_global_customer($_POST['customer_id']);
@@ -491,6 +499,7 @@ function display_order_header(&$order, $editable, $date_text)
 
 	if($editable) {
 		$str = sales_types_list_row(_("Price List:"), 'sales_type', null, true);
+        now_or_never_list_row(_("Now or Never:"), 'now_or_never');
 	} else {
 		label_row(_("Price List:"), $order->sales_type_name);
 	}
