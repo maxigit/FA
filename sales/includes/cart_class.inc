@@ -372,7 +372,7 @@ class cart
 			$this->freight_cost = $freight_cost;
 	}
 
-	function add_to_cart($line_no, $stock_id, $qty, $price, $ppd, $disc, $qty_done=0, $standard_cost=0, $description=null, $id=0, $src_no=0,
+	function add_to_cart($line_no, $stock_id, $qty, $price, $ppd, $disc, $now_or_never, $qty_done=0, $standard_cost=0, $description=null, $id=0, $src_no=0,
 		$src_id=0)
 	{
 		$line = new line_details($stock_id, $qty, $price, $ppd, $disc,
@@ -599,6 +599,7 @@ class line_details
 	var $price;
 	var $ppd; // Prompt Payment Discounted price (the price, not the discount)
 	var $discount_percent;
+    var $now_or_never; // item need to be cancelled or not if not delivered
 	
 	var $standard_cost;
 	var $descr_editable;
@@ -631,7 +632,7 @@ class line_details
 	var $qty_old = 0;
 
 
-	function line_details ($stock_id, $qty, $prc, $ppd, $disc_percent,
+	function line_details ($stock_id, $qty, $prc, $ppd, $disc_percent, $now_or_never,
 		$qty_done, $standard_cost, $description, $id=0, $src_no=0, $src_id=0)
 	{
 	/* Constructor function to add a new LineDetail object with passed params */
@@ -660,6 +661,7 @@ class line_details
 		$this->price = $prc;
 		$this->ppd = $ppd;
 		$this->discount_percent = $disc_percent;
+		$this->now_or_never = $now_or_never;
 		$this->qty_done = $qty_done;
 		$this->standard_cost = $standard_cost;
 		$this->valid = true;

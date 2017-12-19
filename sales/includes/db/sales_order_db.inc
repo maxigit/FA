@@ -77,13 +77,14 @@ function add_sales_order(&$order)
 		if ($loc_notification == 1 && is_inventory_item($line->stock_id))
 			$loc = calculate_reorder_level($order->Location, $line, $st_ids, $st_names, $st_num, $st_reorder); 
 
-		$sql = "INSERT INTO ".TB_PREF."sales_order_details (order_no, trans_type, stk_code, description, unit_price, ppd, quantity, discount_percent) VALUES (";
+		$sql = "INSERT INTO ".TB_PREF."sales_order_details (order_no, trans_type, stk_code, description, unit_price, ppd, quantity, discount_percent, now_or_never) VALUES (";
 		$sql .= $order_no . ",".$order->trans_type .
 				",".db_escape($line->stock_id).", "
 				.db_escape($line->item_description).", $line->price, $line->ppd,
 				$line->quantity,
-				$line->discount_percent)";
-		$result = db_query($sql, "order Details Cannot be Added");
+				$line->discount_percent,
+                $line->now_or_never)";
+        $result = db_query($sql, "order Details Cannot be Added");
 
 	// Now mark quotation line as processed
 		if ($order->trans_type == ST_SALESORDER && $line->src_id)
@@ -293,7 +294,7 @@ function get_sales_order_details($order_no, $trans_type) {
 	$sql = "SELECT id, stk_code, unit_price, ppd, "
 		.TB_PREF."sales_order_details.description,"
 		.TB_PREF."sales_order_details.quantity,
-		  discount_percent,
+		  discount_percent, now_or_never
 		  qty_sent as qty_done, "
 		.TB_PREF."stock_master.units,"
 		.TB_PREF."stock_master.mb_flag,"
@@ -349,7 +350,7 @@ function read_sales_order($order_no, &$order, $trans_type)
 		{
             // display_error($myrow);
 			$order->add_to_cart($line_no,$myrow["stk_code"],$myrow["quantity"],
-				$myrow["unit_price"], $myrow["ppd"], $myrow["discount_percent"],
+				$myrow["unit_price"], $myrow["ppd"], $myrow["discount_percent"], $myrow['nor_or_never'],
 				$myrow["qty_done"], $myrow["standard_cost"], $myrow["description"], $myrow["id"] );
 		$line_no++;
 		}

@@ -19,7 +19,7 @@ function ppd_for($stock_id, $order) {
     return 0;
 }
 //--------------------------------------------------------------------------------
-function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $description='')
+function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $now_or_never, $description='')
 {
 	// calculate item price to sum of kit element prices factor for 
 	// value distribution over all exploded kit items
@@ -53,7 +53,7 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 	 if (!$item['is_foreign'] && $item['item_code'] != $item['stock_id'])
 	 {	// this is sales kit - recurse 
 		add_to_order($order, $item['stock_id'], $new_item_qty*$item['quantity'],
-                     $item_price, $discount);
+                     $item_price, $discount, $now_or_never);
 	 }
 	 else
 	 {	// stock item record eventually with foreign code
@@ -70,7 +70,7 @@ function add_to_order(&$order, $new_item, $new_item_qty, $price, $discount, $des
 		}
         $ppd = ppd_for($item['stock_id'], $order);
 		$order->add_to_cart (count($order->line_items),	$item['stock_id'], 
-                             $new_item_qty*$item['quantity'], $item_price, $ppd, $discount, 0,0, $description);
+                             $new_item_qty*$item['quantity'], $item_price, $ppd, $discount,$now_or_never, 0,0, $description);
 	 }
 	}
 }
@@ -153,7 +153,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 	start_table(TABLESTYLE, "colspan=7 width=90%");
 	$th = array(_("Item Code"), _("Item Description"), _("Quantity"),
 		_("Delivered"),
-		_("Unit"), $order->tax_included ? _("Price after Tax") : _("Price before Tax"),
+                _("Unit"), "Now Or Never", $order->tax_included ? _("Price after Tax") : _("Price before Tax"),
                 _("PPD Price"),
         _("Discount %"), _("Total"), "");
 
@@ -263,6 +263,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 				qty_cell($stock_item->qty_done, false, $dec);
 
 			label_cell($stock_item->units);
+            label_cell($stock_item->now_or_never ? "Now Or Never" : "Happy To Wait");
 			amount_cell($stock_item->price);
 			amount_ppd_cell($stock_item->ppd,$stock_item->price);
 
@@ -601,6 +602,8 @@ function sales_order_item_controls(&$order, &$rowcounter, $line_no=-1)
 //			sales_items_list_cells(null,'item_description', null, false, true);
 //		}
 		//label_cell($order->line_items[$line_no]->item_description, "nowrap");
+
+        $_POST['now_or_never_detail'] = $order->line_items[$id]->now_or_never;
 	    $Ajax->activate('items_table');
 	}
 	else	// prepare new line
@@ -623,6 +626,7 @@ function sales_order_item_controls(&$order, &$rowcounter, $line_no=-1)
 		$_POST['price'] = price_format($price);
 		// default to the customer's discount %
 		$_POST['Disc'] = percent_format($order->default_discount * 100);
+        $_POST['now_or_never_detail'] = $_POST['now_or_never'];
 	}
 
 	qty_cells(null, 'qty', $_POST['qty'], null, null, $dec);
@@ -632,6 +636,7 @@ function sales_order_item_controls(&$order, &$rowcounter, $line_no=-1)
 	}
 
 	label_cell($units, '', 'units');
+    yesno_list_cells(NULL, 'now_or_never_detail', $now_or_never, "Now Or Never", "Happy To Wait");
 
 	amount_cells(null, 'price');
 	label_cells("","");

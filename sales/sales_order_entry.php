@@ -595,7 +595,8 @@ function handle_new_item()
 			return;
 	}
 	add_to_order($_SESSION['Items'], get_post('stock_id'), input_num('qty'),
-		input_num('price'), input_num('Disc') / 100, get_post('stock_id_text'));
+                 input_num('price'), input_num('Disc') / 100, get_post('now_or_never_detail'),
+                 get_post('stock_id_text'));
 
 	unset($_POST['_stock_id_edit'], $_POST['stock_id']);
 	page_modified();
