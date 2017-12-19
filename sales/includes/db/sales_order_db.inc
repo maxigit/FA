@@ -208,7 +208,8 @@ function update_sales_order($order)
 								unit_price = ".db_escape($line->price) . ",
 								ppd = ".db_escape($line->ppd) . ",
 								quantity = ".db_escape($line->quantity) . ",
-								discount_percent = ".db_escape($line->discount_percent) . "
+								discount_percent = ".db_escape($line->discount_percent) . ",
+								now_or_never = ".db_escape($line->now_or_never) . ",
 						WHERE id = {$line->id}";
 		}
 		else {
@@ -291,10 +292,11 @@ function get_sales_order_header($order_no, $trans_type)
 //----------------------------------------------------------------------------------------
 
 function get_sales_order_details($order_no, $trans_type) {
+
 	$sql = "SELECT id, stk_code, unit_price, ppd, "
 		.TB_PREF."sales_order_details.description,"
 		.TB_PREF."sales_order_details.quantity,
-		  discount_percent, now_or_never
+		  discount_percent, now_or_never,
 		  qty_sent as qty_done, "
 		.TB_PREF."stock_master.units,"
 		.TB_PREF."stock_master.mb_flag,"
@@ -350,7 +352,7 @@ function read_sales_order($order_no, &$order, $trans_type)
 		{
             // display_error($myrow);
 			$order->add_to_cart($line_no,$myrow["stk_code"],$myrow["quantity"],
-				$myrow["unit_price"], $myrow["ppd"], $myrow["discount_percent"], $myrow['nor_or_never'],
+				$myrow["unit_price"], $myrow["ppd"], $myrow["discount_percent"], $myrow['now_or_never'],
 				$myrow["qty_done"], $myrow["standard_cost"], $myrow["description"], $myrow["id"] );
 		$line_no++;
 		}

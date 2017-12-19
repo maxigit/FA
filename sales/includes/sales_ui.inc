@@ -53,4 +53,7 @@ function check_edit_conflicts($cartname='Items')
 	}
 }
 
+function now_or_never_cell($now_or_never) {
+    label_cell($now_or_never ? "<span class='redfg'>Now or never</span>": "Happy to wait");
+}
 ?>

@@ -263,7 +263,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 				qty_cell($stock_item->qty_done, false, $dec);
 
 			label_cell($stock_item->units);
-            label_cell($stock_item->now_or_never ? "Now Or Never" : "HTW");
+            now_or_never_cell($stock_item->now_or_never);
 			amount_cell($stock_item->price);
 			amount_ppd_cell($stock_item->ppd,$stock_item->price);
 
@@ -343,6 +343,7 @@ function display_order_header(&$order, $editable, $date_text)
 	
 	$customer_error = "";
 	$change_prices = 0;
+	$change_now_or_never = 0;
 
 	if (isset($order) && !$editable)
 	{
@@ -445,7 +446,6 @@ function display_order_header(&$order, $editable, $date_text)
                 if($old_order->now_or_never_list_row != $order->now_or_never) {
                     $_POST['now_or_never'] = $order->now_or_never;
 				    $Ajax->activate('now_or_never');
-                    
                 }
 				unset($old_order);
 			}
@@ -500,7 +500,7 @@ function display_order_header(&$order, $editable, $date_text)
 
 	if($editable) {
 		$str = sales_types_list_row(_("Price List:"), 'sales_type', null, true);
-        now_or_never_list_row(_("Now or Never:"), 'now_or_never');
+        now_or_never_list_row(_("Now or Never:"), 'now_or_never', true);
 	} else {
 		label_row(_("Price List:"), $order->sales_type_name);
 	}
@@ -511,6 +511,13 @@ function display_order_header(&$order, $editable, $date_text)
 		$Ajax->activate('sales_type');
 		$change_prices = 1;
 	}
+
+	if ($order->now_or_never !== $_POST['now_or_never'] && isset($_POST['_now_or_never_update'])) {
+		$order->now_or_never = $_POST['now_or_never'];
+		$Ajax->activate('now_or_never');
+		$change_now_or_never = 1;
+	}
+
 
 	table_section(4);
 
@@ -568,6 +575,13 @@ function display_order_header(&$order, $editable, $date_text)
 		}
 	    $Ajax->activate('items_table');
 	}
+    if($change_now_or_never) {
+        foreach ($order->line_items as $line_no=>$item) {
+            $line = &$order->line_items[$line_no];
+            $line->now_or_never = $order->now_or_never;
+        }
+        $Ajax->activate('items_table');
+    }
 
 	return $customer_error;
 }

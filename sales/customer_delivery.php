@@ -455,7 +455,7 @@ start_table(TABLESTYLE, "width=80%");
 
 $new = $_SESSION['Items']->trans_no==0;
 $th = array(_("Item Code"), _("Item Description"), 
-	$new ? _("Ordered") : _("Max. delivery"), _("Units"), $new ? _("Delivered") : _("Invoiced"),
+            $new ? _("Ordered") : _("Max. delivery"), _("Units"), _("Now or never"), $new ? _("Delivered") : _("Invoiced"),
             _("This Delivery"), _("Price"), _("PPD Price"), _("Tax Type"), _("Discount"), _("Total"));
 
 table_header($th);
@@ -500,6 +500,7 @@ foreach ($_SESSION['Items']->line_items as $line=>$ln_itm) {
 	$dec = get_qty_dec($ln_itm->stock_id);
 	qty_cell($ln_itm->quantity, false, $dec);
 	label_cell($ln_itm->units);
+    now_or_never_cell($ln_itm->now_or_never);
 	qty_cell($ln_itm->qty_done, false, $dec);
 
 	if(isset($_POST['clear_quantity'])) {

@@ -198,7 +198,7 @@ if ($_SESSION['View']->so_type == 1)
 display_heading2(_("Line Details"));
 
 start_table(TABLESTYLE, "colspan=9 width=95%");
-$th = array(_("Item Code"), _("Item Description"), _("Quantity"), _("Unit"),
+$th = array(_("Item Code"), _("Item Description"), _("Quantity"), _("Unit"), _("Now Or Never"),
             _("Price"), _("PPD"), _("Discount"), _("Total"), _("Quantity Delivered"));
 table_header($th);
 
@@ -216,6 +216,7 @@ foreach ($_SESSION['View']->line_items as $stock_item) {
 	$dec = get_qty_dec($stock_item->stock_id);
 	qty_cell($stock_item->quantity, false, $dec);
 	label_cell($stock_item->units);
+	now_or_never_cell($stock_item->now_or_never);
 	amount_cell($stock_item->price);
 	amount_ppd_cell($stock_item->ppd, $stock_item->price);
 	amount_cell($stock_item->discount_percent * 100);
