@@ -2156,6 +2156,9 @@ function record_status_list_row($label, $name) {
 	return yesno_list_row($label, $name, null, 	_('Inactive'), _('Active'));
 }
 
+function now_or_never_list_row($label, $name) {
+	return yesno_list_row($label, $name, null, 	_('Now Or Never'), _('Happy To Wait'));
+}
 function class_types_list_row($label, $name, $selected_id=null, $submit_on_change=false)
 {
 	global $class_types;

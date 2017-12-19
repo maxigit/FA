@@ -89,7 +89,7 @@ function handle_submit(&$selected_id)
         update_customer($_POST['customer_id'], $_POST['CustName'], $_POST['cust_ref'], $_POST['address'],
             $_POST['tax_id'], $_POST['curr_code'], $_POST['dimension_id'], $_POST['dimension2_id'],
             $_POST['credit_status'], $_POST['payment_terms'], input_num('discount') / 100, input_num('pymt_discount') / 100,
-            input_num('credit_limit'), $_POST['sales_type'], $_POST['notes']);
+                        input_num('credit_limit'), $_POST['sales_type'], $_POST['notes'], $_POST['now_or_never']);
 
         update_record_status($_POST['customer_id'], $_POST['inactive'],
             'debtors_master', 'debtor_no');
@@ -223,6 +223,7 @@ function customer_settings($selected_id)
         $_POST['credit_limit']	= price_format($myrow["credit_limit"]);
         $_POST['notes']  = $myrow["notes"];
         $_POST['inactive'] = $myrow["inactive"];
+        $_POST['now_or_never'] = $myrow["now_or_never"];
     }
 
     start_outer_table(TABLESTYLE2);
@@ -247,8 +248,10 @@ function customer_settings($selected_id)
     }
     sales_types_list_row(_("Sales Type/Price List:"), 'sales_type', $_POST['sales_type']);
 
-    if($selected_id)
+    if($selected_id) {
         record_status_list_row(_("Customer status:"), 'inactive');
+        now_or_never_list_row(_("Now or Never:"), 'now_or_never');
+    }
     elseif (isset($auto_create_branch) && $auto_create_branch == 1)
     {
         table_section_title(_("Branch"));
