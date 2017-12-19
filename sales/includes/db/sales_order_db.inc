@@ -209,7 +209,7 @@ function update_sales_order($order)
 								ppd = ".db_escape($line->ppd) . ",
 								quantity = ".db_escape($line->quantity) . ",
 								discount_percent = ".db_escape($line->discount_percent) . ",
-								now_or_never = ".db_escape($line->now_or_never) . ",
+								now_or_never = ".db_escape($line->now_or_never) . "
 						WHERE id = {$line->id}";
 		}
 		else {

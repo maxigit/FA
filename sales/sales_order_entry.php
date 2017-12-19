@@ -343,6 +343,9 @@ function copy_from_cart()
 	}
 	$_POST['cart_id'] = $cart->cart_id;
 	$_POST['_ex_rate'] = $cart->ex_rate;
+
+	$myrow = get_customer_to_order($cart->customer_id);
+    $_POST['now_or_never'] = $myrow['now_or_never'];
 }
 //--------------------------------------------------------------------------------
 
