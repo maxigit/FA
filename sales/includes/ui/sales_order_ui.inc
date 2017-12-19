@@ -263,7 +263,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 				qty_cell($stock_item->qty_done, false, $dec);
 
 			label_cell($stock_item->units);
-            label_cell($stock_item->now_or_never ? "Now Or Never" : "Happy To Wait");
+            label_cell($stock_item->now_or_never ? "Now Or Never" : "HTW");
 			amount_cell($stock_item->price);
 			amount_ppd_cell($stock_item->ppd,$stock_item->price);
 

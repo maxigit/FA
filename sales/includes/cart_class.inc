@@ -375,7 +375,7 @@ class cart
 	function add_to_cart($line_no, $stock_id, $qty, $price, $ppd, $disc, $now_or_never, $qty_done=0, $standard_cost=0, $description=null, $id=0, $src_no=0,
 		$src_id=0)
 	{
-		$line = new line_details($stock_id, $qty, $price, $ppd, $disc,
+		$line = new line_details($stock_id, $qty, $price, $ppd, $disc, $now_or_never,
 			$qty_done,  $standard_cost, $description, $id, $src_no, $src_id);
 
 		if ($line->valid) {
@@ -386,7 +386,7 @@ class cart
 		return 0;
 	}
 
-	function update_cart_item($line_no, $qty, $price, $disc, $description="")
+	function update_cart_item($line_no, $qty, $price, $disc, $now_or_never, $description="")
 	{
 		if ($description != "")
 			$this->line_items[$line_no]->item_description = $description;
@@ -394,6 +394,7 @@ class cart
 		$this->line_items[$line_no]->qty_dispatched = $qty;
 		$this->line_items[$line_no]->price = $price;
 		$this->line_items[$line_no]->discount_percent = $disc;
+		$this->line_items[$line_no]->now_or_never = $now_or_never;
 	}
 
 	function update_add_cart_item_qty($line_no, $qty)
