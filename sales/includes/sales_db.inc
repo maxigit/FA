@@ -302,6 +302,7 @@ function read_sales_trans($doc_type, $trans_no, &$cart)
 				$cart->line_items[$line_no] = new line_details(
 					$myrow["stock_id"],$myrow["quantity"],
 					$myrow["unit_price"], $myrow["ppd"], $myrow["discount_percent"],
+                    0, // now or never : not relevant so far
 					$myrow["qty_done"], $myrow["standard_cost"],
 					$myrow["StockDescription"],$myrow["id"], $myrow["debtor_trans_no"],
 					@$myrow["src_id"]);
