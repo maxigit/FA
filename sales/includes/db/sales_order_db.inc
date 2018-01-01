@@ -14,8 +14,9 @@ function check_ppd(&$order) {
     if($order->ppd === null) {
         if($order->sales_type) {
             $myrow = get_sales_type($order->sales_type);
+            $now_or_never = 0; //TODO
             $order->set_sales_type($myrow['id'], $myrow['sales_type'],
-                                   $myrow['tax_included'], $myrow['factor'], $myrow['ppd'], $myrow['ppd_days']);
+                                   $myrow['tax_included'], $myrow['factor'], $myrow['ppd'], $myrow['ppd_days'], $now_or_never);
         }
         else
             display_error("Sales type no test");
@@ -327,8 +328,10 @@ function read_sales_order($order_no, &$order, $trans_type)
 	$order->set_branch($myrow["branch_code"], $myrow["tax_group_id"],
 	  $myrow["tax_group_name"], $myrow["contact_phone"]);
 
+    $now_or_never = 0; //TODO
 	$order->set_sales_type($myrow["sales_type_id"], $myrow["sales_type"], 
-                           $myrow["tax_included"], $myrow["factor"], $myrow['ppd'], $myrow['ppd_days']); // no default price calculations on edit
+                           $myrow["tax_included"], $myrow["factor"], $myrow['ppd'], $myrow['ppd_days']
+                           , $now_or_never); // no default price calculations on edit
 
 	$order->set_location($myrow["from_stk_loc"], $myrow["location_name"]);
 

@@ -103,8 +103,10 @@ function display_credit_header(&$order)
 	
 	if ($order->sales_type != $_POST['sales_type_id']) {
 		$myrow = get_sales_type($_POST['sales_type_id']);
+        $now_or_never = 0; $ppd=0; $ppd_days=NULL; //TODO
 		$order->set_sales_type($myrow['id'], $myrow['sales_type'],
-		$myrow['tax_included'], $myrow['factor']);
+                               $myrow['tax_included'], $myrow['factor'],
+                               $ppd, $ppd_days, $now_or_never);
 		$Ajax->activate('sales_type_id');
 		$change_prices = 1;
 	}
