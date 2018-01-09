@@ -418,14 +418,14 @@ and converts to a yyyy/mm/dd format */
 	return sprintf("%04d-%02d-%02d", $year, $month, $day);
 }// end of function
 
-function span_date($i, $el) {
+function span_brewer($i, $el) {
     $sel = $el % 12;
     return "<span class='date-$i-$sel brewer-$sel'>$el</span>";
 }
 
 function date2color($date) {
     $elements = explode('/',$date);
-    return implode('/', array_map(span_date, array_keys($elements), $elements));
+    return implode('/', array_map(span_brewer, array_keys($elements), $elements));
     
 }
 
