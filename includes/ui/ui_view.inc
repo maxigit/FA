@@ -11,6 +11,7 @@
 ***********************************************************************/
 include_once($path_to_root . "/admin/db/voiding_db.inc");
 include_once($path_to_root . "/includes/types.inc");
+include_once($path_to_root . "/includes/ui/db_pager_view.inc");
 
 //--------------------------------------------------------------------------------------
 
@@ -562,12 +563,17 @@ function display_allocations($alloc_result, $total, $payments=false)
     start_table(TABLESTYLE, "width=80%");
 
     $th = array( _("Type"), _("Number"), _("Reference"), _("Date"), _("Total Amount"),
-    	_("Left to Allocate"), _("This Allocation")); table_header($th);
+                 _("Left to Allocate"), _("This Allocation"), "");
+    table_header($th);
     $k = $total_allocated = 0;
 
     while ($alloc_row = db_fetch($alloc_result))
     {
     	alt_table_row_color($k);
+        $row=print_r($alloc_row, TRUE);
+
+        display_warning($row);
+
 
     	label_cell($systypes_array[$alloc_row['type']]);
     	label_cell(get_trans_view_str($alloc_row['type'],$alloc_row['trans_no']));
@@ -586,9 +592,23 @@ function display_allocations($alloc_result, $total, $payments=false)
     	amount_cell($alloc_row['Total']);
    		amount_cell($alloc_row['Total'] - $alloc_row['amt']);
     	amount_cell($alloc_row['amt']);
-    	end_row();
 
     	$total_allocated += $alloc_row['amt'];
+
+        /// allocate link
+        $link = "";
+        if($alloc_row['type'] == ST_SUPPAYMENT
+           || $alloc_row['type'] == ST_SUPPCREDIT
+          ) {
+            $link = alloc_supplier_link($alloc_row);
+        } elseif($alloc_row['type'] == ST_CUSTPAYMENT
+               || $alloc_row['type'] == ST_CUSTCREDIT
+        ) {
+            $link = alloc_customer_link($alloc_row);
+        
+        }
+        label_cell($link);
+    	end_row();
     }
     start_row();
    	label_cell(_("Total Allocated:"), "align=right colspan=5");
@@ -603,6 +623,19 @@ function display_allocations($alloc_result, $total, $payments=false)
     end_table(1);
 }
 
+function alloc_supplier_link($row)
+{
+	pager_link(_("Allocate"),
+                      "/purchasing/allocations/supplier_allocate.php?trans_no="
+                      .$row["trans_no"] . "&trans_type=" . $row["type"], ICON_ALLOC);
+}
+
+function alloc_customer_link($row)
+{
+	return pager_link(_("Allocate"),
+                      "/sales/allocations/customer_allocate.php?trans_no="
+                      .$row["trans_no"] . "&trans_type=" . $row["type"]. "&debtor_no=" . $row["debtor_no"], ICON_ALLOC);
+}
 //--------------------------------------------------------------------------------------
 
 function display_allocations_from($person_type, $person_id, $type, $type_no, $total)
