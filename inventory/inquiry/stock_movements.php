@@ -139,7 +139,7 @@ while ($myrow = db_fetch($result))
 	if($display_location) {
 		label_cell($myrow['loc_code']);
 	}
-	label_cell($trandate);
+	label_cell(date2color($trandate));
 
 	$person = $myrow["person_id"];
 	$gl_posting = "";
