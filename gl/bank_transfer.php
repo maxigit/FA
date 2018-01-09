@@ -39,6 +39,10 @@ if (isset($_GET['AddedID']))
    	display_notification_centered( _("Transfer has been entered"));
 
 	display_note(get_gl_view_str($trans_type, $trans_no, _("&View the GL Journal Entries for this Transfer")));
+	submenu_option(_("Enter Another &Customer Payment"), "/sales/customer_payments.php");
+	submenu_option(_("Enter Other &Deposit"), "/gl/gl_bank.php?NewDeposit=Yes");
+	submenu_option(_("Enter Payment to &Supplier"), "/purchasing/supplier_payment.php");
+	submenu_option(_("Enter Other &Payment"), "/gl/gl_bank.php?NewPayment=Yes");
 
    	hyperlink_no_params($_SERVER['PHP_SELF'], _("Enter &Another Transfer"));
 
