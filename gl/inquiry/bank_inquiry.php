@@ -101,7 +101,7 @@ while ($myrow = db_fetch($result))
 	label_cell(get_trans_view_str($myrow["type"],$myrow["trans_no"],$myrow['ref']));
 	label_cell($trandate);
 	display_debit_or_credit_cells($myrow["amount"]);
-	amount_cell($running_total);
+	amount_cell_color($running_total);
 	label_cell(payment_person_name($myrow["person_type_id"],$myrow["person_id"]));
 	label_cell(get_comments_string($myrow["type"], $myrow["trans_no"]));
 	label_cell(get_gl_view_str($myrow["type"], $myrow["trans_no"]));

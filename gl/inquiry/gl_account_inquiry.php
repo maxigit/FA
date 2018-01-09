@@ -197,7 +197,7 @@ function show_results()
 		label_cell(payment_person_name($myrow["person_type_id"],$myrow["person_id"]));
 		display_debit_or_credit_cells($myrow["amount"]);
 		if ($show_balances)
-		    amount_cell($running_total);
+		    amount_cell_color($running_total);
 		if ($myrow['memo_'] == "")
 			$myrow['memo_'] = get_comments_string($myrow['type'], $myrow['type_no']);
     	label_cell($myrow['memo_']);

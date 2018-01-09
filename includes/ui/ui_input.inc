@@ -435,6 +435,22 @@ function amount_cell($label, $bold=false, $params="", $id=null)
 		label_cell(price_format($label), "nowrap align=right ".$params, $id);
 }
 
+function amount_cell_color($label, $bold=fase, $params="", $id=null) {
+    $str = $label . " :" . floatcmp($label,0);
+    $cmp = floatcmp($label, 0);
+    if ($cmp == 0) {
+        $p = " null_balance";
+        
+                } elseif($cmp >0) {
+        $p = " pos_balance";
+                } else  {
+        
+        $p = " neg_balance";
+    }
+    amount_cell($label, False, "class='$p' $params",$id);
+    
+}
+
 function amount_ppd_cell($ppd, $price, $bold=false, $params="", $id=null)
 {
     $label = $price*(1-$ppd);

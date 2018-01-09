@@ -17,7 +17,7 @@
 \--------------------------------------------------*/
 
 body {
-  background-color: #eee;
+  background-color: #fee;
   background-image: url(images/body_bg.png);
   background-repeat: repeat-x;
   margin: 0;
@@ -151,7 +151,7 @@ a:visited {
 /* Body */
 .fa-body {
   width: 100%;
-  background-color: #fff;
+  background-color: #fee;
   background-image: url(images/content_bg.png);
   background-repeat: repeat-x;
   float: left;
@@ -852,4 +852,19 @@ div.note_msg {
 .on_stocki_dispatched * {
 	color: #888;
 	//background-color: #ccc;
+}
+
+.neg_balance {
+    background: #fdc;
+    /* color: orange; */
+}
+
+.null_balance {
+    background: #cfc;
+    color: green;
+}
+
+.pos_balance {
+		background: #def;
+		color: blue;
 }
