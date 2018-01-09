@@ -354,3 +354,13 @@ function element_pos(e) {
 	if (parentNode != document.documentElement) return null;
 	return res;
 }
+
+
+// copy the balance value to the amount cell
+function copy_bal_amount(balance) {
+    // try target amount First which should be in account
+    // in the current bank currency
+    var input = $(".amount[name='target_amount']");
+    if(input.length == 0) {input = $(".amount[name='amount']");}
+    input.val(0+balance);
+}
