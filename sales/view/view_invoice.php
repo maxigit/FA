@@ -180,7 +180,7 @@ $voided = is_voided_display(ST_SALESINVOICE, $trans_id, _("This invoice has been
 
 if (!$voided)
 {
-	// display_allocations_to(PT_CUSTOMER, $myrow['debtor_no'], ST_SALESINVOICE, $trans_id, $myrow['Total']);
+	display_allocations_to(PT_CUSTOMER, $myrow['debtor_no'], ST_SALESINVOICE, $trans_id, $myrow['Total']);
 }
 
 end_page(true, false, false, ST_SALESINVOICE, $trans_id);

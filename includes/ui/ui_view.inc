@@ -561,23 +561,28 @@ function display_allocations($alloc_result, $total, $payments=false)
 
     start_table(TABLESTYLE, "width=80%");
 
-    $th = array( _("Type"), _("Number"), _("Date"), _("Total Amount"),
-    	_("Left to Allocate"), _("This Allocation"));
-	table_header($th);
+    $th = array( _("Type"), _("Number"), _("Reference"), _("Date"), _("Total Amount"),
+    	_("Left to Allocate"), _("This Allocation")); table_header($th);
     $k = $total_allocated = 0;
 
     while ($alloc_row = db_fetch($alloc_result))
     {
-
     	alt_table_row_color($k);
 
     	label_cell($systypes_array[$alloc_row['type']]);
     	label_cell(get_trans_view_str($alloc_row['type'],$alloc_row['trans_no']));
+        label_cell($alloc_row['reference']);
     	label_cell(sql2date($alloc_row['tran_date']));
     	$alloc_row['Total'] = round2($alloc_row['Total'], user_price_dec());
     	$alloc_row['amt'] = round2($alloc_row['amt'], user_price_dec());
-    	if ($payments && ($alloc_row['type'] == ST_SUPPAYMENT || $alloc_row['type'] == ST_BANKPAYMENT || $alloc_row['type'] == ST_SUPPCREDIT))
-    		$alloc_row['Total'] = -$alloc_row['Total'];
+    	if($payments)
+        {
+            
+            if( $alloc_row['type'] == ST_SUPPAYMENT
+              || $alloc_row['type'] == ST_BANKPAYMENT
+              || $alloc_row['type'] == ST_SUPPCREDIT
+            ) $alloc_row['Total'] = -$alloc_row['Total'];
+        }
     	amount_cell($alloc_row['Total']);
    		amount_cell($alloc_row['Total'] - $alloc_row['amt']);
     	amount_cell($alloc_row['amt']);

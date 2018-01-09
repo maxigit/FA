@@ -119,7 +119,9 @@ function get_alloc_supp_sql($extra_fields=null, $extra_conditions=null, $extra_t
 	$sql = "SELECT
 		trans.type,
 		trans.trans_no,
-		IF(trans.supp_reference='',trans.reference,trans.supp_reference) as reference,
+    concat(trans.reference
+          , if(supp_reference IS NULL or supp_reference = '', '', ' - ')
+          , coalesce(supp_reference, '')) as reference,
  		trans.tran_date,
 		supplier.supp_name, 
 		supplier.curr_code, 
