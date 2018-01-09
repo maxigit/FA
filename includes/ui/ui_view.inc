@@ -570,10 +570,6 @@ function display_allocations($alloc_result, $total, $payments=false)
     while ($alloc_row = db_fetch($alloc_result))
     {
     	alt_table_row_color($k);
-        $row=print_r($alloc_row, TRUE);
-
-        display_warning($row);
-
 
     	label_cell($systypes_array[$alloc_row['type']]);
     	label_cell(get_trans_view_str($alloc_row['type'],$alloc_row['trans_no']));
