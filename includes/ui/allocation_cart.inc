@@ -333,7 +333,7 @@ function show_allocatable($show_totals) {
                     $due_colour = "black";
                 }
                 else $due_colour = "blue";
-    			label_cell($alloc_item->date_, "align=right");
+    			label_cell(date2color($alloc_item->date_), "align=right");
     			label_cell($alloc_item->due_date, "align=right style=\"color:$due_colour\"");
 	    		amount_cell(abs($alloc_item->amount));
 	    		amount_cell(abs($ppd_total));
