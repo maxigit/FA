@@ -149,7 +149,8 @@ function show_results()
 	$th = array_merge($first_cols, $account_col, $dim_cols, $remaining_cols);
 			
 	table_header($th);
-	if ($_POST["account"] != null && is_account_balancesheet($_POST["account"]))
+    // We want the balance to always shows up from the beginning of time.
+	if (TRUE ||  $_POST["account"] != null && is_account_balancesheet($_POST["account"]))
 		$begin = "";
 	else
 	{
