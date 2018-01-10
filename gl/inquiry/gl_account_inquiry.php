@@ -72,6 +72,7 @@ function gl_inquiry_controls()
     gl_all_accounts_list_cells(_("Account:"), 'account', null, false, false, _("All Accounts"));
 	date_cells(_("from:"), 'TransFromDate', '', null, -30);
 	date_cells(_("to:"), 'TransToDate');
+    amount_cells(_("Balance Offset:"), 'balance_offset', null, "0");
     end_row();
 	end_table();
 
@@ -169,9 +170,12 @@ function show_results()
     	label_cell("");
     	label_cell("");
     	end_row();
+
 	}
+
+    $balance_offset = input_num('balance_offset');
 	
-	$running_total = $bfw;
+	$running_total = $bfw + $balance_offset;
 	$j = 1;
 	$k = 0; //row colour counter
 
