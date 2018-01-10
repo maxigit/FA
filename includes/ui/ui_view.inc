@@ -621,7 +621,7 @@ function display_allocations($alloc_result, $total, $payments=false)
 
 function alloc_supplier_link($row)
 {
-	pager_link(_("Allocate"),
+	return pager_link(_("Allocate"),
                       "/purchasing/allocations/supplier_allocate.php?trans_no="
                       .$row["trans_no"] . "&trans_type=" . $row["type"], ICON_ALLOC);
 }
