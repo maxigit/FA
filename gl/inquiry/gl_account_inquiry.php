@@ -189,7 +189,7 @@ function show_results()
     	$trandate = date2color(sql2date($myrow["tran_date"]));
 
     	label_cell(systype_name(null, ($myrow["type"])));
-		label_cell(get_gl_view_str($myrow["type"], $myrow["type_no"], $myrow["type_no"], true));
+		label_cell(get_gl_view_str($myrow["type"], $myrow["type_no"],  span_brewer(0, $myrow["type_no"]),true));
     	label_cell($trandate);
     	
     	if ($_POST["account"] == null)
