@@ -417,9 +417,10 @@ and converts to a yyyy/mm/dd format */
 
 	return sprintf("%04d-%02d-%02d", $year, $month, $day);
 }// end of function
-
-function span_brewer($i, $el) {
-    $sel = $el % 12;
+ 
+function span_brewer($i, $sel, $el=NULL) {
+    if(is_null($el)) $el = $sel;
+    $sel = $sel % 12;
     return "<span class='date-$i-$sel brewer-$sel'>$el</span>";
 }
 
@@ -429,6 +430,11 @@ function date2color($date) {
     
 }
 
+function systype_name($dummy, $type)
+{
+	global $systypes_array;
+	return span_brewer(0, $type, $systypes_array[$type]);
+}
 function date1_greater_date2 ($date1, $date2) 
 {
 

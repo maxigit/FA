@@ -188,7 +188,7 @@ function show_results()
 
     	$trandate = date2color(sql2date($myrow["tran_date"]));
 
-    	label_cell($systypes_array[$myrow["type"]]);
+    	label_cell(systype_name(null, ($myrow["type"])));
 		label_cell(get_gl_view_str($myrow["type"], $myrow["type_no"], $myrow["type_no"], true));
     	label_cell($trandate);
     	

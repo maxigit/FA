@@ -320,7 +320,7 @@ function show_allocatable($show_totals) {
                     $ppd_amount_gst = $alloc_item->ppd_amount_gst ?: 0;
 	    		$ppd_total = $alloc_item->ppd_amount+$ppd_amount_gst ?: 0;
                 alt_table_row_color($k);
-    			label_cell($systypes_array[$alloc_item->type]);
+    			label_cell(systype_name(null, $alloc_item->type));
 	   			label_cell(get_trans_view_str($alloc_item->type, $alloc_item->type_no));
 		   		label_cell($alloc_item->ref);
                 if(date1_greater_date2($cart->date_, $alloc_item->due_date)) {

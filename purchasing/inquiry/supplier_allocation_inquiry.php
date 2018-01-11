@@ -67,12 +67,12 @@ function check_overdue($row)
 		$row['OverDue'] == 1;
 }
 
-function systype_name($dummy, $type)
-{
-	global $systypes_array;
+// function systype_name($dummy, $type)
+// {
+// 	global $systypes_array;
 	
-	return $systypes_array[$type];
-}
+// 	return $systypes_array[$type];
+// }
 
 function view_link($trans)
 {

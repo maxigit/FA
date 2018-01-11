@@ -131,7 +131,7 @@ while ($myrow = db_fetch($result))
 	}
 	$after_qty += $myrow["qty"];
 
-	label_cell($type_name);
+	label_cell(span_brewer(0,$myrow['type'],$type_name));
 
 	label_cell(get_trans_view_str($myrow["type"], $myrow["trans_no"]));
 

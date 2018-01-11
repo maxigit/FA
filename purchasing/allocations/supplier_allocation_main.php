@@ -53,12 +53,11 @@ start_form();
 		$supplier_id = $_POST['supplier_id'];
 
 //--------------------------------------------------------------------------------
-function systype_name($dummy, $type)
-{
-	global $systypes_array;
-
-	return $systypes_array[$type];
-}
+// function systype_name($dummy, $type)
+// {
+// 	global $systypes_array;
+// 	return span_brewer(0, $type, $systypes_array[$type]);
+// }
 
 function trans_view($trans)
 {

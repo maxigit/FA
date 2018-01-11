@@ -96,7 +96,7 @@ while ($myrow = db_fetch($result))
 	$running_total += $myrow["amount"];
 
 	$trandate = date2color(sql2date($myrow["trans_date"]));
-	label_cell($systypes_array[$myrow["type"]]);
+	label_cell(systype_name(null, $myrow["type"]));
 	label_cell(get_trans_view_str($myrow["type"],$myrow["trans_no"]));
 	label_cell(get_trans_view_str($myrow["type"],$myrow["trans_no"],$myrow['ref']));
 	label_cell($trandate);

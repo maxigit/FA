@@ -62,12 +62,12 @@ function journal_pos($row)
 	return $row['gl_seq'] ? $row['gl_seq'] : '-';
 }
 
-function systype_name($dummy, $type)
-{
-	global $systypes_array;
+// function systype_name($dummy, $type)
+// {
+// 	global $systypes_array;
 	
-	return $systypes_array[$type];
-}
+// 	return $systypes_array[$type];
+// }
 
 function view_link($row) 
 {
