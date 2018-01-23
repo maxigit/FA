@@ -87,10 +87,16 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
 		$total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
 			$discount_account, 0, 0, $discount-$vat_discount, $customer_id,
 			"Cannot insert a GL transaction for the payment discount debit");
-        $vat_discount_account =$vat_ppd_account; //TODO move in config or customer
+        // TODO everything is hardcoded, until we can do better
+        $vat_discount_account = 2200; //$vat_ppd_account; //TODO move in config or customer
+        $tax_discount_id = 1;
+        $tax_id = 1;
+        $tax_rate = 20;
 		$total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
                                         $vat_discount_account, 0, 0, $vat_discount, $customer_id,
                                         "Cannot insert a GL transaction for the payment discount debit");
+        add_trans_tax_details( ST_CUSTPAYMENT, $payment_no, $tax_id, $tax_rate, false
+                               , -$vat_discount, -$discount, 1, $date_, "PPD");
 	}
 
 	if ($charge != 0)	{
