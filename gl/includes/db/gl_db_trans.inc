@@ -478,26 +478,26 @@ function get_tax_summary($from, $to)
 
 	$sql = "SELECT 
 				SUM(IF(trans_type=".ST_CUSTCREDIT." || trans_type=".ST_SUPPINVOICE
-					." || trans_type=".ST_JOURNAL.",-1,1)*
+					." || trans_type=".ST_JOURNAL." || trans_type=".ST_CUSTPAYMENT.",-1,1)*
 				IF(trans_type=".ST_BANKDEPOSIT." || trans_type=".ST_SALESINVOICE 
 					." || (trans_type=".ST_JOURNAL ." AND amount<0)"
-					." || trans_type=".ST_CUSTCREDIT.", net_amount*ex_rate,0)) net_output,
+					." || trans_type=".ST_CUSTCREDIT." || trans_type=".ST_CUSTPAYMENT.", net_amount*ex_rate,0)) net_output,
 
 				SUM(IF(trans_type=".ST_CUSTCREDIT." || trans_type=".ST_SUPPINVOICE
-					." || trans_type=".ST_JOURNAL.",-1,1)*
+                 ." || trans_type=".ST_JOURNAL." || trans_type=".ST_CUSTPAYMENT.",-1,1)*
 				IF(trans_type=".ST_BANKDEPOSIT." || trans_type=".ST_SALESINVOICE
 					." || (trans_type=".ST_JOURNAL ." AND amount<0)"
-					." || trans_type=".ST_CUSTCREDIT.", amount*ex_rate,0)) payable,
+                    ." || trans_type=".ST_CUSTCREDIT." || trans_type=".ST_CUSTPAYMENT.", amount*ex_rate,0)) payable,
 
 				SUM(IF(trans_type=".ST_CUSTCREDIT." || trans_type=".ST_SUPPINVOICE." || trans_type=".ST_JOURNAL.",-1,1)*
 				IF(trans_type=".ST_BANKDEPOSIT." || trans_type=".ST_SALESINVOICE
 					." || (trans_type=".ST_JOURNAL ." AND amount<0)"
-					." || trans_type=".ST_CUSTCREDIT.", 0, net_amount*ex_rate)) net_input,
+                    ." || trans_type=".ST_CUSTCREDIT." || trans_type=".ST_CUSTPAYMENT.", 0, net_amount*ex_rate)) net_input,
 
 				SUM(IF(trans_type=".ST_CUSTCREDIT." || trans_type=".ST_SUPPINVOICE." || trans_type=".ST_JOURNAL.",-1,1)*
 				IF(trans_type=".ST_BANKDEPOSIT." || trans_type=".ST_SALESINVOICE
 					." || (trans_type=".ST_JOURNAL ." AND amount<0)"
-					." || trans_type=".ST_CUSTCREDIT.", 0, amount*ex_rate)) collectible,
+                    ." || trans_type=".ST_CUSTCREDIT." || trans_type=".ST_CUSTPAYMENT.", 0, amount*ex_rate)) collectible,
 				taxrec.rate,
 				ttype.id,
 				ttype.name
