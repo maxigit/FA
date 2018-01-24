@@ -351,7 +351,7 @@ start_form();
 	if (list_updated('customer_id') || ($new && list_updated('bank_account'))) {
 		$_SESSION['alloc']->set_person($_POST['customer_id'], PT_CUSTOMER);
 		$_SESSION['alloc']->read();
-		$_POST['memo_'] = $_POST['amount'] = $_POST['discount'] = '';
+		$_POST['memo_'] = $_POST['amount'] = $_POST['discount'] = ''; $_POST['vat_discount'] ='';
 		$Ajax->activate('alloc_tbl');
 	}
 
