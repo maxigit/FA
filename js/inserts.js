@@ -491,7 +491,10 @@ var inserts = {
 			    save_focus(this);
 			};
 		}
-	}
+	},
+    'select':function(e) {
+        $(e).chosen({'search_contains':true, allow_single_deselect:true});
+    }
 /*	'tr.editrow': function(e) {
 		  	e.onkeydown = function(ev) { 
 	  		ev = ev||window.event;
