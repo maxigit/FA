@@ -413,9 +413,10 @@ var inserts = {
 			};
 		}
   		var c = e.className;
-		if (c == 'combo' || c == 'combo2' || c == 'combo3')
+		  if (c == 'combo' || c == 'combo2' || c == 'combo3') {
+          
 			_set_combo_select(e);
-		else {
+      } else {
 			e.onkeydown = function(ev) {	// block unintentional page escape with 'history back' key pressed on buttons
 				ev = ev||window.event;
  				key = ev.keyCode||ev.which;
@@ -425,6 +426,9 @@ var inserts = {
   				}
 			}
 		}
+      // Chosen needs to be activated after the set_combo
+      // so that events are propagated properly
+    $(e).chosen({'search_contains':false, allow_single_deselect:true});
 	},
 	'a.printlink': 	function(l) {
 		l.onclick = function() {
@@ -492,9 +496,6 @@ var inserts = {
 			};
 		}
 	},
-    'select':function(e) {
-        $(e).chosen({'search_contains':true, allow_single_deselect:true});
-    }
 /*	'tr.editrow': function(e) {
 		  	e.onkeydown = function(ev) { 
 	  		ev = ev||window.event;
