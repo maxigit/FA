@@ -132,6 +132,7 @@ function page_header($title, $no_menu=false, $is_index=false, $onload="", $js=""
  	echo "<link href='$path_to_root/themes/default/images/favicon.ico' rel='icon' type='image/x-icon'> \n";
 	if ($css)
 		echo '<link href="'.$css.'" rel="stylesheet" type="text/css">';
+    echo "<script type='text/javascript' src='$path_to_root/js/jquery-3.3.1.min.js'></script>\n";
 
 	send_scripts();
 

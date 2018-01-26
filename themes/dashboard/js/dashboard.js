@@ -28,13 +28,13 @@ $(function(){
 		opacity: 0.4,
 		start: function(event, ui){
 			//Firefox, Safari/Chrome fire click event after drag is complete, fix for that
-			if($.browser.mozilla || $.browser.safari) 
-				$(ui.item).find('.dragbox-content').toggle();
+			// if($.browser.mozilla || $.browser.safari) 
+			// 	$(ui.item).find('.dragbox-content').toggle();
 		},
 		stop: function(event, ui){
 			ui.item.css({'top':'0','left':'0'}); //Opera fix
-			if(!$.browser.mozilla && !$.browser.safari)
-				updateWidgetData();
+			// if(!$.browser.mozilla && !$.browser.safari)
+			// 	updateWidgetData();
 		}
 	})
 	.disableSelection();
