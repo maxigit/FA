@@ -321,6 +321,11 @@ var inserts = {
 	  			}
 			}
 	},
+  'input.datepicker': function(e) {
+      // $(e).datepicker({numberOfMonths:[4,3], dateFormat:"yy/mm/dd", showCurrentAtPos:2, showButtonPanel:true, stepMonths:12});
+      $(e).datepicker({numberOfMonths:[2,3], dateFormat:"yy/mm/dd", showCurrentAtPos:1, showButtonPanel:true, stepMonths:6,changeMonth:true, changeYear:true,
+                       showOtherMonths:true, selectOtherMonths:true });
+  },
 	'input.combo2,input[aspect="fallback"]': 
 	function(e) {
   	    // this hides search button for js enabled browsers
@@ -413,9 +418,10 @@ var inserts = {
 			};
 		}
   		var c = e.className;
-		if (c == 'combo' || c == 'combo2' || c == 'combo3')
+		  if (c == 'combo' || c == 'combo2' || c == 'combo3') {
+          
 			_set_combo_select(e);
-		else {
+      } else {
 			e.onkeydown = function(ev) {	// block unintentional page escape with 'history back' key pressed on buttons
 				ev = ev||window.event;
  				key = ev.keyCode||ev.which;
@@ -425,6 +431,9 @@ var inserts = {
   				}
 			}
 		}
+      // Chosen needs to be activated after the set_combo
+      // so that events are propagated properly
+    $(e).chosen({'search_contains':false, allow_single_deselect:true});
 	},
 	'a.printlink': 	function(l) {
 		l.onclick = function() {
@@ -491,7 +500,7 @@ var inserts = {
 			    save_focus(this);
 			};
 		}
-	}
+	},
 /*	'tr.editrow': function(e) {
 		  	e.onkeydown = function(ev) { 
 	  		ev = ev||window.event;

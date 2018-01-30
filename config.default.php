@@ -228,7 +228,9 @@ if(isset($_SESSION["wa_current_user"])) {
 	// standard external js scripts included in all files
 	$js_static = array('JsHttpRequest.js', 'behaviour.js', 'utils.js', 'inserts.js');
 	// additional js source included in header
-	$js_lib = $js_userlib = array();
+    $js_lib = array();
+    $js_userlib = array( "$js_path/chosen/chosen.jquery.min.js"
+    );
 
 /* 
 	Display a dropdown select box for choosing Company to login if false.
