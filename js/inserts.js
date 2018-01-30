@@ -321,6 +321,11 @@ var inserts = {
 	  			}
 			}
 	},
+  'input.datepicker': function(e) {
+      // $(e).datepicker({numberOfMonths:[4,3], dateFormat:"yy/mm/dd", showCurrentAtPos:2, showButtonPanel:true, stepMonths:12});
+      $(e).datepicker({numberOfMonths:[2,3], dateFormat:"yy/mm/dd", showCurrentAtPos:1, showButtonPanel:true, stepMonths:6,changeMonth:true, changeYear:true,
+                       showOtherMonths:true, selectOtherMonths:true });
+  },
 	'input.combo2,input[aspect="fallback"]': 
 	function(e) {
   	    // this hides search button for js enabled browsers

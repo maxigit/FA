@@ -129,6 +129,8 @@ function page_header($title, $no_menu=false, $is_index=false, $onload="", $js=""
 	echo "<meta http-equiv='Content-type' content='text/html; charset=$encoding'>";
 	echo "<link href='$path_to_root/themes/$theme/default.css' rel='stylesheet' type='text/css'> \n";
 	echo "<link href='$path_to_root/js/chosen/chosen.min.css' rel='stylesheet' type='text/css'> \n";
+	echo "<link href='$path_to_root/js/jquery-ui-1.12.1/jquery-ui.min.css' rel='stylesheet' type='text/css'> \n";
+	echo "<link href='$path_to_root/js/jquery-ui-1.12.1/jquery-ui.structure.min.css' rel='stylesheet' type='text/css'> \n";
  	echo "<link href='$path_to_root/themes/default/images/favicon.ico' rel='icon' type='image/x-icon'> \n";
 	if ($css)
 		echo '<link href="'.$css.'" rel="stylesheet" type="text/css">';

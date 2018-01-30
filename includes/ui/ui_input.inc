@@ -647,7 +647,7 @@ function date_cells($label, $name, $title = null, $check=null, $inc_days=0,
 			$_POST[$name] = $dd;
 		}
 	}
-	if ($use_date_picker)
+	if ($use_date_picker && false)
 	{
 		$calc_image = (file_exists("$path_to_root/themes/".user_theme()."/images/cal.gif")) ? 
 			"$path_to_root/themes/".user_theme()."/images/cal.gif" : "$path_to_root/themes/default/images/cal.gif";
@@ -670,7 +670,7 @@ function date_cells($label, $name, $title = null, $check=null, $inc_days=0,
 
 	default_focus($name);
 	$size = (user_date_format()>3)?11:10; 
-	echo "<input type=\"text\" name=\"$name\" class=\"$class\" $aspect size=\"$size\" maxlength=\"12\" value=\"" 
+	echo "<input type=\"text\" name=\"$name\" class=\"datepicker $class\" $aspect size=\"$size\" maxlength=\"12\" value=\"" 
 	 . $_POST[$name]. "\""
 	 .($title ? " title='$title'": '')." > $post_label";
 	echo "</td>\n";
