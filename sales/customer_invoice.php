@@ -51,13 +51,19 @@ if (isset($_GET['AddedID'])) {
 
 	$invoice_no = $_GET['AddedID'];
 	$trans_type = ST_SALESINVOICE;
+    $pro_forma = $_GET['Proforma'];
 
 	display_notification(_("Selected deliveries has been processed"), true);
 
 	display_note(get_customer_trans_view_str($trans_type, $invoice_no, _("&View This Invoice")), 0, 1);
 
-	display_note(print_document_link($invoice_no."-".$trans_type, _("&Print This Invoice"), true, ST_SALESINVOICE));
-	display_note(print_document_link($invoice_no."-".$trans_type, _("&Email This Invoice"), true, ST_SALESINVOICE, false, "printlink", "", 1),1);
+    submenu_print(_("&Print Magic Invoice"), ST_SALESINVOICE, $invoice_no."-".ST_SALESINVOICE, 'prtopt', 0, 'magic');
+    if(isset($pro_forma)) {
+        submenu_print(_("&Email Proforma Invoice"), ST_SALESINVOICE, $invoice_no."-".ST_SALESINVOICE, null, 1, 'proforma');
+    } else
+    {
+        submenu_print(_("&Email Sales Invoice"), ST_SALESINVOICE, $invoice_no."-".ST_SALESINVOICE, null, 1, null);
+    }
 
 	display_note(get_gl_view_str($trans_type, $invoice_no, _("View the GL &Journal Entries for this Invoice")),1);
 
@@ -342,9 +348,12 @@ if (isset($_POST['process_invoice']) && check_data()) {
 	else
 	{
 		processing_end();
+        $payment_term = $_POST['payment'];
+        $pro_forma_param = "";
+        if($payment_term == 4) $pro_forma_param = "&Proforma=1";
 
 		if ($newinvoice) {
-			meta_forward($_SERVER['PHP_SELF'], "AddedID=$invoice_no");
+			meta_forward($_SERVER['PHP_SELF'], "AddedID=$invoice_no".$pro_forma_param);
 		} else {
 			meta_forward($_SERVER['PHP_SELF'], "UpdatedID=$invoice_no");
 		}
