@@ -61,17 +61,33 @@ function print_document_link($doc_no, $link_text, $link=true, $type_no,
 			break;
 		case ST_SALESINVOICE : // Sales Invoice
 		case ST_CUSTCREDIT : // Customer Credit Note
-			$rep = $type_no==ST_CUSTCREDIT ? 113 : 107;
-			// from, to, currency, email, paylink, comments, orientation
-			$ar = array(
-				'PARAM_0' => $doc_no, 
-				'PARAM_1' => $doc_no, 
-				'PARAM_2' => '', 
-				'PARAM_3' => $email, 
-				'PARAM_4' => '',
-				'PARAM_5' => $extra,  // pro-format
-				'PARAM_6' => $def_orientation);
-			break;
+            if($extra == 'magic') {
+                $rep = "_magic_customer_invoice";
+                $ar = array(
+                    'PARAM_0' => $doc_no, 
+                    'PARAM_1' => $doc_no, 
+                    'PARAM_2' => '', 
+                    'PARAM_3' => $email, 
+                    'PARAM_4' => '',
+                    'PARAM_5' => $pro_format,
+                    // 'PARAM_6' => $def_orientation);
+                    // 'PARAM_7' => $def_orientation);
+                    'PARAM_8' => $def_orientation);
+            }
+            else {
+                $rep = $type_no==ST_CUSTCREDIT ? 113 : 107;
+                // from, to, currency, email, paylink, comments, orientation
+                $pro_format = $extra == 'proformat';
+                $ar = array(
+                    'PARAM_0' => $doc_no, 
+                    'PARAM_1' => $doc_no, 
+                    'PARAM_2' => '', 
+                    'PARAM_3' => $email, 
+                    'PARAM_4' => '',
+                    'PARAM_5' => $pro_format,
+                    'PARAM_6' => $def_orientation);
+			}
+            break;
 		case ST_PURCHORDER :
 			$rep = 209;
 			// from, to, currency, email, comments, orientation

@@ -218,9 +218,9 @@ if (isset($_GET['AddedID'])) {
 	submenu_view(_("&View This Invoice"), ST_SALESINVOICE, $invoice);
 
     // TODO replacte with magic invoice
-    submenu_print(_("&Print Sales Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, 'prtopt', 0, 'magic');
+    submenu_print(_("&Print Magic Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, 'prtopt', 0, 'magic');
     if(isset($pro_format)) {
-        submenu_print(_("&Email Pro format Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, null, 1, 'proforma');
+        submenu_print(_("&Email Proformat Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, null, 1, 'proforma');
     } else
     {
         submenu_print(_("&Email Sales Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, null, 1, null);

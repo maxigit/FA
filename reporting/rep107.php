@@ -248,6 +248,7 @@ function print_invoices()
 				$rep->TextCol(1, 7, $myrow['curr_code'] . ": " . $words, - 2);
 			}
 			$rep->Font();
+            if($print_as_quote) {display_warning("This is a pro-format");};
 			if ($email == 1)
 			{
 				if($print_as_quote)  {
