@@ -211,13 +211,20 @@ if (isset($_GET['AddedID'])) {
 
 } elseif (isset($_GET['AddedDI'])) {
 	$invoice = $_GET['AddedDI'];
+    $pro_format = $_GET['Proforma'];
 
 	display_notification_centered(sprintf(_("Invoice # %d has been entered."), $invoice));
 
 	submenu_view(_("&View This Invoice"), ST_SALESINVOICE, $invoice);
 
-	submenu_print(_("&Print Sales Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, 'prtopt');
-	submenu_print(_("&Email Sales Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, null, 1);
+    // TODO replacte with magic invoice
+    submenu_print(_("&Print Sales Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, 'prtopt', 0, 'magic');
+    if(isset($pro_format)) {
+        submenu_print(_("&Email Pro format Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, null, 1, 'proforma');
+    } else
+    {
+        submenu_print(_("&Email Sales Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, null, 1, null);
+    }
 	set_focus('prtopt');
 	
 	$sql = "SELECT trans_type_from, trans_no_from FROM ".TB_PREF."cust_allocations
@@ -497,7 +504,10 @@ if (isset($_POST['ProcessOrder']) && can_process()) {
 		} elseif ($trans_type == ST_SALESQUOTE) {
 			meta_forward($_SERVER['PHP_SELF'], "AddedQU=$trans_no");
 		} elseif ($trans_type == ST_SALESINVOICE) {
-			meta_forward($_SERVER['PHP_SELF'], "AddedDI=$trans_no&Type=$so_type");
+            $payment_term = $_POST['payment'];
+            $pro_format_param = "";
+            if($payment_term == 4) $pro_format_param = "&Proforma=1";
+			meta_forward($_SERVER['PHP_SELF'], "AddedDI=$trans_no&Type=$so_type".$pro_format_param);
 		} else {
 			meta_forward($_SERVER['PHP_SELF'], "AddedDN=$trans_no&Type=$so_type");
 		}
