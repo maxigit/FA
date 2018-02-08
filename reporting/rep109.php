@@ -42,8 +42,9 @@ function print_sales_orders()
 	$currency = $_POST['PARAM_2'];
 	$email = $_POST['PARAM_3'];
 	$print_as_quote = $_POST['PARAM_4'];
-	$comments = $_POST['PARAM_5'];
-	$orientation = $_POST['PARAM_6'];
+	$sort_by_stock_id = $_POST['PARAM_5'];
+	$comments = $_POST['PARAM_6'];
+	$orientation = $_POST['PARAM_7'];
 
 	if (!$from || !$to) return;
 
@@ -104,7 +105,7 @@ function print_sales_orders()
 		$rep->SetCommonData($myrow, $branch, $myrow, $baccount, ST_SALESORDER, $contacts);
 		$rep->NewPage();
 
-		$result = get_sales_order_details($i, ST_SALESORDER);
+		$result = get_sales_order_details($i, ST_SALESORDER, $sort_by_stock_id);
 		$SubTotal = 0;
 		$items = $prices = array();
 		while ($myrow2=db_fetch($result))

@@ -292,7 +292,7 @@ function get_sales_order_header($order_no, $trans_type)
 
 //----------------------------------------------------------------------------------------
 
-function get_sales_order_details($order_no, $trans_type) {
+function get_sales_order_details($order_no, $trans_type, $sort_by_stock_id=TRUE) {
 
 	$sql = "SELECT id, stk_code, unit_price, ppd, "
 		.TB_PREF."sales_order_details.description,"
@@ -307,7 +307,10 @@ function get_sales_order_details($order_no, $trans_type) {
 	FROM ".TB_PREF."sales_order_details, ".TB_PREF."stock_master
 	WHERE ".TB_PREF."sales_order_details.stk_code = ".TB_PREF."stock_master.stock_id
 	AND order_no =" . db_escape($order_no) 
-		." AND trans_type = " . db_escape($trans_type) . " ORDER BY stk_code";
+         ." AND trans_type = " . db_escape($trans_type) . " ORDER BY ";
+    if ($sort_by_stock_id) {
+        $sql .= "stk_code";
+    } else $sql .= "id";
 
 	return db_query($sql, "Retreive order Line Items");
 }
