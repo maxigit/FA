@@ -229,6 +229,7 @@ function check_page_security($page_security)
 		echo _("The security settings on your account do not permit you to access this function");
 		echo "</b>";
 		echo "<br><br><br><br></center>";
+        http_response_code(403); // Unauthorized
 		end_page(@$_REQUEST['popup']);
 		exit;
 	}
@@ -236,6 +237,7 @@ function check_page_security($page_security)
 		&& !in_array($page_security, array('SA_SOFTWAREUPGRADE', 'SA_OPEN', 'SA_BACKUP')))
 	{
 		display_error(_('System is blocked after source upgrade until database is updated on System/Software Upgrade page'));
+        http_response_code(503); //Unavailable
 		end_page();
 		exit;
 	}
