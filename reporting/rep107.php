@@ -128,7 +128,7 @@ function print_invoices()
 
 					$rep->TextCol(3, 4,	$myrow2['units'], -2);
 					$rep->TextCol(4, 5,	$DisplayPrice, -2);
-                    if ($myrow2["ppd"]==0) {
+                    if ($myrow2["ppd"]==0 || !$displayPPD ) {
                         $rep->Font("italic");
                         $rep->TextCol(5, 6,	"NA     ", -2);
                         $rep->Font();
@@ -214,13 +214,12 @@ function print_invoices()
 			$DisplayTotal = number_format2($sign*$total,$dec);
             $DisplayTotalPPD = number_format2($total - $myrow["ov_ppd_amount"] - $myrow["ov_ppd_gst"], $dec);
             $ppd_percent= number_format2(($myrow["ppd"] ?: 0)*100,user_percent_dec());
-            $ppd_days = $myrow["ppd_days"] ?: 1; // can be null
-            $ppd_days_s = $ppd_days  > 1 ? "s" : "";
 			$rep->Font('bold');
 			$rep->TextCol(3, 6, _("TOTAL INVOICE"), - 2);
 			$rep->TextCol(6, 7, $DisplayTotal, -2);
             // Add PPD text if needed
-            if($ppd+$ppd_gst <> 0) {
+            if(($ppd+$ppd_gst <> 0) && $displayPPD) {
+                $ppd_days_s = $ppd_days  > 1 ? "s" : "";
                 $rep->Font('italic');
                 $rep->SetTextColor(0,0,255);
                 $rep->NewLine(2);
