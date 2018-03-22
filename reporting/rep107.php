@@ -80,6 +80,11 @@ function print_invoices()
 			if($customer && $myrow['debtor_no'] != $customer) {
 				continue;
 			}
+
+            $ppd_days = $myrow["ppd_days"]; // can be null
+            $ppd_days_s = $ppd_days  > 1 ? "s" : "";
+            $displayPPD =$ppd_days > 0;
+
 			$baccount = get_default_bank_account($myrow['curr_code']);
 			$params['bankaccount'] = $baccount['id'];
 
