@@ -433,7 +433,7 @@ var inserts = {
 		}
       // Chosen needs to be activated after the set_combo
       // so that events are propagated properly
-    $(e).chosen({'search_contains':false, allow_single_deselect:true});
+      $(e).chosen({'search_contains':false, allow_single_deselect:true, width:'100%'});
 	},
 	'a.printlink': 	function(l) {
 		l.onclick = function() {
