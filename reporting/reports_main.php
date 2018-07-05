@@ -132,6 +132,7 @@ $reports->addReport(RC_CUSTOMER, 109, _('&Print Sales Orders'),
 			_('Email Customers') => 'YES_NO',
 			_('Print as Quote') => 'YES_NO',
 			_('Sort by Stock Id') => 'YES_NO',
+			_('Display line number') => 'YES_NO',
 			_('Comments') => 'TEXTBOX',
 			_('Orientation') => 'ORIENTATION'));
 $reports->addReport(RC_CUSTOMER, 111, _('&Print Sales Quotations'),

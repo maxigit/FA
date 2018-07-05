@@ -151,7 +151,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 
     div_start('items_table');
 	start_table(TABLESTYLE, "colspan=7 width=90%");
-	$th = array(_("Item Code"), _("Item Description"), _("Quantity"),
+	$th = array(_("#"),_("Item Code"), _("Item Description"), _("Quantity"),
 		_("Delivered"),
                 _("Unit"), "Now Or Never", $order->tax_included ? _("Price after Tax") : _("Price before Tax"),
                 _("PPD Price"),
@@ -251,6 +251,8 @@ function display_order_summary($title, &$order, $editable_items=false)
 			} else {
 				alt_table_row_color($k);
 			}
+            $line_no_plus_one = $line_no+1;
+            echo "<td>${line_no_plus_one}</td>";
 
 			view_stock_status_cell($stock_item->stock_id);
 
@@ -281,7 +283,7 @@ function display_order_summary($title, &$order, $editable_items=false)
 		}
 		else
 		{
-			sales_order_item_controls($order, $k,  $line_no);
+          sales_order_item_controls($order, $k,  $line_no);
 		}
 
 		$total += $line_total;
@@ -593,6 +595,7 @@ function sales_order_item_controls(&$order, &$rowcounter, $line_no=-1)
     global $Ajax;
 
 	alt_table_row_color($rowcounter);
+    echo "<td></td>"; // line number 
 
 	$id = find_submit('Edit');
 	if ($line_no!=-1 && $line_no == $id) // edit old line

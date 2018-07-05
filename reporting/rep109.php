@@ -44,7 +44,8 @@ function print_sales_orders()
 	$print_as_quote = $_POST['PARAM_4'];
 	$sort_by_stock_id = $_POST['PARAM_5'];
 	$comments = $_POST['PARAM_6'];
-	$orientation = $_POST['PARAM_7'];
+	$display_line_no = $_POST['PARAM_7'];
+	$orientation = $_POST['PARAM_8'];
 
 	if (!$from || !$to) return;
 
@@ -108,8 +109,10 @@ function print_sales_orders()
 		$result = get_sales_order_details($i, ST_SALESORDER, $sort_by_stock_id);
 		$SubTotal = 0;
 		$items = $prices = array();
+        $line_no = 0;
 		while ($myrow2=db_fetch($result))
 		{
+            $line_no+=1;
 			$Net = round2(((1 - $myrow2["discount_percent"]) * $myrow2["unit_price"] * $myrow2["quantity"]),
 			   user_price_dec());
 			$prices[] = $Net;
@@ -122,6 +125,7 @@ function print_sales_orders()
 				$DisplayDiscount ="";
 			else
 				$DisplayDiscount = number_format2($myrow2["discount_percent"]*100,user_percent_dec()) . "%";
+            $rep->textCol(-1,0, sprintf("% 8d",$line_no)); # line number
 			$rep->TextCol(0, 1,	$myrow2['stk_code'], -2);
 			$oldrow = $rep->row;
 			$rep->TextColLines(1, 2, $myrow2['description'], -2);
