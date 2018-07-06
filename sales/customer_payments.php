@@ -71,14 +71,17 @@ if (!isset($_POST['bank_account'])) { // first page call
 	}
 }
 
+$reset_ppd_js = true;
 if (list_updated('BranchID')) {
 	// when branch is selected via external editor also customer can change
 	$br = get_branch(get_post('BranchID'));
 	$_POST['customer_id'] = $br['debtor_no'];
 	$_SESSION['alloc']->person_id = $br['debtor_no'];
 	$Ajax->activate('customer_id');
+    $reset_ppd_js = false;
 }
 
+if ($reset_ppd_js) $Ajax->addScript(true,"allocated_ppd={};");
 if (!isset($_POST['customer_id'])) {
 	$_SESSION['alloc']->person_id = $_POST['customer_id'] = get_global_customer(false);
 	$_SESSION['alloc']->read();
