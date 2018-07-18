@@ -43,8 +43,8 @@ function print_sales_orders()
 	$email = $_POST['PARAM_3'];
 	$print_as_quote = $_POST['PARAM_4'];
 	$sort_by_stock_id = $_POST['PARAM_5'];
-	$comments = $_POST['PARAM_6'];
-	$display_line_no = $_POST['PARAM_7'];
+	$display_line_no = $_POST['PARAM_6'];
+	$comments = $_POST['PARAM_7'];
 	$orientation = $_POST['PARAM_8'];
 
 	if (!$from || !$to) return;
@@ -125,7 +125,7 @@ function print_sales_orders()
 				$DisplayDiscount ="";
 			else
 				$DisplayDiscount = number_format2($myrow2["discount_percent"]*100,user_percent_dec()) . "%";
-            $rep->textCol(-1,0, sprintf("% 8d",$line_no)); # line number
+            if($display_line_no) $rep->textCol(-1,0, sprintf("% 8d",$line_no)); # line number
 			$rep->TextCol(0, 1,	$myrow2['stk_code'], -2);
 			$oldrow = $rep->row;
 			$rep->TextColLines(1, 2, $myrow2['description'], -2);
