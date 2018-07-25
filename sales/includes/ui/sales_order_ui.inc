@@ -13,9 +13,11 @@ include_once($path_to_root . "/sales/includes/cart_class.inc");
 include_once($path_to_root . "/includes/manufacturing.inc");
 
 function ppd_for($stock_id, $order) {
-    if (preg_match("/^....-...-.../", $stock_id)) {
+    if (preg_match("/^....-...-.../", $stock_id) || preg_match("/^ES19/", $stock_id)) {
         return get_sales_type($order->sales_type)['ppd'];
     }
+    if($stock_id == "EL18-XXX")
+        return get_sales_type($order->sales_type)['ppd'];
     return 0;
 }
 //--------------------------------------------------------------------------------
