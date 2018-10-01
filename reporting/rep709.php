@@ -127,7 +127,7 @@ function print_tax_report()
 
 	while ($trans=db_fetch($transactions))
 	{
-		if (in_array($trans['trans_type'], array(ST_CUSTCREDIT,ST_SUPPINVOICE,ST_JOURNAL))) {
+		if (in_array($trans['trans_type'], array(ST_CUSTCREDIT,ST_SUPPINVOICE,ST_JOURNAL, ST_CUSTPAYMENT))) {
 			$trans['net_amount'] *= -1;
 			$trans['amount'] *= -1;
 		}
@@ -164,7 +164,7 @@ function print_tax_report()
 			$taxes[$trans['tax_type_id']]['taxout'] += $trans['amount'];
 			$taxes[$trans['tax_type_id']]['out'] += $trans['net_amount'];
 		}
-		elseif (in_array($trans['trans_type'], array(ST_BANKDEPOSIT,ST_SALESINVOICE,ST_CUSTCREDIT))) {
+		elseif (in_array($trans['trans_type'], array(ST_BANKDEPOSIT,ST_SALESINVOICE,ST_CUSTCREDIT,ST_CUSTPAYMENT))) {
 			$taxes[$trans['tax_type_id']]['taxout'] += $trans['amount'];
 			$taxes[$trans['tax_type_id']]['out'] += $trans['net_amount'];
 		} else {
