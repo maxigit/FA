@@ -169,7 +169,7 @@ class items_cart
 		 * Checks if the total net amount match the total of non-tax line amount.
 		 */
 		$non_tax = $this->gl_items_total() - $this->gl_items_total_tax();
-		return $non_tax == $this->gl_items_total_net();
+		return !floatcmp($non_tax, $this->gl_items_total_net());
 
 	}
 
