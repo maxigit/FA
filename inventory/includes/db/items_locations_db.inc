@@ -9,16 +9,16 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
     See the License here <http://www.gnu.org/licenses/gpl-3.0.html>.
 ***********************************************************************/
-function add_item_location($loc_code, $location_name, $delivery_address, $phone, $phone2, $order_weight, $stock_weight, $fax, $email, $contact, $delivery_date, $delivery_period)
+function add_item_location($loc_code, $location_name, $delivery_address, $phone, $phone2, $order_weight, $stock_weight, $fax, $email, $contact, $availability_date, $availability_period)
 {
 	$sql = "INSERT INTO ".TB_PREF."locations (loc_code, location_name, delivery_address, phone, phone2, fax, email,
-             order_weight, stock_weight, delivery_date, delivery_period,
+             order_weight, stock_weight, availability_date, availability_period,
              contact)
 		VALUES (".db_escape($loc_code).", ".db_escape($location_name).", ".db_escape($delivery_address).", "
 			.db_escape($phone).", ".db_escape($phone2).", ".db_escape($fax).", ".db_escape($email).", 
             order_weight=".db_escape($order_weight).", stock_weight=".db_escape($stock_weight).",
-         delivery_date=".db_escape($delivery_date).",
-         delivery_period=".db_escape($delivery_period).", "
+         availability_date=".db_escape($availability_date).",
+         availability_period=".db_escape($availability_period).", "
 			.db_escape($contact).")";
 
 	db_query($sql,"a location could not be added");
@@ -32,7 +32,7 @@ function add_item_location($loc_code, $location_name, $delivery_address, $phone,
 
 //------------------------------------------------------------------------------------
 
-function update_item_location($loc_code, $location_name, $delivery_address, $phone, $phone2, $order_weight, $stock_weight, $fax, $email, $contact, $delivery_date, $delivery_period)
+function update_item_location($loc_code, $location_name, $delivery_address, $phone, $phone2, $order_weight, $stock_weight, $fax, $email, $contact, $availability_date, $availability_period)
 
 {
     $sql = "UPDATE ".TB_PREF."locations SET location_name=".db_escape($location_name).",
@@ -40,8 +40,8 @@ function update_item_location($loc_code, $location_name, $delivery_address, $pho
     	phone=".db_escape($phone).", phone2=".db_escape($phone2).", fax=".db_escape($fax).",
 	order_weight=".db_escape($order_weight).", stock_weight=".db_escape($stock_weight).",
     	email=".db_escape($email).", contact=".db_escape($contact).",
-        delivery_date=".db_escape($delivery_date).",
-        delivery_period=".db_escape($delivery_period)." 
+        availability_date=".db_escape($availability_date).",
+        availability_period=".db_escape($availability_period)." 
     	WHERE loc_code = ".db_escape($loc_code);
 
 	db_query($sql,"a location could not be updated");
