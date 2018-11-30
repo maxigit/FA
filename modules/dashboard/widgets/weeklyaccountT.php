@@ -130,7 +130,7 @@ function week_of_month($date) {
 		$this->get_account_transaction($from, $to, $transactions, 'debit previous', -($this->by_month ? 12 : 52));
 
 		usort($transactions, function($a, $b) { return strcmp($a["trans_date"], $b["trans_date"]); } );
-		print_r($transactions);
+		//print_r($transactions);
 
 	//flag is not needed
 	$flag = true;
@@ -139,9 +139,9 @@ function week_of_month($date) {
 	if($this->display_total) {
 		$table['cols'] = array(
 			array('label' => 'Date', 'type' => 'string'),
-			array('label' => 'Balance', 'type' => 'number'),
-			array('label' => 'Previous Year', 'type' => 'number')
-			,array('label' => 'Budget', 'type' => 'number')
+			array('label' => 'Payment', 'type' => 'number'),
+			array('label' => 'Invoice', 'type' => 'number')
+			,array('label' => 'Outstanding', 'type' => 'number')
 		);
 	}
 	else {
@@ -170,6 +170,10 @@ function week_of_month($date) {
 	$balance_date = nil;// $date;
 	$i=0;
 	while($r = $transactions[$i]) {
+        if($i < 10){
+            $to_w = print_r($r, TRUE);
+            display_warning("$i => $to_w");
+        }
 		if ($r['trans_date'] != '2000-01-01') {
 
 			$balance_date = sql2date($r['trans_date']);
@@ -204,6 +208,17 @@ function week_of_month($date) {
 				//$week_budget = min($budget, $week_budget);
 			}
 		}
+        else {
+			switch($r['type']) {
+			case 'credit':
+                $r['type'] = 'debit';
+                // $r['amount'] = -$r['amount'];
+                break;
+			case 'credit_previous':
+                $r['type'] = 'debit_previous';
+                // $r['amount'] = -$r['amount'];
+                break;
+        }}
 			$temp = array();
 			switch($r['type']) {
 			case 'credit':
