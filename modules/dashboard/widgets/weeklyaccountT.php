@@ -170,10 +170,6 @@ function week_of_month($date) {
 	$balance_date = nil;// $date;
 	$i=0;
 	while($r = $transactions[$i]) {
-        if($i < 10){
-            $to_w = print_r($r, TRUE);
-            display_warning("$i => $to_w");
-        }
 		if ($r['trans_date'] != '2000-01-01') {
 
 			$balance_date = sql2date($r['trans_date']);
