@@ -73,7 +73,6 @@ function gl_inquiry_controls()
 	date_cells(_("from:"), 'TransFromDate', '', null, -30);
 	date_cells(_("to:"), 'TransToDate');
     amount_cells(_("Balance Offset:"), 'balance_offset', null, "0");
-    journal_types_list_cells(_("Type:"), "filterType");
     end_row();
 	end_table();
 
@@ -83,10 +82,14 @@ function gl_inquiry_controls()
 		dimensions_list_cells(_("Dimension")." 1:", 'Dimension', null, true, " ", false, 1);
 	if ($dim > 1)
 		dimensions_list_cells(_("Dimension")." 2:", 'Dimension2', null, true, " ", false, 2);
-	ref_cells("Item filter:", "item_filter");
 
 	small_amount_cells(_("Amount min:"), 'amount_min', null, " ");
 	small_amount_cells(_("Amount max:"), 'amount_max', null, " ");
+    end_row();
+    start_row();
+    journal_types_list_cells(_("Type:"), "filterType");
+	ref_cells("Memo:", "memo");
+	ref_cells("Item filter:", "item_filter");
 	submit_cells('Show',_("Show"),'','', 'default');
 	end_row();
 	end_table();
@@ -117,7 +120,7 @@ function show_results()
     	$_POST['Dimension2'] = 0;
 	$result = get_gl_transactions($_POST['TransFromDate'], $_POST['TransToDate'], -1,
         $_POST["account"], $_POST['Dimension'], $_POST['Dimension2'], $filter_type,
-    	input_num('amount_min'), input_num('amount_max'), $_POST['item_filter']);
+                                  input_num('amount_min'), input_num('amount_max'), $_POST['item_filter'],$_POST['memo']);
 
 	$colspan = ($dim == 2 ? "6" : ($dim == 1 ? "5" : "4"));
 

@@ -108,7 +108,7 @@ function add_gl_balance($type, $trans_id, $date_, $amount, $person_type_id=null,
 
 function get_gl_transactions($from_date, $to_date, $trans_no=0,
 	$account=null, $dimension=0, $dimension2=0, $filter_type=null,
-	$amount_min=null, $amount_max=null, $item_filter)
+                             $amount_min=null, $amount_max=null, $item_filter=null,$memo_filter=null)
 {
 	global $show_voided_gl_trans;
 	
@@ -147,6 +147,10 @@ function get_gl_transactions($from_date, $to_date, $trans_no=0,
 	
 	if ($amount_max != null)
 		$sql .= " AND ABS(".TB_PREF."gl_trans.amount) <= ABS(".db_escape($amount_max).")";
+
+    if ($memo_filter != null and $memo_filter !=  "") {
+        $sql .= " AND (".TB_PREF."gl_trans.memo_ LIKE '".$memo_filter."')";
+    }
 
 	$sql .= filter_item_condition($item_filter);
 
