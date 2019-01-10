@@ -73,6 +73,7 @@ function gl_inquiry_controls()
 	date_cells(_("from:"), 'TransFromDate', '', null, -30);
 	date_cells(_("to:"), 'TransToDate');
     amount_cells(_("Balance Offset:"), 'balance_offset', null, "0");
+    journal_types_list_cells(_("Type:"), "filterType");
     end_row();
 	end_table();
 
@@ -106,13 +107,16 @@ function show_results()
 	$act_name = $_POST["account"] ? get_gl_account_name($_POST["account"]) : "";
 	$dim = get_company_pref('use_dimension');
 
+    $filter_type = $_POST['filterType'];
+    if ($filter_type === -1) $filter_type = null;
+
     /*Now get the transactions  */
     if (!isset($_POST['Dimension']))
     	$_POST['Dimension'] = 0;
     if (!isset($_POST['Dimension2']))
     	$_POST['Dimension2'] = 0;
 	$result = get_gl_transactions($_POST['TransFromDate'], $_POST['TransToDate'], -1,
-    	$_POST["account"], $_POST['Dimension'], $_POST['Dimension2'], null,
+        $_POST["account"], $_POST['Dimension'], $_POST['Dimension2'], $filter_type,
     	input_num('amount_min'), input_num('amount_max'), $_POST['item_filter']);
 
 	$colspan = ($dim == 2 ? "6" : ($dim == 1 ? "5" : "4"));
