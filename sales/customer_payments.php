@@ -43,7 +43,22 @@ if (isset($_GET['customer_id']))
 	$_POST['customer_id'] = $_GET['customer_id'];
 }
 
-if (!isset($_POST['bank_account'])) { // first page call
+if (isset($_GET['DateBanked']))
+{
+	$_POST['DateBanked'] = $_GET['DateBanked'];
+}
+
+if (isset($_GET['bank_account']))
+{
+	$_POST['bank_account'] = $_GET['bank_account'];
+    $first_page_call = True;
+}
+if (isset($_GET['memo_']))
+{
+	$_POST['memo_'] = $_GET['memo_'];
+}
+
+if (!isset($_POST['bank_account']) || $first_page_call) { // first page call
 	$_SESSION['alloc'] = new allocation(ST_CUSTPAYMENT, 0, get_post('customer_id'));
 
 	if (isset($_GET['SInvoice'])) {
@@ -69,6 +84,10 @@ if (!isset($_POST['bank_account'])) { // first page call
 		} else
 			display_error(_("Invalid sales invoice number."));
 	}
+    if (isset($_GET['DateBanked'])) {
+        // update date cart so that ppd indicator is shown properly
+        $_SESSION['alloc']->date_ = $_GET['DateBanked'];
+    }
 }
 
 $reset_ppd_js = true;
