@@ -34,7 +34,19 @@ if (isset($_GET['supplier_id']))
 {
 	$_POST['supplier_id'] = $_GET['supplier_id'];
 }
-
+if (isset($_GET['DatePaid']))
+{
+	$_POST['DatePaid'] = $_GET['DatePaid'];
+}
+if (isset($_GET['bank_account']))
+{
+	$_POST['bank_account'] = $_GET['bank_account'];
+    $first_page_call =True;
+}
+if (isset($_GET['memo_']))
+{
+	$_POST['memo_'] = $_GET['memo_'];
+}
 //----------------------------------------------------------------------------------------
 
 check_db_has_suppliers(_("There are no suppliers defined in the system."));
@@ -66,7 +78,7 @@ if (list_updated('supplier_id')) {
 
 //----------------------------------------------------------------------------------------
 
-if (!isset($_POST['bank_account'])) { // first page call
+if (!isset($_POST['bank_account']) || $first_page_call) { // first page call
 	$_SESSION['alloc'] = new allocation(ST_SUPPAYMENT, 0, get_post('supplier_id'));
 
 	if (isset($_GET['PInvoice'])) {
