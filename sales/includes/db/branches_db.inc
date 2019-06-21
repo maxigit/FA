@@ -193,7 +193,8 @@ function get_branch_contacts($branch_code, $action=null, $customer_id=null, $def
 	$sql .= ')';
 	
 	if ($action)
-		$sql .= ' AND (r.action='.db_escape($action).($default ? " OR r.action='general'" : '').')';
+		$sql .= ' AND (r.action='.db_escape($action).(true ? " OR r.action='general'" : '').')';
+    // $sql .= ' AND (r.action='.db_escape($action).($default ? " OR r.action='general'" : '').')';
 	
 	$res = db_query($sql, "can't retrieve branch contacts");
 
