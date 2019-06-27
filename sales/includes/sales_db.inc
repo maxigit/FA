@@ -154,7 +154,10 @@ function get_price ($stock_id, $currency, $sales_type_id, $factor=null, $date=nu
 			$price *= $factor;
 	}	
 	if ($price === false)
+    {
+        display_error("No price have been set up for $stock_id");
 		return 0;
+    }
 	elseif ($round_to != 1)	
 		return round_to_nearest($price, $round_to);
 	else
