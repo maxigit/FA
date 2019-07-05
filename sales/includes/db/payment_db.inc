@@ -96,7 +96,7 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
                                         $vat_discount_account, 0, 0, $vat_discount, $customer_id,
                                         "Cannot insert a GL transaction for the payment discount debit");
         add_trans_tax_details( ST_CUSTPAYMENT, $payment_no, $tax_id, $tax_rate, false
-                               , $vat_discount, $discount, 1, $date_, "PPD");
+                               , $vat_discount, $discount-$vat_discount, 1, $date_, "PPD");
 	}
 
 	if ($charge != 0)	{
