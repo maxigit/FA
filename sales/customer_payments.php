@@ -417,7 +417,7 @@ start_form();
 
     start_row();
 	amount_cells(_("Amount of Discount:"), 'discount', null, '', $cust_currency,null, "oninput='update_allocated_amount();'");
-    amount_cells(_("including"), 'vat_discount', null, '', "VAT");
+    amount_cells(_("including")  , 'vat_discount', null, '', "VAT", null, "DISABLED"); //not used
     end_row();
 
     start_row();

@@ -9,6 +9,28 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
     See the License here <http://www.gnu.org/licenses/gpl-3.0.html>.
 ***********************************************************************/
+// Find the tax group of the first branch, as we have no choice
+function get_customer_tax_group_for_ppd($customer_id) {
+    $sql = "SELECT tax_group_id FROM ".TB_PREF."cust_branch 
+            WHERE debtor_no=".db_escape($customer_id)." AND (inactive = 0 OR distable_trans = 1)  LIMIT 1";
+
+    $result = db_query($sql, "No branch found for given customer");
+    $row = db_fetch_row($result);
+    return $row[0]; // first field
+    
+}
+function get_ppd_tax($customer_id, $branch_id, $discount) {
+    $tax_group_id = get_cust_branch($customer_id, $branch_id)["tax_group_id"];
+    $taxes =  get_tax_for_items(array("EPD"), array($discount),0 , $tax_group_id, 1);
+    $ret_array = array();
+    foreach($taxes as $tax) {
+        if ($tax['Net'] == 0) continue;
+        $ret_array[]= $tax;
+    }
+
+    return $ret_array;
+    
+}
 /*
   Write/update customer payment.
 
@@ -21,7 +43,7 @@
 	$charge - in bank currency
 */
 function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_account,
- $date_, $ref, $amount, $discount, $vat_discount, $memo_, $rate=0, $charge=0, $bank_amount=0)
+                                $date_, $ref, $amount, $discount, $vat_discount_unused, $memo_, $rate=0, $charge=0, $bank_amount=0)
 {
 	global $Refs, $vat_ppd_account;
 
@@ -32,6 +54,16 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
 	hook_db_prewrite($args, ST_CUSTPAYMENT);
 
 	$company_record = get_company_prefs();
+    $vat_discount=0;
+    $ppd_tax_array = array();
+	if ($discount != 0)	{
+        // TODO everything is hardcoded, until we can do better
+        $pdd_tax_array = get_ppd_tax($customer_id, $branch_id, $discount);
+        foreach($pdd_tax_array as $ppd_tax) {
+            $value = $ppd_tax['Value'];
+            $vat_discount += $value;
+        }
+    }
 
 	if ($trans_no != 0) {
 	  delete_comments(ST_CUSTPAYMENT, $trans_no);
@@ -83,20 +115,26 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
 		"Cannot insert a GL transaction for the debtors account credit");
 	}
 	if ($discount != 0)	{
+        // TODO everything is hardcoded, until we can do better
+        $r = print_r($pdd_tax_array, TRUE);
+        foreach($pdd_tax_array as $ppd_tax) {
+            $net = $ppd_tax['Net'];
+            if($net == 0 ) continue;
+            $vat_discount_account = $ppd_tax['sales_gl_code'];
+            $tax_id = $ppd_tax['tax_type_id'];
+            $tax_rate = $ppd_tax['rate'];
+            $value = $ppd_tax['Value'];
+            
+            $total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
+                                            $vat_discount_account, 0, 0, $value, $customer_id,
+                                            "Cannot insert a GL transaction for the payment discount debit");
+            add_trans_tax_details( ST_CUSTPAYMENT, $payment_no, $tax_id, $tax_rate, false
+                                   , $value, $net, 0, $date_, "PPD");
+        }
 		/* Now Debit discount account with discounts allowed*/
 		$total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
-			$discount_account, 0, 0, $discount-$vat_discount, $customer_id,
-			"Cannot insert a GL transaction for the payment discount debit");
-        // TODO everything is hardcoded, until we can do better
-        $vat_discount_account = 2200; //$vat_ppd_account; //TODO move in config or customer
-        $tax_discount_id = 1;
-        $tax_id = 1;
-        $tax_rate = 20;
-		$total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
-                                        $vat_discount_account, 0, 0, $vat_discount, $customer_id,
+                                        $discount_account, 0, 0, $discount-$vat_discount, $customer_id,
                                         "Cannot insert a GL transaction for the payment discount debit");
-        add_trans_tax_details( ST_CUSTPAYMENT, $payment_no, $tax_id, $tax_rate, false
-                               , $vat_discount, $discount-$vat_discount, 1, $date_, "PPD");
 	}
 
 	if ($charge != 0)	{
