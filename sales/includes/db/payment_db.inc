@@ -74,11 +74,11 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
 
 	$bank = get_bank_account($bank_account);
 
+    if(!$rate)
+        $rate = get_exchange_rate_from_to(get_customer_currency($customer_id),
+                                          $bank['bank_curr_code'], $date_ );
 	if (!$bank_amount) 	// backward compatibility workaround
 	{
-		if(!$rate)
-			$rate = get_exchange_rate_from_to(get_customer_currency($customer_id),
-				$bank['bank_curr_code'], $date_ );
 
 		$bank_amount = $amount/$rate;
 	}
@@ -129,7 +129,8 @@ function write_customer_payment($trans_no, $customer_id, $branch_id, $bank_accou
                                             $vat_discount_account, 0, 0, $value, $customer_id,
                                             "Cannot insert a GL transaction for the payment discount debit");
             add_trans_tax_details( ST_CUSTPAYMENT, $payment_no, $tax_id, $tax_rate, false
-                                   , $value, $net, 0, $date_, "PPD");
+                                   , $value, $net, $rate, $date_, "PPD");
+            //                                     ^ ex rate TODO get real one
         }
 		/* Now Debit discount account with discounts allowed*/
 		$total += add_gl_trans_customer(ST_CUSTPAYMENT, $payment_no, $date_,
