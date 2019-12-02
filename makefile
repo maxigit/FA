@@ -25,3 +25,7 @@ run_mysql:
 
 clear_js_cache:
 	rm -rf ../fa-config/company/0/js_cache/*
+
+.PHONY: tags
+tags:
+	ctags -G -R .
