@@ -1,0 +1,2 @@
+php:
+  cmd: docker exec mae_fa_1 php
