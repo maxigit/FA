@@ -356,3 +356,4 @@ br();
 end_form();
 end_page();
 ?>
+	unset($_POST['mantax']);
