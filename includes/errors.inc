@@ -152,6 +152,15 @@ function error_box() {
 	Helper to avoid sparse log notices.
 */
 function end_flush() {
+  $error = error_get_last();
+  if(isset($error) && $error['type'] === E_ERROR)
+  {
+    display_error("Last error: ". $error['message']. " file:" . $error['file'] . " line:" . $error['line']);
+    error_log("FLUSH caught error");
+    error_log($error['message']);
+    error_log($error['file']);
+    error_log($error['line']);
+  }
 	global $Ajax;
 
 	if (isset($Ajax))
