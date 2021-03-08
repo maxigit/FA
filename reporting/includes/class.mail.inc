@@ -158,8 +158,10 @@ class email
 		$ret = 0;
         foreach($this->to as $mail)
         {
+          error_log("Sending Email [".$this->subject."] To [".print_r($this->to,TRUE)."] ...");
 			if (mail($mail, $this->subject, $this->body, $this->header, $this->add_params))
 				$ret++;
+        error_log("... Email Sent");
         }
         return $ret;
     }
