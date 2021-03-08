@@ -998,6 +998,7 @@ class FrontReport extends Cpdf
 				$fname = $dir.'/'.uniqid('').'.pdf';
 			$this->Output($fname, 'F');
 
+      $ref="";
 			if ($email == 1)
 			{
 				$contactData = array();
@@ -1010,6 +1011,7 @@ class FrontReport extends Cpdf
                         , 'name2'=>true);
                     $contactMap = array();
 					foreach($this->contactData as $contact)
+            if(!$ref) $ref = $contact['ref'];
 						if (!empty($contact['email'])) {
                             $key = implode('|', array_intersect_key($contact, $keys));
 							$contactMap[$key] = $contact;
@@ -1019,7 +1021,7 @@ class FrontReport extends Cpdf
 
 				if(!count($contactData)) {
 					$this->SetLang(user_language());
-					display_warning(sprintf(_("You have no email contact defined for this type of document for '%s'."), $this->formData['recipient_name']));
+					display_warning(sprintf(_("You have no email contact defined for this type of document for '%s' '%s'."),$ref, $this->formData['recipient_name']));
 				} else {
 					$sent = $try = 0;
 					$emails = "";
