@@ -223,6 +223,9 @@ if (isset($_GET['AddedID'])) {
     } else
     {
         submenu_print(_("&Email Sales Invoice"), ST_SALESINVOICE, $invoice."-".ST_SALESINVOICE, null, 1, null);
+        if(defined('FAMES_URL')) {
+          hyperlink_params(FAMES_URL."/customers/invoice/commodity_codes/$invoice_no/Nothing", _("Process Shipping"), "");
+        }
     }
 	set_focus('prtopt');
 	
