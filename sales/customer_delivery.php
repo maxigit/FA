@@ -62,6 +62,7 @@ if (isset($_GET['AddedID'])) {
 	display_note(print_document_link($dispatch_no, _("E&mail as Packing Slip"), true, ST_CUSTDELIVERY, false, "printlink", "", 1, 1), 1);
 
 	display_note(get_gl_view_str(13, $dispatch_no, _("View the GL Journal Entries for this Dispatch")),1);
+	hyperlink_params("$path_to_root/sales/customer_invoice.php", _("Invoice This Delivery"), "DeliveryNumber=$dispatch_no");
 
   // deliveries to batch with if any
   $_POST['OutstandingOnly'] = True;
@@ -70,7 +71,6 @@ if (isset($_GET['AddedID'])) {
   deliveries_table($customer,null,True);
   end_form();
 
-	hyperlink_params("$path_to_root/sales/customer_invoice.php", _("Invoice This Delivery"), "DeliveryNumber=$dispatch_no");
 
 	// hyperlink_params("$path_to_root/sales/inquiry/sales_orders_view.php", _("Select Another Order For Dispatch"), "OutstandingOnly=1");
 
@@ -83,6 +83,10 @@ if (isset($_GET['AddedID'])) {
     end_row();
     end_table();
     end_form();
+
+    $_POST['order_view_mode'] = 'OutstandingOnly';
+    order_inquiry_table($customer, ST_SALESORDER);
+
 
 
 	display_footer_exit();

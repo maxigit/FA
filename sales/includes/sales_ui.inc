@@ -58,6 +58,7 @@ function now_or_never_cell($now_or_never) {
     label_cell($now_or_never ? "<span class='redfg'>Now or never</span>": "Happy to wait");
 }
 //------------------------------------------------------------------------------------------------
+// Delivery Table
 function trans_view($trans, $trans_no)
 {
 	return get_customer_trans_view_str(ST_CUSTDELIVERY, $trans['trans_no']);
@@ -111,7 +112,6 @@ function ppd_percent($row) {
 
 function deliveries_table($selected_customer, $selected_stock_item=null,$check_batch=false) {
   $sql = get_sql_for_sales_deliveries_view($selected_customer, $selected_stock_item);
-  display_warning("SQL: $sql");
   if($check_batch)
      $batch_fun = 'batch_checkbox_checked';
   else 
@@ -143,5 +143,163 @@ function deliveries_table($selected_customer, $selected_stock_item=null,$check_b
   //$table->width = "92%";
 
   display_db_pager($table);
+}
+//---------------------------------------------------------------------------------------------
+//	Orders inquiry table
+//
+function check_overdue_order($row)
+{
+	global $trans_type;
+	if ($trans_type == ST_SALESQUOTE)
+		return (date1_greater_date2(Today(), sql2date($row['delivery_date'])));
+	else
+		return ($row['type'] == 0
+			&& date1_greater_date2(Today(), sql2date($row['delivery_date']))
+			&& ($row['TotDelivered'] < $row['TotQuantity']));
+}
+
+function view_link($dummy, $order_no)
+{
+	global $trans_type;
+	return  get_customer_trans_view_str($trans_type, $order_no);
+}
+
+function prt_link($row)
+{
+	global $trans_type;
+	return print_document_link($row['order_no'], _("Print"), true, $trans_type, ICON_PRINT);
+}
+
+function edit_link($row) 
+{
+	if (@$_GET['popup'])
+		return '';
+	global $trans_type;
+	$modify = ($trans_type == ST_SALESORDER ? "ModifyOrderNumber" : "ModifyQuotationNumber");
+  return pager_link( _("Edit"),
+    "/sales/sales_order_entry.php?$modify=" . $row['order_no'], ICON_EDIT);
+}
+
+function dispatch_link($row)
+{
+	global $trans_type;
+	if ($trans_type == ST_SALESORDER)
+  		return pager_link( _("Dispatch"),
+			"/sales/customer_delivery.php?OrderNumber=" .$row['order_no'], ICON_DOC);
+	else		
+  		return pager_link( _("Sales Order"),
+			"/sales/sales_order_entry.php?OrderNumber=" .$row['order_no'], ICON_DOC);
+}
+
+function invoice_link($row)
+{
+	global $trans_type;
+	if ($trans_type == ST_SALESORDER)
+  		return pager_link( _("Invoice"),
+			"/sales/sales_order_entry.php?NewInvoice=" .$row["order_no"], ICON_DOC);
+	else
+		return '';
+}
+
+function delivery_link($row)
+{
+  return pager_link( _("Delivery"),
+	"/sales/sales_order_entry.php?NewDelivery=" .$row['order_no'], ICON_DOC);
+}
+
+function order_link($row)
+{
+  return pager_link( _("Sales Order"),
+	"/sales/sales_order_entry.php?NewQuoteToSalesOrder=" .$row['order_no'], ICON_DOC);
+}
+
+function tmpl_checkbox($row)
+{
+	global $trans_type;
+	if ($trans_type == ST_SALESQUOTE)
+		return '';
+	if (@$_GET['popup'])
+		return '';
+	$name = "chgtpl" .$row['order_no'];
+	$value = $row['type'] ? 1:0;
+
+// save also in hidden field for testing during 'Update'
+
+ return checkbox(null, $name, $value, true,
+ 	_('Set this order as a template for direct deliveries/invoices'))
+	. hidden('last['.$row['order_no'].']', $value, false);
+}
+function order_inquiry_table($selected_customer, $trans_type_local) {
+  global $trans_type;
+  $save_trans_type = $trans_type;
+  $trans_type = $trans_type_local;
+  $sql = get_sql_for_sales_orders_view($selected_customer, $trans_type, $_POST['OrderNumber'], $_POST['order_view_mode'],
+    @$selected_stock_item, @$_POST['OrdersAfterDate'], @$_POST['OrdersToDate'], @$_POST['OrderReference'], $_POST['StockLocation'], $_POST['customer_id']);
+  display_warning("SQL: $sql");
+
+if ($trans_type == ST_SALESORDER)
+	$cols = array(
+		_("Order #") => array('fun'=>'view_link'),
+		_("Ref") => array('type' => 'sorder.reference', 'ord' => '') ,
+		_("Customer") => array('type' => 'debtor.name' , 'ord' => 'asc') ,
+		_("Branch"), 
+		_("Cust Order Ref"),
+		_("Order Date") => array('type' =>  'date', 'ord' => ''),
+		_("Required By") =>array('type'=>'date', 'ord'=>''),
+		_("Delivery To"), 
+		_("Order Total") => array('type'=>'amount', 'ord'=>''),
+		'Type' => 'skip',
+		_("Currency") => array('align'=>'center')
+	);
+else
+	$cols = array(
+		_("Quote #") => array('fun'=>'view_link'),
+		_("Ref"),
+		_("Customer"),
+		_("Branch"), 
+		_("Cust Order Ref"),
+		_("Quote Date") => 'date',
+		_("Valid until") =>array('type'=>'date', 'ord'=>''),
+		_("Delivery To"), 
+		_("Quote Total") => array('type'=>'amount', 'ord'=>''),
+		'Type' => 'skip',
+		_("Currency") => array('align'=>'center')
+	);
+if ($_POST['order_view_mode'] == 'OutstandingOnly') {
+	//array_substitute($cols, 4, 1, _("Cust Order Ref"));
+	array_append($cols, array(
+		array('insert'=>true, 'fun'=>'dispatch_link'),
+		array('insert'=>true, 'fun'=>'edit_link')));
+
+} elseif ($_POST['order_view_mode'] == 'InvoiceTemplates') {
+	array_substitute($cols, 4, 1, _("Description"));
+	array_append($cols, array( array('insert'=>true, 'fun'=>'invoice_link')));
+
+} else if ($_POST['order_view_mode'] == 'DeliveryTemplates') {
+	array_substitute($cols, 4, 1, _("Description"));
+	array_append($cols, array(
+			array('insert'=>true, 'fun'=>'delivery_link'))
+	);
+
+} elseif ($trans_type == ST_SALESQUOTE) {
+	 array_append($cols,array(
+					array('insert'=>true, 'fun'=>'edit_link'),
+					array('insert'=>true, 'fun'=>'order_link'),
+					array('insert'=>true, 'fun'=>'prt_link')));
+} elseif ($trans_type == ST_SALESORDER) {
+	 array_append($cols,array(
+			_("Tmpl") => array('insert'=>true, 'fun'=>'tmpl_checkbox'),
+					array('insert'=>true, 'fun'=>'edit_link'),
+					array('insert'=>true, 'fun'=>'prt_link')));
+};
+
+
+$table =& new_db_pager('orders_tbl', $sql, $cols);
+$table->set_marker('check_overdue_order', _("Marked items are overdue."));
+
+$table->width = "80%";
+
+display_db_pager($table);
+$trans_type = $save_trans_type;
 }
 ?>
