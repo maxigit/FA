@@ -1,1 +1,1 @@
-set path=.,**
+set path=,,
