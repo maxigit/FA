@@ -321,7 +321,11 @@ class BoxReports
 					$ref = ($print_invoice_no == 1 ? "trans_no" : "reference");
 					$sql = "SELECT concat(".TB_PREF."debtor_trans.trans_no, '-',
 						".TB_PREF."debtor_trans.type) AS TNO, concat('$IV ', ".TB_PREF."debtor_trans.$ref,' ', ".TB_PREF."debtors_master.name) as IName
-						FROM ".TB_PREF."debtors_master, ".TB_PREF."debtor_trans WHERE type=".ST_SALESINVOICE." AND ".TB_PREF."debtors_master.debtor_no=".TB_PREF."debtor_trans.debtor_no ORDER BY ".TB_PREF."debtor_trans.trans_no DESC";
+            FROM ".TB_PREF."debtors_master, ".TB_PREF."debtor_trans WHERE type=".ST_SALESINVOICE." AND ".TB_PREF."debtors_master.debtor_no=".TB_PREF."debtor_trans.debtor_no ";
+          //$sql .= " AND ".TB_PREF."debtor_trans.tran_date >= DATE_ADD(CURDATE(), INTERVAL -2 YEAR)";
+          $sql .= " ORDER BY ".TB_PREF."debtor_trans.trans_no DESC"; 
+          $sql .= " LIMIT 500";
+          // Limit to 2 years back
 					return combo_input($name, '', $sql, 'TNO', 'IName',array('order'=>false));
 
 				case 'CREDIT':
