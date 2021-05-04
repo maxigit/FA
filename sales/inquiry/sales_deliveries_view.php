@@ -11,7 +11,7 @@
 ***********************************************************************/
 $page_security = 'SA_SALESINVOICE';
 $path_to_root = "../..";
-include($path_to_root . "/includes/db_pager.inc");
+include_once($path_to_root . "/includes/db_pager.inc");
 include($path_to_root . "/includes/session.inc");
 
 include($path_to_root . "/sales/includes/sales_ui.inc");
@@ -133,73 +133,6 @@ else
 }
 
 //---------------------------------------------------------------------------------------------
-function trans_view($trans, $trans_no)
-{
-	return get_customer_trans_view_str(ST_CUSTDELIVERY, $trans['trans_no']);
-}
-
-function batch_checkbox($row)
-{
-	$name = "Sel_" .$row['trans_no'];
-	return $row['Done'] ? '' :
-		"<input type='checkbox' name='$name' value='1' >"
-// add also trans_no => branch code for checking after 'Batch' submit
-	 ."<input name='Sel_[".$row['trans_no']."]' type='hidden' value='"
-	 .$row['branch_code'].'-'.$row['ppd'].'-'.$row['ppd_days']."'>\n";
-}
-
-function edit_link($row)
-{
-	return $row["Outstanding"]==0 ? '' :
-		pager_link(_('Edit'), "/sales/customer_delivery.php?ModifyDelivery="
-			.$row['trans_no'], ICON_EDIT);
-}
-
-function prt_link($row)
-{
-	return print_document_link($row['trans_no'], _("Print"), true, ST_CUSTDELIVERY, ICON_PRINT);
-}
-
-function invoice_link($row)
-{
-	return $row["Outstanding"]==0 ? '' :
-		pager_link(_('Invoice'), "/sales/customer_invoice.php?DeliveryNumber=" 
-			.$row['trans_no'], ICON_DOC);
-}
-
-function check_overdue($row)
-{
-   	return date1_greater_date2(Today(), sql2date($row["due_date"])) && 
-			$row["Outstanding"]!=0;
-}
-
-function ppd_percent($row) {
-    return number_format2($row['ppd']*100, user_percent_dec())."% (".$row['ppd_days'] .")";
-    
-}
-//------------------------------------------------------------------------------------------------
-$sql = get_sql_for_sales_deliveries_view($selected_customer, $selected_stock_item);
-
-$cols = array(
-		_("Delivery #") => array('fun'=>'trans_view'), 
-		_("Customer"), 
-		'branch_code' => 'skip',
-		_("Branch") => array('ord'=>''), 
-		_("Contact"),
-		_("Reference"), 
-		_("Cust Ref"), 
-		_("Delivery Date") => array('type'=>'date', 'ord'=>''),
-		_("Due By") => 'date', 
-		_("Delivery Total") => array('type'=>'amount', 'ord'=>''),
-        _("PPD") => array('fun'=>'ppd_percent', 'align'=>'right') ,
-        _("days") => 'skip', // array('align'=>'center') ,
-		_("Currency") => array('align'=>'center'),
-		submit('BatchInvoice',_("Batch"), false, _("Batch Invoicing")) 
-			=> array('insert'=>true, 'fun'=>'batch_checkbox', 'align'=>'center'),
-		array('insert'=>true, 'fun'=>'edit_link'),
-		array('insert'=>true, 'fun'=>'invoice_link'),
-		array('insert'=>true, 'fun'=>'prt_link')
-);
 
 //-----------------------------------------------------------------------------------
 if (isset($_SESSION['Batch']))
@@ -209,13 +142,8 @@ if (isset($_SESSION['Batch']))
     unset($_SESSION['Batch']);
 }
 
-$table =& new_db_pager('deliveries_tbl', $sql, $cols);
-$table->set_marker('check_overdue', _("Marked items are overdue."));
 
-//$table->width = "92%";
-
-display_db_pager($table);
-
+deliveries_table($selected_customer, $selected_stock_item);
 end_form();
 end_page();
 

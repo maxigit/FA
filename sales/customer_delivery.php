@@ -63,6 +63,13 @@ if (isset($_GET['AddedID'])) {
 
 	display_note(get_gl_view_str(13, $dispatch_no, _("View the GL Journal Entries for this Dispatch")),1);
 
+  // deliveries to batch with if any
+  $_POST['OutstandingOnly'] = True;
+  start_form(false, false, '/sales/inquiry/sales_deliveries_view.php?OutstandingOnly=1');
+  $customer = $_SESSION['OriginalOrder']->customer_id;
+  deliveries_table($customer,null,True);
+  end_form();
+
 	hyperlink_params("$path_to_root/sales/customer_invoice.php", _("Invoice This Delivery"), "DeliveryNumber=$dispatch_no");
 
 	// hyperlink_params("$path_to_root/sales/inquiry/sales_orders_view.php", _("Select Another Order For Dispatch"), "OutstandingOnly=1");
@@ -76,6 +83,7 @@ if (isset($_GET['AddedID'])) {
     end_row();
     end_table();
     end_form();
+
 
 	display_footer_exit();
 

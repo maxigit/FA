@@ -411,8 +411,10 @@ function get_sql_for_sales_deliveries_view($selected_customer, $selected_stock_i
 	}
 	else
 	{
-		$sql .= " AND trans.tran_date >= '".date2sql($_POST['DeliveryAfterDate'])."'";
-		$sql .= " AND trans.tran_date <= '".date2sql($_POST['DeliveryToDate'])."'";
+    if(isset($_POST['DeliveryAfterDate']))
+      $sql .= " AND trans.tran_date >= '".date2sql($_POST['DeliveryAfterDate'])."'";
+    if(isset($_POST['DeliveryAfterDate']))
+      $sql .= " AND trans.tran_date <= '".date2sql($_POST['DeliveryToDate'])."'";
 
 		if ($selected_customer != -1)
 			$sql .= " AND trans.debtor_no=".db_escape($selected_customer)." ";

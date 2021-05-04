@@ -197,6 +197,12 @@ if (isset($_GET['AddedID'])) {
 
 	display_note(get_gl_view_str(ST_CUSTDELIVERY, $delivery, _("View the GL Journal Entries for this Dispatch")),0, 1);
 
+  $_POST['OutstandingOnly'] = True;
+  start_form(false, false, '/sales/inquiry/sales_deliveries_view.php?OutstandingOnly=1');
+  $customer = $_SESSION['OriginalOrder']->customer_id;
+  deliveries_table($customer,null,True);
+  end_form();
+
 	submenu_option(_("Make &Invoice Against This Delivery"),
 		"/sales/customer_invoice.php?DeliveryNumber=$delivery");
 
