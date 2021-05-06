@@ -61,7 +61,7 @@ function now_or_never_cell($now_or_never) {
 // Delivery Table
 function trans_view($trans, $trans_no)
 {
-	return get_customer_trans_view_str(ST_CUSTDELIVERY, $trans['trans_no']);
+	return get_trans_view_str($trans["type"], $trans["trans_no"]);
 }
 
 function batch_checkbox($row, $checked=false)

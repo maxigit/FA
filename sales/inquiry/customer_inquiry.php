@@ -124,11 +124,6 @@ function order_view($row)
 		: "";
 }
 
-function trans_view($trans)
-{
-	return get_trans_view_str($trans["type"], $trans["trans_no"]);
-}
-
 function due_date($row)
 {
 	return	$row["type"] == ST_SALESINVOICE	? $row["due_date"] : '';
@@ -192,7 +187,7 @@ function edit_link($row)
 	return $str ? pager_link(_('Edit'), $str, ICON_EDIT) : '';
 }
 
-function prt_link($row)
+function prt_link2($row)
 {
   	if ($row['type'] == ST_CUSTPAYMENT || $row['type'] == ST_BANKDEPOSIT) 
 		return print_document_link($row['trans_no']."-".$row['type'], _("Print Receipt"), true, ST_CUSTPAYMENT, ICON_PRINT);
@@ -229,7 +224,7 @@ $cols = array(
 		array('insert'=>true, 'fun'=>'gl_view'),
 		array('insert'=>true, 'fun'=>'credit_link'),
 		array('insert'=>true, 'fun'=>'edit_link'),
-		array('insert'=>true, 'fun'=>'prt_link')
+		array('insert'=>true, 'fun'=>'prt_link2')
 	);
 
 

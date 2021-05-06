@@ -64,11 +64,6 @@ start_form();
 // 	return $systypes_array[$type];
 // }
 
-function trans_view($trans)
-{
-	return get_trans_view_str($trans["type"], $trans["trans_no"]);
-}
-
 function alloc_link($row)
 {
     return alloc_customer_link($row);
