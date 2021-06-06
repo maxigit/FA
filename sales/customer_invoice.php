@@ -583,8 +583,9 @@ $accumulate_shipping = get_company_pref('accumulate_shipping');
 if ($is_batch_invoice && $accumulate_shipping)
 	set_delivery_shipping_sum(array_keys($_SESSION['Items']->src_docs));
 # Calculate shipping
-# 9.5 or free postage above 300 for delivery in the UK.
-# 20 otherwise
+# 11.5 or free postage above 300 for delivery in the UK.
+# 20 offshore UK
+# 23.5 International
 $inv_items_total = $_SESSION['Items']->get_items_total_dispatch(false);
 $inv_items_total_ppd = $_SESSION['Items']->get_items_total_dispatch(true);
 
@@ -596,12 +597,16 @@ function shipping_rules($cart, $ship_via, $shipping_cost) {
                 $shipping_cost = price_format(0);
             }
             else {
-                $shipping_cost = 9.5;
+                $shipping_cost = 11.5;
             }
             break;
         case 2: // Off-shore 
-            $shipping_cost = 20.0;
-            break;
+          //display_warning("TAX ".$cart->tax_group_id);
+          if($cart->tax_group_id == 1) // uk no custom date
+            $shipping_cost = 20;
+          else
+            $shipping_cost = 23.5;
+          break;
         case 3: // free shipping
             $shipping_cost = 0.0;
             break;
