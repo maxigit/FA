@@ -370,6 +370,14 @@ var inserts = {
 				return false;
 			}
 	},
+  'button.inputsubmit':
+    function(e) {
+      e.onclick = function() {
+        e.disabled=true;
+        e.form.submit();
+      }
+      return false;
+    },
     '.amount': function(e) {
 		if(e.onblur==undefined) {
   		  e.onblur = function() {
