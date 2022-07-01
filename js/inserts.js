@@ -373,10 +373,21 @@ var inserts = {
   'button.inputsubmit':
     function(e) {
       e.onclick = function() {
+        if (e.value) {
+          // input with submit type are net sent
+          // unless you click on them.
+          // we need to emulate this behavior and add
+          // the current button to the form.
+          var input = document.createElement('input');
+          input.setAttribute('name', e.name);
+          input.setAttribute('value', e.value);
+          input.setAttribute('type', 'hidden');
+          e.form.appendChild(input);
+        }
         e.disabled=true;
         e.form.submit();
       }
-      return false;
+      return true;
     },
     '.amount': function(e) {
 		if(e.onblur==undefined) {
