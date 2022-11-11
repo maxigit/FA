@@ -1,0 +1,590 @@
+explain extended
+SELECT 
+  sub.debtor_no, 
+  sub.branch_code, 
+  debtor_ref, 
+  branch_ref, 
+  min(delivery_date) AS delivery_date, 
+  max(max_delivery_date) AS max_delivery_date, 
+  sum(order_quantity) AS quantity, 
+  sum(amount) AS amount, 
+  SUM(
+    GREATEST(
+      0, 
+      LEAST(
+        order_quantity - quantity_held - quantity_to_pick, 
+        available_topick - quantity_to_pick
+      )
+    )
+  ) AS available_quantity, 
+  SUM(
+    IF(
+      order_quantity > 0, 
+      amount / order_quantity *(
+        GREATEST(
+          0, 
+          LEAST(
+            order_quantity - quantity_held - quantity_to_pick, 
+            available_topick - quantity_to_pick
+          )
+        )
+      ), 
+      0
+    )
+  ) AS available_amount, 
+  sum(quantity_held) AS quantity_held, 
+  min(occasion_date) AS occasion_date, 
+  group_concat(
+    distinct order_comment separator ';'
+  ) AS order_comment, 
+  group_concat(
+    distinct detail_comment separator ';'
+  ) AS detail_comment, 
+  sum(quantity_to_pick) AS quantity_to_pick, 
+  sum(amount_to_pick) AS amount_to_pick 
+FROM 
+  (
+    SELECT  -- select 2
+      debtor_no, 
+      branch_code, 
+      min(so.delivery_date) AS delivery_date, 
+      max(so.delivery_date) AS max_delivery_date, 
+      sum(sub.order_quantity) AS order_quantity, 
+      sum(
+        sub.order_quantity * unit_price *(1 - discount_percent)
+      ) AS amount, 
+      sum(available) as available_topick, 
+      sum(
+        GREATEST(
+          0, 
+          quantity_held - COALESCE(quantity_to_pick, 0)
+        )
+      ) AS quantity_held, 
+      min(sub.occasion_date) AS occasion_date, 
+      group_concat(
+        distinct so.comments separator ';'
+      ) AS order_comment, 
+      group_concat(
+        distinct sod.comment separator ';'
+      ) AS detail_comment, 
+      COALESCE(
+        sum(quantity_to_pick), 
+        0
+      ) AS quantity_to_pick, 
+      sum(
+        quantity_to_pick * unit_price *(1 - discount_percent)
+      ) AS amount_to_pick 
+    FROM 
+      0_sales_order_details sod 
+      JOIN 0_sales_orders so ON (
+        so.order_no = sod.order_no 
+        AND so.trans_type = sod.trans_type 
+        AND so.trans_type = 30
+      ) 
+      LEFT JOIN (
+        SELECT 
+          sod.id, 
+          so.order_no, 
+          stk_code, 
+          pickable.order_quantity, 
+          pickable.available, 
+          pickable.allocated_detail, 
+          pickable.qoh, 
+          to_pick.quantity AS quantity_to_pick, 
+          availabily, 
+          delivery_date, 
+          can_wait_until_date, 
+          occasion_date, 
+          relegation_date, 
+          expiry_date, 
+          comment, 
+          sod.`priority`, 
+          ref, 
+          sod.id AS detail_id, 
+          IF(
+            delivery_date > '2022-11-08', order_quantity, 
+            0
+          ) AS quantity_held 
+        FROM 
+          0_sales_order_details sod 
+          JOIN 0_sales_orders so ON (
+            so.order_no = sod.order_no 
+            AND so.trans_type = sod.trans_type 
+            AND so.trans_type = 30
+          ) 
+          LEFT JOIN(
+            SELECT 
+              detail_id, 
+              SUM(quantity) quantity, 
+              MAX(quantity_before) quantity_before 
+            FROM 
+              0_denorm_order_details_queue 
+            WHERE 
+              expected_location IN ('DEF') 
+            GROUP BY 
+              detail_id
+          ) d ON (d.detail_id = sod.id) 
+          LEFT JOIN (
+            SELECT 
+              detail_id, 
+              - sum(quantity) as quantity, 
+              sku 
+            FROM 
+              0_topick 
+            WHERE 
+              type IN ('order', 'booked') 
+            GROUP BY 
+              detail_id
+          ) to_pick ON (to_pick.detail_id = sod.id) 
+          LEFT JOIN (
+            SELECT 
+              detail_id, 
+              order_quantity, 
+              available, 
+              allocated_detail, 
+              qoh 
+            FROM 
+              (
+                WITH topick AS (
+                  SELECT 
+                    detail_id, 
+                    - sum(quantity) as quantity, 
+                    sku 
+                  FROM 
+                    0_topick 
+                  WHERE 
+                    type IN ('order', 'booked') 
+                  GROUP BY 
+                    detail_id
+                ), 
+                grouped_queue AS (
+                  SELECT 
+                    detail_id, 
+                    stock_id, 
+                    sum(quantity) AS quantity, 
+                    min(quantity_before) AS quantity_before 
+                  FROM 
+                    0_denorm_order_details_queue 
+                  GROUP BY 
+                    detail_id
+                ), 
+                detail_summary_ AS (
+                  SELECT 
+                    detail_id, 
+                    d.quantity as allocated, 
+                    d.quantity_before, 
+                    (
+                      select 
+                        sum(
+                          GREATEST(
+                            0, 
+                            if(
+                              q.quantity_before < d.quantity_before -- before full quantity regardless if picked or not
+                              , 
+                              q.quantity, 
+                              COALESCE(topick.quantity, 0)
+                            )
+                          )
+                        ) 
+                      from 
+                        grouped_queue q 
+                        left join topick using(detail_id) 
+                      where 
+                        q.stock_id = d.stock_id
+                    ) as allocated_before_or_picked 
+                  FROM 
+                    grouped_queue d
+                ), 
+                detail_summary AS (
+                  SELECT 
+                    detail_id, 
+                    allocated, 
+                    quantity_before, 
+                    allocated_before_or_picked 
+                  FROM 
+                    detail_summary_
+                ) 
+                SELECT 
+                  sod.id AS detail_id, 
+                  sod.stk_code AS stock_id, 
+                  order_no, 
+                  debtor_no, 
+                  branch_code, 
+                  (sod.quantity - sod.qty_sent) as order_quantity, 
+                  detail_summary.allocated AS allocated_detail, 
+                  qoh, 
+                  topick.quantity AS quantity_to_pick, 
+                  GREATEST(
+                    0, 
+                    LEAST(
+                      COALESCE(qoh, 0) - detail_summary.allocated_before_or_picked, 
+                      detail_summary.allocated
+                    )
+                  ) available 
+                FROM 
+                  0_sales_order_details sod 
+                  JOIN 0_sales_orders so3 USING (order_no, trans_type) 
+                  LEFT JOIN detail_summary ON (
+                    sod.id = detail_summary.detail_id
+                  ) 
+                  LEFT JOIN topick ON (sod.id = topick.detail_id) 
+                  LEFT JOIN (
+                    SELECT 
+                      SUM(quantity) AS qoh, 
+                      stock_id 
+                    FROM 
+                      0_denorm_qoh 
+                    WHERE 
+                      loc_code IN ('DEF') 
+                    GROUP BY 
+                      stock_id
+                  ) qoh ON(qoh.stock_id = sod.stk_code) 
+                WHERE 
+                  1
+              ) sub
+          ) pickable ON (pickable.detail_id = sod.id) 
+          LEFT JOIN (
+            SELECT 
+              detail_id, 
+              expected_location as availabily 
+            FROM 
+              0_denorm_order_details_queue 
+            GROUP BY 
+              detail_id
+          ) dexp ON (dexp.detail_id = sod.id) 
+        WHERE 
+          sod.quantity > qty_sent 
+          AND expiry_date >= '2022/11/01'
+      ) sub ON (sod.id = sub.detail_id) 
+    WHERE 
+      sod.expiry_date >= '2022/11/01' 
+      AND sod.qty_sent < sod.quantity 
+    GROUP BY 
+      debtor_no, 
+      branch_code, 
+      sod.stk_code
+  ) sub 
+  JOIN 0_debtors_master USING (debtor_no) 
+  JOIN 0_cust_branch USING (debtor_no, branch_code) 
+GROUP BY 
+  debtor_no, 
+  branch_code 
+ORDER BY 
+  debtor_ref 
+LIMIT 
+  0, 1270;
+show warnings
+!!&stag +unsafe +t
++------+--------------------+------------------------------+--------+-------------------------------------------------+-----------+---------+---------------------------------------------------------+------------+----------+-----------------------------------------------------+
+| id   | select_type        | table                        | type   | possible_keys                                   | key       | key_len | ref                                                     | rows       | filtered | Extra                                               |
++------+--------------------+------------------------------+--------+-------------------------------------------------+-----------+---------+---------------------------------------------------------+------------+----------+-----------------------------------------------------+
+|    1 | PRIMARY            | 0_cust_branch                | ALL    | PRIMARY,branch_code                             | NULL      | NULL    | NULL                                                    | 795        |   100.00 | Using temporary; Using filesort                     |
+|    1 | PRIMARY            | 0_debtors_master             | eq_ref | PRIMARY                                         | PRIMARY   | 4       | fa.0_cust_branch.debtor_no                              | 1          |   100.00 |                                                     |
+|    1 | PRIMARY            | <derived2>                   | ref    | key1                                            | key1      | 8       | fa.0_cust_branch.debtor_no,fa.0_cust_branch.branch_code | 8072213254 |   100.00 |                                                     |
+|    2 | DERIVED            | sod                          | ALL    | sorder                                          | NULL      | NULL    | NULL                                                    | 267455     |    99.90 | Using where; Using temporary; Using filesort        |
+|    2 | DERIVED            | so                           | eq_ref | PRIMARY                                         | PRIMARY   | 6       | const,fa.sod.order_no                                   | 1          |   100.00 |                                                     |
+|    2 | DERIVED            | sod                          | eq_ref | PRIMARY,sorder                                  | PRIMARY   | 4       | fa.sod.id                                               | 1          |    99.90 | Using where                                         |
+|    2 | DERIVED            | so                           | eq_ref | PRIMARY                                         | PRIMARY   | 6       | const,fa.sod.order_no                                   | 1          |   100.00 |                                                     |
+|    2 | DERIVED            | <derived4>                   | ref    | key0                                            | key0      | 5       | fa.sod.id                                               | 10         |   100.00 |                                                     |
+|    2 | DERIVED            | <derived5>                   | ALL    | NULL                                            | NULL      | NULL    | NULL                                                    | 0          |     0.00 | Using where                                         |
+|    2 | DERIVED            | so                           | index  | PRIMARY                                         | PRIMARY   | 6       | NULL                                                    | 27120      |   100.00 | Using where; Using index                            |
+|    2 | DERIVED            | sod                          | ref    | PRIMARY,sorder                                  | sorder    | 6       | fa.so.trans_type,fa.so.order_no                         | 10         |   100.00 | Using where                                         |
+|    2 | DERIVED            | <derived16>                  | ALL    | NULL                                            | NULL      | NULL    | NULL                                                    | 0          |     0.00 | Using where                                         |
+|    2 | DERIVED            | <derived15>                  | ref    | key0                                            | key0      | 5       | fa.sod.id                                               | 2          |   100.00 |                                                     |
+|    2 | DERIVED            | <derived13>                  | ref    | key0                                            | key0      | 23      | fa.sod.stk_code                                         | 2          |   100.00 | Using where                                         |
+|    2 | DERIVED            | <derived14>                  | ref    | key0                                            | key0      | 5       | fa.sod.id                                               | 2          |   100.00 |                                                     |
+|   14 | LATERAL DERIVED    | 0_denorm_order_details_queue | ref    | detail_id                                       | detail_id | 5       | fa.sod.id                                               | 1          |   100.00 | Using index                                         |
+|   16 | DERIVED            | NULL                         | NULL   | NULL                                            | NULL      | NULL    | NULL                                                    | NULL       |     NULL | Impossible WHERE noticed after reading const tables |
+|   13 | LATERAL DERIVED    | 0_denorm_qoh                 | ref    | stock_id                                        | stock_id  | 23      | fa.sod.stk_code                                         | 4          |   100.00 | Using index condition                               |
+|   15 | LATERAL DERIVED    | 0_denorm_order_details_queue | ref    | detail_id                                       | detail_id | 5       | fa.sod.id                                               | 1          |   100.00 |                                                     |
+|   10 | DEPENDENT SUBQUERY | <derived7>                   | system | NULL                                            | NULL      | NULL    | NULL                                                    | 0          |     0.00 | Const row not found                                 |
+|   10 | DEPENDENT SUBQUERY | <derived8>                   | ref    | key0                                            | key0      | 23      | d.stock_id                                              | 170        |   100.00 |                                                     |
+|    8 | DERIVED            | 0_denorm_order_details_queue | ALL    | NULL                                            | NULL      | NULL    | NULL                                                    | 1705       |   100.00 | Using temporary; Using filesort                     |
+|    7 | DERIVED            | NULL                         | NULL   | NULL                                            | NULL      | NULL    | NULL                                                    | NULL       |     NULL | Impossible WHERE noticed after reading const tables |
+|    5 | DERIVED            | NULL                         | NULL   | NULL                                            | NULL      | NULL    | NULL                                                    | NULL       |     NULL | Impossible WHERE noticed after reading const tables |
+|    4 | DERIVED            | 0_denorm_order_details_queue | ALL    | expected_location,detail_id,expected_location_2 | NULL      | NULL    | NULL                                                    | 1705       |    38.59 | Using where; Using temporary; Using filesort        |
++------+--------------------+------------------------------+--------+-------------------------------------------------+-----------+---------+---------------------------------------------------------+------------+----------+-----------------------------------------------------+
++-------+------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Level | Code | Message                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
++-------+------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Note  | 1276 | Field or reference 'd.quantity_before' of SELECT #10 was resolved in SELECT #9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Note  | 1276 | Field or reference 'd.stock_id' of SELECT #10 was resolved in SELECT #9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Note  | 1003 | /* select#1 */ select `sub`.`debtor_no` AS `debtor_no`,`sub`.`branch_code` AS `branch_code`,`fa`.`0_debtors_master`.`debtor_ref` AS `debtor_ref`,`fa`.`0_cust_branch`.`branch_ref` AS `branch_ref`,min(`sub`.`delivery_date`) AS `delivery_date`,max(`sub`.`max_delivery_date`) AS `max_delivery_date`,sum(`sub`.`order_quantity`) AS `quantity`,sum(`sub`.`amount`) AS `amount`,sum(greatest(0,least(`sub`.`order_quantity` - `sub`.`quantity_held` - `sub`.`quantity_to_pick`,`sub`.`available_topick` - `sub`.`quantity_to_pick`))) AS `available_quantity`,sum(if(`sub`.`order_quantity` > 0,`sub`.`amount` / `sub`.`order_quantity` * greatest(0,least(`sub`.`order_quantity` - `sub`.`quantity_held` - `sub`.`quantity_to_pick`,`sub`.`available_topick` - `sub`.`quantity_to_pick`)),0)) AS `available_amount`,sum(`sub`.`quantity_held`) AS `quantity_held`,min(`sub`.`occasion_date`) AS `occasion_date`,group_concat(distinct `sub`.`order_comment` separator ';') AS `order_comment`,group_concat(distinct `sub`.`detail_comment` separator ';') AS `detail_comment`,sum(`sub`.`quantity_to_pick`) AS `quantity_to_pick`,sum(`sub`.`amount_to_pick`) AS `amount_to_pick` from (/* select#2 */ select `so`.`debtor_no` AS `debtor_no`,`so`.`branch_code` AS `branch_code`,min(`so`.`delivery_date`) AS `delivery_date`,max(`so`.`delivery_date`) AS `max_delivery_date`,sum(`fa`.`sod`.`quantity` - `fa`.`sod`.`qty_sent`) AS `order_quantity`,sum((`fa`.`sod`.`quantity` - `fa`.`sod`.`qty_sent`) * `sod`.`unit_price` * (1 - `sod`.`discount_percent`)) AS `amount`,sum(greatest(0,least(coalesce(`qoh`.`qoh`,0) - (/* select#10 */ select sum(greatest(0,if(`q`.`quantity_before` < `d`.`quantity_before`,`q`.`quantity`,coalesce(NULL,0)))) from `grouped_queue` `q` where `q`.`stock_id` = `d`.`stock_id`),`d`.`quantity`))) AS `available_topick`,sum(greatest(0,if(`fa`.`so`.`delivery_date` > '2022-11-08',`fa`.`sod`.`quantity` - `fa`.`sod`.`qty_sent`,0) - coalesce(`to_pick`.`quantity`,0))) AS `quantity_held`,min(`fa`.`sod`.`occasion_date`) AS `occasion_date`,group_concat(distinct `so`.`comments` separator ';') AS `order_comment`,group_concat(distinct `sod`.`comment` separator ';') AS `detail_comment`,coalesce(sum(`to_pick`.`quantity`),0) AS `quantity_to_pick`,sum(`to_pick`.`quantity` * `sod`.`unit_price` * (1 - `sod`.`discount_percent`)) AS `amount_to_pick` from `fa`.`0_sales_order_details` `sod` join `fa`.`0_sales_orders` `so` left join (`fa`.`0_sales_order_details` `sod` join `fa`.`0_sales_orders` `so` left join (/* select#4 */ select `0_denorm_order_details_queue`.`detail_id` AS `detail_id`,sum(`0_denorm_order_details_queue`.`quantity`) AS `quantity`,max(`0_denorm_order_details_queue`.`quantity_before`) AS `quantity_before` from `fa`.`0_denorm_order_details_queue` where `0_denorm_order_details_queue`.`expected_location` = 'DEF' group by `0_denorm_order_details_queue`.`detail_id`) `d` on(`d`.`detail_id` = `sod`.`id`) left join (/* select#5 */ select 325719 AS `detail_id`,-sum(117) AS `quantity`,'po' AS `sku` from dual where 0 group by 325719) `to_pick` on(`to_pick`.`detail_id` = `sod`.`id`) left join (`fa`.`0_sales_order_details` `sod` join `fa`.`0_sales_orders` `so` left join (`grouped_queue` `d`) on(`d`.`detail_id` = `sod`.`id`) left join `topick` on(`topick`.`detail_id` = `sod`.`id`) left join (/* select#13 */ select sum(`fa`.`0_denorm_qoh`.`quantity`) AS `qoh`,`fa`.`0_denorm_qoh`.`stock_id` AS `stock_id` from `fa`.`0_denorm_qoh` where `fa`.`0_denorm_qoh`.`loc_code` = 'DEF' and `fa`.`0_denorm_qoh`.`stock_id` = `fa`.`sod`.`stk_code` group by `fa`.`0_denorm_qoh`.`stock_id`) `qoh` on(`qoh`.`stock_id` = `fa`.`sod`.`stk_code` and `fa`.`sod`.`stk_code` is not null)) on(`fa`.`sod`.`id` = `sod`.`id` and `fa`.`sod`.`order_no` = `fa`.`so`.`order_no` and `fa`.`sod`.`trans_type` = `fa`.`so`.`trans_type` and 1) left join (/* select#14 */ select `fa`.`0_denorm_order_details_queue`.`detail_id` AS `detail_id`,`fa`.`0_denorm_order_details_queue`.`expected_location` AS `availabily` from `fa`.`0_denorm_order_details_queue` where `fa`.`0_denorm_order_details_queue`.`detail_id` = `sod`.`id` and `fa`.`0_denorm_order_details_queue`.`detail_id` = `fa`.`sod`.`id` group by `fa`.`0_denorm_order_details_queue`.`detail_id`) `dexp` on(`dexp`.`detail_id` = `sod`.`id`)) on(`fa`.`sod`.`id` = `sod`.`id` and `fa`.`so`.`order_no` = `fa`.`sod`.`order_no` and `fa`.`sod`.`trans_type` = 30 and `fa`.`so`.`trans_type` = 30 and `fa`.`sod`.`quantity` > `fa`.`sod`.`qty_sent` and `fa`.`sod`.`expiry_date` >= '2022/11/01' and `fa`.`sod`.`order_no` is not null) where `so`.`order_no` = `sod`.`order_no` and `sod`.`trans_type` = 30 and `so`.`trans_type` = 30 and `sod`.`expiry_date` >= '2022/11/01' and `sod`.`qty_sent` < `sod`.`quantity` group by `so`.`debtor_no`,`so`.`branch_code`,`sod`.`stk_code`) `sub` join `fa`.`0_debtors_master` join `fa`.`0_cust_branch` where `fa`.`0_debtors_master`.`debtor_no` = `fa`.`0_cust_branch`.`debtor_no` and `sub`.`debtor_no` = `fa`.`0_cust_branch`.`debtor_no` and `sub`.`branch_code` = `fa`.`0_cust_branch`.`branch_code` group by `sub`.`debtor_no`,`sub`.`branch_code` order by `fa`.`0_debtors_master`.`debtor_ref` limit 0,1270 |
++-------+------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+!!^out
+
+
+
+
+
+
+
+
+
+
+
+explain
+SELECT  -- select 2
+*
+-- debtor_no, 
+-- branch_code, 
+-- min(so.delivery_date) AS delivery_date, 
+-- max(so.delivery_date) AS max_delivery_date, 
+-- sum(sub.order_quantity) AS order_quantity, 
+-- sum(
+--     sub.order_quantity * unit_price *(1 - discount_percent)
+-- ) AS amount, 
+-- sum(available) as available_topick, 
+-- sum(
+--     GREATEST(
+--         0, 
+--         quantity_held - COALESCE(quantity_to_pick, 0)
+--     )
+-- ) AS quantity_held, 
+-- min(sub.occasion_date) AS occasion_date, 
+-- group_concat(
+--     distinct so.comments separator ';'
+-- ) AS order_comment, 
+-- group_concat(
+--     distinct sod.comment separator ';'
+-- ) AS detail_comment, 
+-- COALESCE(
+--     sum(quantity_to_pick), 
+--     0
+-- ) AS quantity_to_pick, 
+-- sum(
+--     quantity_to_pick * unit_price *(1 - discount_percent)
+-- ) AS amount_to_pick 
+FROM 
+0_sales_order_details sod 
+JOIN 0_sales_orders so ON (
+    so.order_no = sod.order_no 
+    AND so.trans_type = sod.trans_type 
+    AND so.trans_type = 30
+) 
+LEFT JOIN (
+    SELECT 
+    -- sod.id, 
+    -- so.order_no, 
+    -- stk_code, 
+    -- pickable.order_quantity, 
+    -- pickable.available, 
+    -- pickable.allocated_detail, 
+    -- pickable.qoh, 
+    -- to_pick.quantity AS quantity_to_pick, 
+    -- availabily, 
+    -- delivery_date, 
+    -- can_wait_until_date, 
+    -- occasion_date, 
+    -- relegation_date, 
+    -- expiry_date, 
+    -- comment, 
+    -- sod.`priority`, 
+    -- ref, 
+    sod.id AS detail_id, 
+    IF(
+        delivery_date > '2021-11-08', order_quantity, 
+        0
+        ) AS quantity_held 
+        FROM 
+        0_sales_order_details sod 
+        JOIN 0_sales_orders so ON (
+            so.order_no = sod.order_no 
+            AND so.trans_type = sod.trans_type 
+            AND so.trans_type = 30
+        ) 
+        -- LEFT JOIN(
+        --     SELECT 
+        --     detail_id, 
+        --     SUM(quantity) quantity, 
+        --     MAX(quantity_before) quantity_before 
+        --     FROM 
+        --     0_denorm_order_details_queue 
+        --     WHERE 
+        --     expected_location IN ('DEF') 
+        --     GROUP BY 
+        --     detail_id
+        -- ) d ON (d.detail_id = sod.id) 
+        -- LEFT JOIN (
+        --     SELECT 
+        --     detail_id, 
+        --     - sum(quantity) as quantity, 
+        --     sku 
+        --     FROM 
+        --     0_topick 
+        --     WHERE 
+        --     type IN ('order', 'booked') 
+        --     GROUP BY 
+        --     detail_id
+        -- ) to_pick ON (to_pick.detail_id = sod.id) 
+        LEFT JOIN (
+            SELECT 
+            *
+            -- detail_id, 
+            -- order_quantity, 
+            -- available, 
+            -- allocated_detail, 
+            -- qoh 
+            FROM 
+            (
+                WITH topick AS (
+                    SELECT 
+                    detail_id, 
+                    - sum(quantity) as quantity, 
+                    sku 
+                    FROM 
+                    0_topick 
+                    WHERE 
+                    type IN ('order', 'booked') 
+                    GROUP BY 
+                    detail_id
+                ), 
+                grouped_queue AS (
+                    SELECT 
+                    detail_id, 
+                    stock_id, 
+                    sum(quantity) AS quantity, 
+                    min(quantity_before) AS quantity_before 
+                    FROM 
+                    0_denorm_order_details_queue 
+                    GROUP BY 
+                    detail_id
+                ), 
+                detail_summary_ AS (
+                    SELECT 
+                    detail_id, 
+                    d.quantity as allocated, 
+                    d.quantity_before, 
+                    (
+                        select 
+                        sum(
+                            GREATEST(
+                                0, 
+                                if(
+                                    q.quantity_before < d.quantity_before -- before full quantity regardless if picked or not
+                                    , 
+                                    q.quantity, 
+                                    COALESCE(topick.quantity, 0)
+                                    )
+                                )
+                            ) 
+                            from 
+                            grouped_queue q 
+                            left join topick using(detail_id) 
+                            where 
+                            q.stock_id = d.stock_id
+                        ) as allocated_before_or_picked 
+                        FROM 
+                        grouped_queue d
+                    ), 
+                    detail_summary AS (
+                        SELECT 
+                        detail_id, 
+                        allocated, 
+                        quantity_before, 
+                        allocated_before_or_picked 
+                        FROM 
+                        detail_summary_
+                    ) 
+                    SELECT 
+                    sod.id AS detail_id, 
+                    sod.stk_code AS stock_id, 
+                    order_no, 
+                    debtor_no, 
+                    branch_code, 
+                    (sod.quantity - sod.qty_sent) as order_quantity, 
+                    detail_summary.allocated AS allocated_detail, 
+                    -- qoh, 
+                    topick.quantity AS quantity_to_pick, 
+                    GREATEST(
+                        0, 
+                        LEAST(
+                            COALESCE( 0) - detail_summary.allocated_before_or_picked, 
+                            detail_summary.allocated
+                        )
+                    ) available 
+                    FROM 
+                    0_sales_order_details sod 
+                    JOIN 0_sales_orders so USING (order_no, trans_type) 
+                    LEFT JOIN detail_summary ON (
+                        sod.id = detail_summary.detail_id
+                    ) 
+                    LEFT JOIN topick ON (sod.id = topick.detail_id) 
+                    -- LEFT JOIN (
+                    --     SELECT 
+                    --     SUM(quantity) AS qoh, 
+                    --     stock_id 
+                    --     FROM 
+                    --     0_denorm_qoh 
+                    --     WHERE 
+                    --     loc_code IN ('DEF') 
+                    --     GROUP BY 
+                    --     stock_id
+                    -- ) qoh ON(qoh.stock_id = sod.stk_code) 
+                    WHERE 
+                    1
+                ) sub
+            ) pickable ON (pickable.detail_id = sod.id) 
+            LEFT JOIN (
+                SELECT 
+                detail_id, 
+                expected_location as availabily 
+                FROM 
+                0_denorm_order_details_queue 
+                GROUP BY 
+                detail_id
+            ) dexp ON (dexp.detail_id = sod.id) 
+            WHERE 
+            sod.quantity > qty_sent 
+            AND expiry_date >= '2021/11/01'
+        ) sub ON (sod.id = sub.detail_id) 
+        WHERE 
+        sod.expiry_date >= '2021/11/01' 
+        AND sod.qty_sent < sod.quantity 
+        GROUP BY 
+        debtor_no, 
+        branch_code
+        -- , sod.stk_code
+!!&stag
++------+--------------------+------------------------------+--------+----------------+-----------+---------+-----------------------+--------+-----------------------------------------------------+
+| id   | select_type        | table                        | type   | possible_keys  | key       | key_len | ref                   | rows   | Extra                                               |
++------+--------------------+------------------------------+--------+----------------+-----------+---------+-----------------------+--------+-----------------------------------------------------+
+|    1 | PRIMARY            | sod                          | ALL    | sorder         | NULL      | NULL    | NULL                  | 267455 | Using where; Using temporary; Using filesort        |
+|    1 | PRIMARY            | so                           | eq_ref | PRIMARY        | PRIMARY   | 6       | const,fa.sod.order_no | 1      |                                                     |
+|    1 | PRIMARY            | sod                          | eq_ref | PRIMARY,sorder | PRIMARY   | 4       | fa.sod.id             | 1      | Using where                                         |
+|    1 | PRIMARY            | so                           | eq_ref | PRIMARY        | PRIMARY   | 6       | const,fa.sod.order_no | 1      |                                                     |
+|    1 | PRIMARY            | sod                          | eq_ref | PRIMARY,sorder | PRIMARY   | 4       | fa.sod.id             | 1      | Using where                                         |
+|    1 | PRIMARY            | <derived12>                  | ALL    | NULL           | NULL      | NULL    | NULL                  | 0      | Using where                                         |
+|    1 | PRIMARY            | so                           | index  | PRIMARY        | PRIMARY   | 6       | NULL                  | 27120  | Using where; Using index                            |
+|    1 | PRIMARY            | <derived11>                  | ref    | key0           | key0      | 5       | fa.sod.id             | 2      |                                                     |
+|    1 | PRIMARY            | <derived10>                  | ref    | key0           | key0      | 5       | fa.sod.id             | 2      |                                                     |
+|   10 | LATERAL DERIVED    | 0_denorm_order_details_queue | ref    | detail_id      | detail_id | 5       | fa.sod.id             | 1      | Using index                                         |
+|   12 | DERIVED            | NULL                         | NULL   | NULL           | NULL      | NULL    | NULL                  | NULL   | Impossible WHERE noticed after reading const tables |
+|   11 | LATERAL DERIVED    | 0_denorm_order_details_queue | ref    | detail_id      | detail_id | 5       | fa.sod.id             | 1      |                                                     |
+|    7 | DEPENDENT SUBQUERY | <derived4>                   | system | NULL           | NULL      | NULL    | NULL                  | 0      | Const row not found                                 |
+|    7 | DEPENDENT SUBQUERY | <derived5>                   | ref    | key0           | key0      | 23      | d.stock_id            | 170    |                                                     |
+|    5 | DERIVED            | 0_denorm_order_details_queue | ALL    | NULL           | NULL      | NULL    | NULL                  | 1705   | Using temporary; Using filesort                     |
+|    4 | DERIVED            | NULL                         | NULL   | NULL           | NULL      | NULL    | NULL                  | NULL   | Impossible WHERE noticed after reading const tables |
++------+--------------------+------------------------------+--------+----------------+-----------+---------+-----------------------+--------+-----------------------------------------------------+
+!!^out
++------+--------------------+------------------------------+--------+----------------+-----------+---------+-----------------------+--------+-----------------------------------------------------+
+| id   | select_type        | table                        | type   | possible_keys  | key       | key_len | ref                   | rows   | Extra                                               |
++------+--------------------+------------------------------+--------+----------------+-----------+---------+-----------------------+--------+-----------------------------------------------------+
+|    1 | PRIMARY            | sod                          | ALL    | sorder         | NULL      | NULL    | NULL                  | 267455 | Using where; Using temporary; Using filesort        |
+|    1 | PRIMARY            | so                           | eq_ref | PRIMARY        | PRIMARY   | 6       | const,fa.sod.order_no | 1      |                                                     |
+|    1 | PRIMARY            | sod                          | eq_ref | PRIMARY,sorder | PRIMARY   | 4       | fa.sod.id             | 1      | Using where                                         |
+|    1 | PRIMARY            | so                           | eq_ref | PRIMARY        | PRIMARY   | 6       | const,fa.sod.order_no | 1      |                                                     |
+|    1 | PRIMARY            | sod                          | eq_ref | PRIMARY,sorder | PRIMARY   | 4       | fa.sod.id             | 1      | Using where                                         |
+|    1 | PRIMARY            | <derived12>                  | ALL    | NULL           | NULL      | NULL    | NULL                  | 0      | Using where                                         |
+|    1 | PRIMARY            | so                           | index  | PRIMARY        | PRIMARY   | 6       | NULL                  | 27120  | Using where; Using index                            |
+|    1 | PRIMARY            | <derived11>                  | ref    | key0           | key0      | 5       | fa.sod.id             | 2      |                                                     |
+|    1 | PRIMARY            | <derived10>                  | ref    | key0           | key0      | 5       | fa.sod.id             | 2      |                                                     |
+|   10 | LATERAL DERIVED    | 0_denorm_order_details_queue | ref    | detail_id      | detail_id | 5       | fa.sod.id             | 1      | Using index                                         |
+|   12 | DERIVED            | NULL                         | NULL   | NULL           | NULL      | NULL    | NULL                  | NULL   | Impossible WHERE noticed after reading const tables |
+|   11 | LATERAL DERIVED    | 0_denorm_order_details_queue | ref    | detail_id      | detail_id | 5       | fa.sod.id             | 1      |                                                     |
+|    7 | DEPENDENT SUBQUERY | <derived4>                   | system | NULL           | NULL      | NULL    | NULL                  | 0      | Const row not found                                 |
+|    7 | DEPENDENT SUBQUERY | <derived5>                   | ref    | key0           | key0      | 23      | d.stock_id            | 170    |                                                     |
+|    5 | DERIVED            | 0_denorm_order_details_queue | ALL    | NULL           | NULL      | NULL    | NULL                  | 1705   | Using temporary; Using filesort                     |
+|    4 | DERIVED            | NULL                         | NULL   | NULL           | NULL      | NULL    | NULL                  | NULL   | Impossible WHERE noticed after reading const tables |
++------+--------------------+------------------------------+--------+----------------+-----------+---------+-----------------------+--------+-----------------------------------------------------+
+
