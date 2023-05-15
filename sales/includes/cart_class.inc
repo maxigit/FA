@@ -662,7 +662,7 @@ class line_details
 		$this->price = $prc;
 		$this->ppd = $ppd;
 		$this->discount_percent = $disc_percent;
-		$this->now_or_never = $now_or_never;
+		$this->now_or_never = $stock_id == "SOF" ? 1 : $now_or_never;
 		$this->qty_done = $qty_done;
 		$this->standard_cost = $standard_cost;
 		$this->valid = true;
