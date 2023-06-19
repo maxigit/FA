@@ -60,14 +60,12 @@ if (isset($_GET['AddedID'])) {
     submenu_print(_("&Print Magic Invoice"), ST_SALESINVOICE, $invoice_no."-".ST_SALESINVOICE, 'prtopt', 0, 'magic');
     if(isset($pro_forma)) {
         submenu_print(_("&Email Proforma Invoice"), ST_SALESINVOICE, $invoice_no."-".ST_SALESINVOICE, null, 1, 'proforma');
-    } else
-    {
-        submenu_print(_("&Email Sales Invoice"), ST_SALESINVOICE, $invoice_no."-".ST_SALESINVOICE, null, 1, null);
-        if(defined('FAMES_URL')) {
-          hyperlink_params(FAMES_URL."/customers/invoice/commodity_codes/$invoice_no/Nothing", _("Process Shipping"), "");
-        }
-
     }
+    submenu_print(_("&Email Sales Invoice"), ST_SALESINVOICE, $invoice_no."-".ST_SALESINVOICE, null, 1, null);
+    if(defined('FAMES_URL')) {
+      hyperlink_params(FAMES_URL."/customers/invoice/commodity_codes/$invoice_no/Nothing", _("Process Shipping"), "");
+    }
+
 
 	display_note(get_gl_view_str($trans_type, $invoice_no, _("View the GL &Journal Entries for this Invoice")),1);
 
