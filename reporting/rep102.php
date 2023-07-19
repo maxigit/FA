@@ -30,8 +30,8 @@ print_aged_customer_analysis();
 function get_invoices($customer_id, $to, $all=true)
 {
 	$todate = date2sql($to);
-	$PastDueDays1 = get_company_pref('past_due_days');
-	$PastDueDays2 = 2 * $PastDueDays1;
+	$PastDueDays2 = get_company_pref('past_due_days');
+	$PastDueDays1 = 10;
 
 	// Revomed allocated from sql
 	if ($all)
@@ -115,8 +115,8 @@ function print_aged_customer_analysis()
 	if ($show_all) $show = _('Yes');
 	else $show = _('No');
 
-	$PastDueDays1 = get_company_pref('past_due_days');
-	$PastDueDays2 = 2 * $PastDueDays1;
+	$PastDueDays2 = get_company_pref('past_due_days');
+	$PastDueDays1 = 10;
 	$nowdue = "1-" . $PastDueDays1 . " " . _('Days');
 	$pastdue1 = $PastDueDays1 + 1 . "-" . $PastDueDays2 . " " . _('Days');
 	$pastdue2 = _('Over') . " " . $PastDueDays2 . " " . _('Days');
