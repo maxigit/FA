@@ -1,6 +1,5 @@
 <?php
 /**********************************************************************
-    Copyright (C) FrontAccounting, LLC.
 	Released under the terms of the GNU General Public License, GPL, 
 	as published by the Free Software Foundation, either version 3 
 	of the License, or (at your option) any later version.
@@ -62,15 +61,22 @@ function delete_customer($customer_id)
 	commit_transaction();
 }
 
-function get_customer_details($customer_id, $to=null, $all=true)
+function get_customer_details($customer_id, $to=null, $all=true, $ppd_days=0)
 {
 
 	if ($to == null)
 		$todate = date("Y-m-d");
 	else
 		$todate = date2sql($to);
-	$past1 = get_company_pref('past_due_days');
-	$past2 = 2 * $past1;
+  if ($ppd==0) {
+    $past2 = get_company_pref('past_due_days');
+    $past1 = 10;
+  } else {
+    $past1= $ppd_days;
+    
+    $past2 = 2 * $past1;
+ }
+
 	// removed - debtor_trans.alloc from all summations
 	if ($all)
     	$value = "IFNULL(IF(trans.type=11 OR trans.type=12 OR trans.type=2, -1, 1) 
@@ -79,7 +85,7 @@ function get_customer_details($customer_id, $to=null, $all=true)
     	$value = "IFNULL(IF(trans.type=11 OR trans.type=12 OR trans.type=2, -1, 1) 
     		* (trans.ov_amount + trans.ov_gst + trans.ov_freight + trans.ov_freight_tax + trans.ov_discount - 
     		trans.alloc),0)";
-	$due = "IF (trans.type=10, trans.due_date, trans.tran_date)";
+	$due = $ppd_days > 0 ? " trans.tran_date" : "IF (trans.type=10, trans.due_date, trans.tran_date)";
     $sql = "SELECT ".TB_PREF."debtors_master.name, ".TB_PREF."debtors_master.curr_code, ".TB_PREF."payment_terms.terms,
 		".TB_PREF."debtors_master.credit_limit, ".TB_PREF."credit_status.dissallow_invoices, ".TB_PREF."credit_status.reason_description,
 
@@ -115,6 +121,14 @@ function get_customer_details($customer_id, $to=null, $all=true)
 
     return $customer_record;
 
+}
+
+// Check if there is something overdue past the 10 days
+function can_customer_get_ppd($customer_id)
+{
+   $customer = get_customer_details($customer_id, $to=null, $all=true, 14);
+   $can =  $customer['Overdue1'] <= 0.01 && $customer['Overdue2'] <= 0.01;
+   return $can;
 }
 
 

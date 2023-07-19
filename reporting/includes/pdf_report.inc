@@ -385,7 +385,7 @@ class FrontReport extends Cpdf
 		'myrow' => array('ord_date', 'date_', 'tran_date', 
 			'order_no','reference', 'id', 'trans_no', 'name', 'location_name',
 			'delivery_address', 'supp_name', 'address',
-			'DebtorName', 'supp_account_no', 'wo_ref', 'debtor_ref','type', 'trans_no', 
+			'debtor_no', 'DebtorName', 'supp_account_no', 'wo_ref', 'debtor_ref','type', 'trans_no', 
 			'StockItemName', 'tax_id', 'order_', 'delivery_date', 'units_issued',
 			'due_date', 'required_by', 'payment_terms', 'curr_code',
 			'ov_freight', 'ov_gst', 'ov_amount', 'requisition_no', 'contact'),
