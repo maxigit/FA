@@ -68,14 +68,13 @@ function get_customer_details($customer_id, $to=null, $all=true, $ppd_days=0)
 		$todate = date("Y-m-d");
 	else
 		$todate = date2sql($to);
-  if ($ppd==0) {
-    $past2 = get_company_pref('past_due_days');
-    $past1 = 10;
+  if ($ppd_days==0) {
+    $past1 = get_company_pref('past_due_days');
   } else {
     $past1= $ppd_days;
     
-    $past2 = 2 * $past1;
  }
+ $past2 = 2 * $past1;
 
 	// removed - debtor_trans.alloc from all summations
 	if ($all)
@@ -128,7 +127,7 @@ function can_customer_get_ppd($customer_id)
 {
    $customer = get_customer_details($customer_id, $to=null, $all=true, 14);
    $can =  $customer['Overdue1'] <= 0.01 && $customer['Overdue2'] <= 0.01;
-   return $can;
+   return true; // $can;
 }
 
 
