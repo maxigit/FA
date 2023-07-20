@@ -134,7 +134,7 @@ function can_customer_get_ppd($customer_id, $to=null)
 {
    $to = sql2date($to);
    $customer = get_customer_details($customer_id, $to, $all=false, 14);
-   display_warning("[$to] CAN " . print_r($customer, true));
+   // display_warning("[$to] CAN " . print_r($customer, true));
    $can =  $customer['Overdue1'] <= 0.01;
    return $can;
 }
