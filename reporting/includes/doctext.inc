@@ -27,7 +27,7 @@
 
 	// default item column headers
     $displayPPD = $this->formData['doctype'] == ST_SALESINVOICE && can_customer_get_ppd($this->formData['debtor_no'], $this->formData['tran_date']);
-    $discColumn = $displayPPD ? "With PPD (*)" : "Discount %";
+    $discColumn = $this->formData['doctype'] == ST_SALESINVOICE ? "With PPD (*)" : "Discount %";
 
 	$this->headers = array(_("Item Code"), _("Item Description"), _("Quantity"),
 		_("Unit"), _("Price"), _($discColumn), _("Total"));
