@@ -83,7 +83,7 @@ function print_invoices()
 
             $ppd_days = $myrow["ppd_days"]; // can be null
             $ppd_days_s = $ppd_days  > 1 ? "s" : "";
-            $displayPPD =$ppd_days > 0 && can_customer_get_ppd($myrow['debtor_no']);
+            $displayPPD =$ppd_days > 0 && can_customer_get_ppd($myrow['debtor_no'], $myrow['tran_date']);
 
 			$baccount = get_default_bank_account($myrow['curr_code']);
 			$params['bankaccount'] = $baccount['id'];

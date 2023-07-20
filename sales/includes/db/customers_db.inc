@@ -84,7 +84,14 @@ function get_customer_details($customer_id, $to=null, $all=true, $ppd_days=0)
     	$value = "IFNULL(IF(trans.type=11 OR trans.type=12 OR trans.type=2, -1, 1) 
     		* (trans.ov_amount + trans.ov_gst + trans.ov_freight + trans.ov_freight_tax + trans.ov_discount - 
     		trans.alloc),0)";
-	$due = $ppd_days > 0 ? " trans.tran_date" : "IF (trans.type=10, trans.due_date, trans.tran_date)";
+  /* if ppd_days enabled
+   * we are interested in the date of the invoice , however 
+   * we want all payment and credit note to compensate for overdue invoice
+   * even though they have been just paid.
+   * To so, we see all payments as paid in the past
+   */
+
+	$due = $ppd_days > 0 ? "IF (trans.type=10, trans.tran_date, DATE_ADD('$todate', INTERVAL - $past2 DAY))" : "IF (trans.type=10, trans.due_date, trans.tran_date)";
     $sql = "SELECT ".TB_PREF."debtors_master.name, ".TB_PREF."debtors_master.curr_code, ".TB_PREF."payment_terms.terms,
 		".TB_PREF."debtors_master.credit_limit, ".TB_PREF."credit_status.dissallow_invoices, ".TB_PREF."credit_status.reason_description,
 
@@ -123,11 +130,13 @@ function get_customer_details($customer_id, $to=null, $all=true, $ppd_days=0)
 }
 
 // Check if there is something overdue past the 10 days
-function can_customer_get_ppd($customer_id)
+function can_customer_get_ppd($customer_id, $to=null)
 {
-   $customer = get_customer_details($customer_id, $to=null, $all=true, 14);
-   $can =  $customer['Overdue1'] <= 0.01 && $customer['Overdue2'] <= 0.01;
-   return true; // $can;
+   $to = sql2date($to);
+   $customer = get_customer_details($customer_id, $to, $all=false, 14);
+   display_warning("[$to] CAN " . print_r($customer, true));
+   $can =  $customer['Overdue1'] <= 0.01;
+   return $can;
 }
 
 
