@@ -702,7 +702,7 @@ function display_delivery_details(&$order)
  		if (list_updated('Location'))
  			$Ajax->activate('items_table');
 		label_row(_("Cash account:"), $order->pos['bank_account_name']);
-		textarea_row(_("Comments:"), "Comments", $order->Comments, 31, 5);
+		textarea_row(_("Comments:"), "Comments", $order->Comments, 31, 5, null, "", "maxlength=255");
 		end_table();
 		hidden('delivery_date', $order->due_date);
 	} else {
@@ -750,7 +750,7 @@ function display_delivery_details(&$order)
 		    _('Phone number of ordering person. Defaults to branch phone number'));
 		text_row(_("Customer Reference:"), 'cust_ref', $order->cust_ref, 25, 25,
 		  _('Customer reference number for this order (if any)'));
-		textarea_row(_("Comments:"), "Comments", $order->Comments, 31, 5);
+		textarea_row(_("Comments:"), "Comments", $order->Comments, 31, 5, null, "", "maxlength=255");
 
 		shippers_list_row(_("Shipping Company:"), 'ship_via', $order->ship_via);
 

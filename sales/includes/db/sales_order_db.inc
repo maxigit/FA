@@ -44,7 +44,7 @@ function add_sales_order(&$order)
 		 ", " .db_escape($order->trans_type) . "," .db_escape($order->Branch) . ", ".
 			db_escape($order->cust_ref) .",". 
 			db_escape($order->reference) .",". 
-			db_escape($order->Comments) .",'" . 
+			db_escape(substr($order->Comments,0,255)) .",'" . 
 			date2sql($order->document_date) . "', " .
 			db_escape($order->sales_type) . ", " .
 			db_escape($order->ship_via)."," . 
@@ -160,7 +160,7 @@ function update_sales_order($order)
 		branch_code = " . db_escape($order->Branch) . ",
 		customer_ref = ". db_escape($order->cust_ref) .",
 		reference = ". db_escape($order->reference) .",
-		comments = ". db_escape($order->Comments) .",
+		comments = ". db_escape(substr($order->Comments,0,255)) .",
 		ord_date = " . db_escape($ord_date) . ",
 		order_type = " .db_escape($order->sales_type) . ",
 		ship_via = " . db_escape($order->ship_via) .",
